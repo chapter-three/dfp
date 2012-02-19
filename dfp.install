@@ -1,0 +1,69 @@
+<?php
+
+/**
+ * @file
+ * Installation file for DFP module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function dfp_uninstall() {
+  // Remove any blocks created by DFP.
+  db_delete('block')
+    ->condition('module', 'dfp')
+    ->execute();
+}
+
+/**
+ * Implements hook_schema().
+ */
+function dfp_schema() {
+  $schema['dfp_tags'] = array(
+    'description' => 'Stores information about Google Publisher Tags.',
+    'export' => array(
+      'key' => 'machinename',
+      'identifier' => 'tag', // Exports will be available as $tag
+      'default hook' => 'default_dfp_tags', // Function hook name.
+      'api' => array(
+        'owner' => 'dfp',
+        'api' => 'dfp_tags_default', // Base name for api include files.
+        'minimum_version' => 1,
+        'current_version' => 1,
+      ),
+    ),
+    'fields' => array(
+      'machinename' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => "The tag's unique name.",
+      ),
+      'size' => array(
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => "The tag's size(s).",
+      ),
+      'active' => array(
+        'type' => 'int',
+        'default' => 1,
+        'description' => "If true the tag can be displayed.",
+      ),
+      'block' => array(
+        'type' => 'int',
+        'default' => 0,
+        'description' => 'If true, a block will be created in which to display this tag.',
+      ),
+      'settings' => array(
+        'type' => 'blob',
+        'description' => "Serialized array of settings.",
+      ),
+      'primary key' => array('machinename'),
+    ),
+  );
+
+  return $schema;
+}
