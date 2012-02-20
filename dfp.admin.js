@@ -6,9 +6,9 @@
 Drupal.behaviors.dfpVerticalTabs = {
   attach: function (context) {
     $('fieldset#edit-tag-settings', context).drupalSetSummary(function (context) {
-      var machinename = Drupal.checkPlain($('#edit-machinename', context).val());
+      var name = Drupal.checkPlain($('#edit-name', context).val());
       var size = Drupal.checkPlain($('#edit-size', context).val());
-      return machinename  + ' [' + size + ']';
+      return name  + ' [' + size + ']';
     });
     $('fieldset#edit-display-settings', context).drupalSetSummary(function (context) {
       return Drupal.t('Configure how the ad will be displayed');

@@ -25,6 +25,13 @@ function dfp_schema() {
       'load callback' => 'dfp_tag_load',
     ),
     'fields' => array(
+      'adid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Primary ID field for the table. Not used for anything except internal lookups.',
+        'no export' => TRUE, // Do not export database-only keys.
+      ),
       'machinename' => array(
         'type' => 'varchar',
         'length' => 128,
@@ -32,12 +39,12 @@ function dfp_schema() {
         'default' => '',
         'description' => "The tag's unique name.",
       ),
-      'adid' => array(
-        'type' => 'serial',
-        'unsigned' => TRUE,
+      'name' => array(
+        'type' => 'varchar',
+        'length' => 128,
         'not null' => TRUE,
-        'description' => 'Primary ID field for the table. Not used for anything except internal lookups.',
-        'no export' => TRUE, // Do not export database-only keys.
+        'default' => '',
+        'description' => "The tag's human-readable name.",
       ),
       'size' => array(
         'type' => 'varchar',

@@ -55,19 +55,40 @@ function dfp_ad_tag_form(&$form, &$form_state) {
   );
 
   // Tag settings.
-  $form['settings']['tag_settings'] = array(
+  $form['tag_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Tag Settings'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
+    '#group' => 'settings',
+    '#attached' => array(
+      'js' => array(
+        'vertical-tabs' => drupal_get_path('module', 'dfp') . '/dfp.admin.js',
+      ),
+    ),
   );
-  $form['settings']['tag_settings']['machinename'] = $form['info']['machinename'];
-  $form['settings']['tag_settings']['machinename']['#title'] = t('Unique Name');
-  $form['settings']['tag_settings']['machinename']['#maxlength'] = 128;
-  $form['settings']['tag_settings']['machinename']['#description'] = t('Only use lowercase letters, numbers and dashes. This name will be used as the "id" attribute in your markup. Example: top-banner');
+
+  $form['tag_settings']['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+    '#required' => TRUE,
+    '#maxlength' => 64,
+    //'#default_value' => $tag->name,
+  );
+  $form['tag_settings']['machinename'] = array(
+    '#type' => 'machine_name',
+    '#title' => t('Unique Name'),
+    '#maxlength' => 128,
+    '#default_value' => $tag->machinename,
+    '#description' => t('Only use lowercase letters, numbers and dashes. This name will be used as the "id" attribute in your markup. Example: top-banner'),
+    '#machine_name' => array(
+      'exists' => 'dfp_tag_name_exists',
+      'source' => array('tag_settings', 'name'),
+    ),
+  ) + $form['info']['machinename'];
   unset($form['info']);
 
-  $form['settings']['tag_settings']['size'] = array(
+  $form['tag_settings']['size'] = array(
     '#type' => 'textfield',
     '#title' => t('Size(s)'),
     '#description' => t('Example: 300x600,300x250'),
@@ -77,13 +98,14 @@ function dfp_ad_tag_form(&$form, &$form_state) {
   );
 
   // Display settings.
-  $form['settings']['display_settings'] = array(
+  $form['display_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Display Settings'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
+    '#group' => 'settings',
   );
-  $form['settings']['display_settings']['slug'] = array(
+  $form['display_settings']['slug'] = array(
     '#type' => 'textfield',
     '#title' => t('Slug'),
     '#description' => t('Override the default slug for this ad tag. Use !none for no slug. Leave this field empty to use the default slug. Example: Advertisement', array('!none' => check_plain('<none>'))),
@@ -91,13 +113,13 @@ function dfp_ad_tag_form(&$form, &$form_state) {
     '#maxlength' => 64,
     '#default_value' => $tag->settings['overrides']['slug'],
   );
-  $form['settings']['display_settings']['block'] = array(
+  $form['display_settings']['block'] = array(
     '#type' => 'checkbox',
     '#title' => t('Create a block for this ad tag'),
     '#description' => t('Create a block (configurable at !url) in which this ad tag is displayed.', array('!url' => l('admin/build/block', 'admin/build/block'))),
     '#default_value' => $tag->block,
   );
-  $form['settings']['display_settings']['scriptless'] = array(
+  $form['display_settings']['scriptless'] = array(
     '#type' => 'checkbox',
     '#title' => t('Render this tag without javascript'),
     '#description' => t('Use this option for ads included in emails.'),
@@ -105,13 +127,15 @@ function dfp_ad_tag_form(&$form, &$form_state) {
   );
 
   // Display settings.
-  $form['settings']['targeting_settings'] = array(
+  $form['targeting_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Targeting'),
+    '#description' => t('If a target should have multiple values, separate them with a comma. Example: ny, nj, ct'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
+    '#group' => 'settings',
   );
-  $form['settings']['targeting_settings']['targeting'] = array(
+  $form['targeting_settings']['targeting'] = array(
     '#tree' => FALSE,
     '#prefix' => '<div id="dfp-targeting-wrapper">',
     '#suffix' => '</div>',
@@ -125,7 +149,7 @@ function dfp_ad_tag_form(&$form, &$form_state) {
   // Add one blank set of target fields.
   _dfp_targeting_form($form, count($targeting) + 1);
 
-  $form['settings']['targeting_settings']['targeting']['dfp_more_targets'] = array(
+  $form['targeting_settings']['targeting']['dfp_more_targets'] = array(
     '#type' => 'submit',
     '#value' => t('Add another target'),
     '#submit' => array('dfp_more_targets_submit'),
@@ -137,12 +161,18 @@ function dfp_ad_tag_form(&$form, &$form_state) {
     ),
   );
 
+dpm($form);
+
+
 }
 
 /**
  * Form validation for the dart_tag form.
  */
 function dfp_ad_tag_form_validate(&$form, &$form_state) {
+dpm($form_state);
+
+
   // Do not validate unless the save button is pressed.
   if ($form_state['values']['op'] != 'Save') {
     return;
@@ -165,31 +195,44 @@ function dfp_more_targets_submit($form, &$form_state) {
 }
 
 /**
+ * Check if the given machinename is unique in the dfp_tags table.
+ */
+function dfp_tag_name_exists($machinename) {
+  $select = db_select('dfp_tags', 'dt');
+  $select->addExpression('COUNT(*)');
+  $select->condition('dt.machinename', $machinename);
+
+  return $select->execute()->fetchField();
+}
+
+/**
  * Ajax callback for adding new messages to the broadcast messages form.
  */
 function dfp_more_targets_js($form, $form_state) {
-  return $form['settings']['targeting_settings']['targeting'];
+  return $form['targeting_settings']['targeting'];
 }
 
 function _dfp_targeting_form(&$form, $key, $data = array()) {
-  $form['settings']['targeting_settings']['targeting'][$key] = array(
+  $form['targeting_settings']['targeting'][$key] = array(
     '#prefix' => '<div class="target" id="target-' . $key . '">',
     '#suffix' => '</div>',
   );
-  $form['settings']['targeting_settings']['targeting'][$key]['target'] = array(
+  $form['targeting_settings']['targeting'][$key]['target'] = array(
     '#type' => 'textfield',
     '#title_display' => 'invisible',
     '#title' => t('Target Name'),
     '#size' => 40,
     '#default_value' => isset($data['target']) ? $data['target'] : '',
-    '#parents' => array('targeting', $key, 'name'),
+    '#parents' => array('targeting', $key, 'target'),
+    '#attributes' => array('class' => array('field-target-target')),
   );
-  $form['settings']['targeting_settings']['targeting'][$key]['value'] = array(
+  $form['targeting_settings']['targeting'][$key]['value'] = array(
     '#type' => 'textfield',
     '#title_display' => 'invisible',
     '#title' => t('Target Value'),
     '#default_value' => isset($data['value']) ? $data['value'] : '',
-    '#parents' => array('targeting', $key, 'message'),
+    '#parents' => array('targeting', $key, 'value'),
+    '#attributes' => array('class' => array('field-target-value')),
   );
 }
 
