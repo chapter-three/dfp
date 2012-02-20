@@ -1,26 +1,71 @@
 <?php
 
 /**
- * Implements hook_help().
- */
-function dfp_help($path, $arg) {
-  switch ($path) {
-    case 'admin/help#dfp':
-      $output = '<p>' . t('The Doubleclick for Publishers (dfp) module allows you to integrate Google Publisher Tags (gpt) onto your site.') . '</p>';
-      $output .= '<p>' . t('This module provides you with a general settings form as well as the ability to create a tag (with all its associated data) in the database. Therse tags can be displayed as blocks, or you can add a simple bit of php to your tpl.php file(s) within your theme to indicate where specific tags should be displayed.') . '</p>';
-      $output .= '<p>' . t('In addition, you can tell this module about specific javascript variables that exist on your pages in order to include them in your ad tags. For example, you can include a variable called "channel" with a value of "sports".') . '</p>';
-      return $output;
-  }
-}
-
-/**
  * Implements hook_permission().
  */
 function dfp_permission() {
   return array(
-    'administer Google Publisher Tags' => array(
-      'title' => t('administer DART tags'),
+    'administer DFP' => array(
+      'title' => t('Administer Doubleclick for Publisher ads'),
       'description' => t('Users can create, edit, and delete Doubleclick for Publishers (dfp) ad tags and configure how and when they should be displayed.'),
     ),
   );
 }
+
+/**
+ * Implements hook_theme().
+ */
+function dfp_theme() {
+  $theme_hooks = array(
+    'dfp_targeting' => array(
+      'render element' => 'form',
+      'file' => 'dfp.admin.inc',
+    ),
+  );
+
+  return $theme_hooks;
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function dfp_ctools_plugin_directory($module, $type) {
+  // Load the export_ui plugin.
+  if ($type == 'export_ui') {
+    return 'plugins/export_ui';
+  }
+}
+
+/**
+ * Load function.
+ */
+function dfp_tag_load($machinename = '') {
+  ctools_include('export');
+
+  // Grab an array of all DART tags or the specificed DART tag.
+  if (empty($machinename)) {
+    $tags = ctools_export_load_object('dfp_tags');
+  }
+  else {
+    $tags = ctools_export_load_object('dfp_tags', 'names', array($machinename));
+  }
+
+  // foreach ($tags as $tag) {
+  //   $settings = unserialize($tag->settings);
+  //   foreach ($settings as $setting -> $value) {
+  //     $tag->{$setting} = $value;
+  //   }
+  // }
+
+  // Build up the tag objects
+  return empty($machinename) ? $tags : array_shift($tags);
+}
+
+/**
+* Save a single tag.
+*/
+function dfp_tag_save(&$tag) {
+  $update = (isset($tag->adid) && is_numeric($tag->adid)) ? array('adid') : array();
+  return drupal_write_record('dfp_tag', $tag, $update);
+}
+

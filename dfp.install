@@ -6,31 +6,23 @@
  */
 
 /**
- * Implements hook_uninstall().
- */
-function dfp_uninstall() {
-  // Remove any blocks created by DFP.
-  db_delete('block')
-    ->condition('module', 'dfp')
-    ->execute();
-}
-
-/**
  * Implements hook_schema().
  */
 function dfp_schema() {
   $schema['dfp_tags'] = array(
-    'description' => 'Stores information about Google Publisher Tags.',
+    'description' => 'Stores information about DFP ad tags.',
     'export' => array(
       'key' => 'machinename',
+      'primary key' => 'adid',
       'identifier' => 'tag', // Exports will be available as $tag
-      'default hook' => 'default_dfp_tags', // Function hook name.
+      'default hook' => 'default_dfp_tag', // Function hook name.
       'api' => array(
         'owner' => 'dfp',
-        'api' => 'dfp_tags_default', // Base name for api include files.
+        'api' => 'default_dfp_tags', // Base name for api include files.
         'minimum_version' => 1,
         'current_version' => 1,
       ),
+      'load callback' => 'dfp_tag_load',
     ),
     'fields' => array(
       'machinename' => array(
@@ -40,28 +32,33 @@ function dfp_schema() {
         'default' => '',
         'description' => "The tag's unique name.",
       ),
+      'adid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Primary ID field for the table. Not used for anything except internal lookups.',
+        'no export' => TRUE, // Do not export database-only keys.
+      ),
       'size' => array(
         'type' => 'varchar',
-        'length' => 64,
+        'length' => 255,
         'not null' => TRUE,
         'default' => '',
         'description' => "The tag's size(s).",
       ),
-      'active' => array(
-        'type' => 'int',
-        'default' => 1,
-        'description' => "If true the tag can be displayed.",
-      ),
       'block' => array(
         'type' => 'int',
         'default' => 0,
-        'description' => 'If true, a block will be created in which to display this tag.',
+        'description' => 'If true, a block will be created in which to display this ad tag.',
       ),
       'settings' => array(
         'type' => 'blob',
         'description' => "Serialized array of settings.",
       ),
-      'primary key' => array('machinename'),
+    ),
+    'primary key' => array('adid'),
+    'unique keys' => array(
+      'name' => array('machinename'),
     ),
   );
 
