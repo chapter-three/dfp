@@ -27,16 +27,15 @@ $plugin = array(
   'title plural proper' => t('DFP ads'),
 
   // Define the class to use as a handler for DFP ad tags.
-  // 'handler' => array(
-  //   'class' => 'dfp_ad_tag_ui',
-  //   'parent' => 'ctools_export_ui',
-  // ),
+  'handler' => array(
+     'class' => 'dfp_tag_ui',
+     'parent' => 'ctools_export_ui',
+  ),
 
   // Define the names of the functions that provide the add/edit forms.
 
   'form' => array(
     'settings' => 'dfp_ad_tag_form',
-    'submit' => 'dfp_ad_tag_form_submit',
     'validate' => 'dfp_ad_tag_form_validate',
   ),
 );
@@ -46,6 +45,7 @@ $plugin = array(
  */
 function dfp_ad_tag_form(&$form, &$form_state) {
   $tag = $form_state['item'];
+  $input = $form_state['input'];
 
   // Make sure that this file is included even on aajx callbacks.
   form_load_include($form_state, 'inc', 'dfp', 'plugins/export_ui/dfp_ctools_export_ui');
@@ -73,7 +73,7 @@ function dfp_ad_tag_form(&$form, &$form_state) {
     '#title' => t('Name'),
     '#required' => TRUE,
     '#maxlength' => 64,
-    //'#default_value' => $tag->name,
+    '#default_value' => $tag->name,
   );
   $form['tag_settings']['machinename'] = array(
     '#type' => 'machine_name',
@@ -111,7 +111,7 @@ function dfp_ad_tag_form(&$form, &$form_state) {
     '#description' => t('Override the default slug for this ad tag. Use !none for no slug. Leave this field empty to use the default slug. Example: Advertisement', array('!none' => check_plain('<none>'))),
     '#required' => FALSE,
     '#maxlength' => 64,
-    '#default_value' => $tag->settings['overrides']['slug'],
+    '#default_value' => $tag->settings['slug'],
   );
   $form['display_settings']['block'] = array(
     '#type' => 'checkbox',
@@ -123,7 +123,7 @@ function dfp_ad_tag_form(&$form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Render this tag without javascript'),
     '#description' => t('Use this option for ads included in emails.'),
-    '#default_value' => $tag->settings['options']['scriptless'],
+    '#default_value' => $tag->settings['scriptless'],
   );
 
   // Display settings.
@@ -140,8 +140,18 @@ function dfp_ad_tag_form(&$form, &$form_state) {
     '#suffix' => '</div>',
     '#theme' => 'dfp_targeting',
   );
+
+  // Get the current targets. The tag object will be used when loading the edit
+  // form. The input value will be used when an AJAX submit occurs.
+  $tageting = array();
+  if (isset($input['targeting'])) {
+    $targeting = $input['targeting'];
+  }
+  elseif (isset($tag->settings['targeting'])) {
+    $targeting = $tag->settings['targeting'];
+  }
+
   // Add existing targets to the form.
-  $targeting = isset($form_state['input']['targeting']) ? $form_state['input']['targeting'] : array();
   foreach ($targeting as $key => $data) {
     _dfp_targeting_form($form, $key, $data);
   }
@@ -167,17 +177,14 @@ function dfp_ad_tag_form(&$form, &$form_state) {
  * Form validation for the dart_tag form.
  */
 function dfp_ad_tag_form_validate(&$form, &$form_state) {
-  // Do not validate unless the save button is pressed.
-  if ($form_state['values']['op'] != 'Save') {
-    return;
+  foreach ($form_state['values']['targeting'] as $key => $value) {
+    if (empty($value['target']) && !empty($value['value'])) {
+      form_set_error('targeting][' . $key . '][target', t('The target cannot be empty if a value exists.'));
+    }
+    if (!empty($value['target']) && empty($value['value'])) {
+      form_set_error('targeting][' . $key . '][value', t('The value cannot be empty if a target exists.'));
+    }
   }
-}
-
-/**
- * Form submission for the dart_tag form.
- */
-function dfp_ad_tag_form_submit(&$form, &$form_state) {
-
 }
 
 /**
@@ -206,6 +213,9 @@ function dfp_more_targets_js($form, $form_state) {
   return $form['targeting_settings']['targeting'];
 }
 
+/**
+ *
+ */
 function _dfp_targeting_form(&$form, $key, $data = array()) {
   $form['targeting_settings']['targeting'][$key] = array(
     '#prefix' => '<div class="target" id="target-' . $key . '">',
