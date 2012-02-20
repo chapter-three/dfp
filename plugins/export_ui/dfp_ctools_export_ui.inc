@@ -130,7 +130,6 @@ function dfp_ad_tag_form(&$form, &$form_state) {
   $form['targeting_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Targeting'),
-    '#description' => t('If a target should have multiple values, separate them with a comma. Example: ny, nj, ct'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#group' => 'settings',
@@ -142,7 +141,7 @@ function dfp_ad_tag_form(&$form, &$form_state) {
     '#theme' => 'dfp_targeting',
   );
   // Add existing targets to the form.
-  $targeting = isset($form_state['values']['targeting']) ?$form_state['values']['targeting'] : array();
+  $targeting = isset($form_state['input']['targeting']) ? $form_state['input']['targeting'] : array();
   foreach ($targeting as $key => $data) {
     _dfp_targeting_form($form, $key, $data);
   }
@@ -153,6 +152,7 @@ function dfp_ad_tag_form(&$form, &$form_state) {
     '#type' => 'submit',
     '#value' => t('Add another target'),
     '#submit' => array('dfp_more_targets_submit'),
+    '#limit_validation_errors' => array(),
     '#ajax' => array(
       'callback' => 'dfp_more_targets_js',
       'wrapper' => 'dfp-targeting-wrapper',
@@ -161,18 +161,12 @@ function dfp_ad_tag_form(&$form, &$form_state) {
     ),
   );
 
-dpm($form);
-
-
 }
 
 /**
  * Form validation for the dart_tag form.
  */
 function dfp_ad_tag_form_validate(&$form, &$form_state) {
-dpm($form_state);
-
-
   // Do not validate unless the save button is pressed.
   if ($form_state['values']['op'] != 'Save') {
     return;
@@ -221,7 +215,7 @@ function _dfp_targeting_form(&$form, $key, $data = array()) {
     '#type' => 'textfield',
     '#title_display' => 'invisible',
     '#title' => t('Target Name'),
-    '#size' => 40,
+    '#size' => 10,
     '#default_value' => isset($data['target']) ? $data['target'] : '',
     '#parents' => array('targeting', $key, 'target'),
     '#attributes' => array('class' => array('field-target-target')),
@@ -230,10 +224,15 @@ function _dfp_targeting_form(&$form, $key, $data = array()) {
     '#type' => 'textfield',
     '#title_display' => 'invisible',
     '#title' => t('Target Value'),
+    '#size' => 20,
     '#default_value' => isset($data['value']) ? $data['value'] : '',
     '#parents' => array('targeting', $key, 'value'),
     '#attributes' => array('class' => array('field-target-value')),
   );
+  if (empty($data)) {
+    $form['targeting_settings']['targeting'][$key]['target']['#description'] = t('Example: state');
+    $form['targeting_settings']['targeting'][$key]['value']['#description'] = t('Example: ny, nj, ct');
+  }
 }
 
 
