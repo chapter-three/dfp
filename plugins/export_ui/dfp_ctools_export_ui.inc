@@ -143,7 +143,7 @@ function dfp_ad_tag_form(&$form, &$form_state) {
 
   // Get the current targets. The tag object will be used when loading the edit
   // form. The input value will be used when an AJAX submit occurs.
-  $tageting = array();
+  $targeting = array();
   if (isset($input['targeting'])) {
     $targeting = $input['targeting'];
   }
