@@ -1,6 +1,18 @@
 <?php
 
 /**
+ * Implements hook_help().
+ */
+function dfp_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#dfp':
+      $output = '<p>' . t('The Doubleclick For Publishers (DFP) module allows you to integrate Google Publisher Tags onto your site.') . '</p>';
+      $output .= '<p>' . t('This module provides you with a general settings form as well as the ability to create a tag (with all its associated data) in the database. You can display your ads as blocks, or add a simple bit of php to your tpl.php file(s) within your theme to indicate where specific tags should be displayed.') . '</p>';
+      return $output;
+  }
+}
+
+/**
  * Implements hook_permission().
  */
 function dfp_permission() {
@@ -17,13 +29,41 @@ function dfp_permission() {
  */
 function dfp_theme() {
   $theme_hooks = array(
-    'dfp_targeting' => array(
+    'dfp_target' => array(
       'render element' => 'form',
       'file' => 'dfp.admin.inc',
     ),
   );
 
   return $theme_hooks;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function dfp_menu() {
+  $items = array();
+
+  $items['admin/structure/dfp_ads/settings'] = array(
+    'title' => 'Global DFP Settings',
+    'type' => MENU_LOCAL_TASK,
+    'description' => "Configure your site-wide DFP settings.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dfp_admin_settings'),
+    'access arguments' => array('administer DFP'),
+    'file' => 'dfp.admin.inc',
+    'weight' => 5,
+  );
+  $items['admin/structure/dfp_ads/test_page'] = array(
+    'title' => 'DFP Test Page',
+    'type' => MENU_LOCAL_TASK,
+    'description' => "View all your DFP tags on a single page",
+    'page callback' => 'dfp_test_page',
+    'access arguments' => array('administer DFP'),
+    'weight' => 10,
+  );
+
+  return $items;
 }
 
 /**
@@ -50,12 +90,9 @@ function dfp_tag_load($machinename = '') {
     $tags = ctools_export_load_object('dfp_tags', 'names', array($machinename));
   }
 
-  // foreach ($tags as $tag) {
-  //   $settings = unserialize($tag->settings);
-  //   foreach ($settings as $setting -> $value) {
-  //     $tag->{$setting} = $value;
-  //   }
-  // }
+  foreach ($tags as &$tag) {
+    $tag->settings = is_array($tag->settings) ? $tag->settings : unserialize($tag->settings);
+  }
 
   // Build up the tag objects
   return empty($machinename) ? $tags : array_shift($tags);

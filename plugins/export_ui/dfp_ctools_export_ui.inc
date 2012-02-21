@@ -35,20 +35,20 @@ $plugin = array(
   // Define the names of the functions that provide the add/edit forms.
 
   'form' => array(
-    'settings' => 'dfp_ad_tag_form',
-    'validate' => 'dfp_ad_tag_form_validate',
+    'settings' => 'dfp_tag_form',
+    'validate' => 'dfp_tag_form_validate',
   ),
 );
 
 /**
  * Form builder; Create an ad tag.
  */
-function dfp_ad_tag_form(&$form, &$form_state) {
-  $tag = $form_state['item'];
-  $input = $form_state['input'];
-
-  // Make sure that this file is included even on aajx callbacks.
+function dfp_tag_form(&$form, &$form_state) {
+  // Make sure that all the necessary files are included even on ajax callbacks.
   form_load_include($form_state, 'inc', 'dfp', 'plugins/export_ui/dfp_ctools_export_ui');
+  form_load_include($form_state, 'inc', 'dfp', 'dfp.admin');
+
+  $tag = $form_state['item'];
 
   $form['settings'] = array(
     '#type' => 'vertical_tabs',
@@ -80,7 +80,7 @@ function dfp_ad_tag_form(&$form, &$form_state) {
     '#title' => t('Unique Name'),
     '#maxlength' => 128,
     '#default_value' => $tag->machinename,
-    '#description' => t('Only use lowercase letters, numbers and dashes. This name will be used as the "id" attribute in your markup. Example: top-banner'),
+    '#description' => t('Only use letters, numbers and underscores. Example: top-banner'),
     '#machine_name' => array(
       'exists' => 'dfp_tag_name_exists',
       'source' => array('tag_settings', 'name'),
@@ -126,57 +126,16 @@ function dfp_ad_tag_form(&$form, &$form_state) {
     '#default_value' => $tag->settings['scriptless'],
   );
 
-  // Display settings.
-  $form['targeting_settings'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Targeting'),
-    '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
-    '#group' => 'settings',
-  );
-  $form['targeting_settings']['targeting'] = array(
-    '#tree' => FALSE,
-    '#prefix' => '<div id="dfp-targeting-wrapper">',
-    '#suffix' => '</div>',
-    '#theme' => 'dfp_targeting',
-  );
-
-  // Get the current targets. The tag object will be used when loading the edit
-  // form. The input value will be used when an AJAX submit occurs.
-  $targeting = array();
-  if (isset($input['targeting'])) {
-    $targeting = $input['targeting'];
-  }
-  elseif (isset($tag->settings['targeting'])) {
-    $targeting = $tag->settings['targeting'];
-  }
-
-  // Add existing targets to the form.
-  foreach ($targeting as $key => $data) {
-    _dfp_targeting_form($form, $key, $data);
-  }
-  // Add one blank set of target fields.
-  _dfp_targeting_form($form, count($targeting) + 1);
-
-  $form['targeting_settings']['targeting']['dfp_more_targets'] = array(
-    '#type' => 'submit',
-    '#value' => t('Add another target'),
-    '#submit' => array('dfp_more_targets_submit'),
-    '#limit_validation_errors' => array(),
-    '#ajax' => array(
-      'callback' => 'dfp_more_targets_js',
-      'wrapper' => 'dfp-targeting-wrapper',
-      'effect' => 'fade',
-      'file' => 'plugins/export_ui/dfp_ctools_export_ui.inc',
-    ),
-  );
+  // Global display options.
+  $existing_targeting = _dfp_get_existing_targeting($form_state, isset($tag->settings['targeting']) ? $tag->settings['targeting'] : array());
+  _dfp_targeting_form($form, $form_state, $existing_targeting);
 
 }
 
 /**
- * Form validation for the dart_tag form.
+ * Form validation for the dfp_ad_tag form.
  */
-function dfp_ad_tag_form_validate(&$form, &$form_state) {
+function dfp_tag_form_validate(&$form, &$form_state) {
   foreach ($form_state['values']['targeting'] as $key => $value) {
     if (empty($value['target']) && !empty($value['value'])) {
       form_set_error('targeting][' . $key . '][target', t('The target cannot be empty if a value exists.'));
@@ -185,14 +144,6 @@ function dfp_ad_tag_form_validate(&$form, &$form_state) {
       form_set_error('targeting][' . $key . '][value', t('The value cannot be empty if a target exists.'));
     }
   }
-}
-
-/**
- * Submit handler to add more targets to an ad tag.
- */
-function dfp_more_targets_submit($form, &$form_state) {
-  $form_state['targeting'] = $form_state['values']['targeting'];
-  $form_state['rebuild'] = TRUE;
 }
 
 /**
@@ -205,45 +156,3 @@ function dfp_tag_name_exists($machinename) {
 
   return $select->execute()->fetchField();
 }
-
-/**
- * Ajax callback for adding new messages to the broadcast messages form.
- */
-function dfp_more_targets_js($form, $form_state) {
-  return $form['targeting_settings']['targeting'];
-}
-
-/**
- *
- */
-function _dfp_targeting_form(&$form, $key, $data = array()) {
-  $form['targeting_settings']['targeting'][$key] = array(
-    '#prefix' => '<div class="target" id="target-' . $key . '">',
-    '#suffix' => '</div>',
-  );
-  $form['targeting_settings']['targeting'][$key]['target'] = array(
-    '#type' => 'textfield',
-    '#title_display' => 'invisible',
-    '#title' => t('Target Name'),
-    '#size' => 10,
-    '#default_value' => isset($data['target']) ? $data['target'] : '',
-    '#parents' => array('targeting', $key, 'target'),
-    '#attributes' => array('class' => array('field-target-target')),
-  );
-  $form['targeting_settings']['targeting'][$key]['value'] = array(
-    '#type' => 'textfield',
-    '#title_display' => 'invisible',
-    '#title' => t('Target Value'),
-    '#size' => 20,
-    '#default_value' => isset($data['value']) ? $data['value'] : '',
-    '#parents' => array('targeting', $key, 'value'),
-    '#attributes' => array('class' => array('field-target-value')),
-  );
-  if (empty($data)) {
-    $form['targeting_settings']['targeting'][$key]['target']['#description'] = t('Example: state');
-    $form['targeting_settings']['targeting'][$key]['value']['#description'] = t('Example: ny, nj, ct');
-  }
-}
-
-
-
