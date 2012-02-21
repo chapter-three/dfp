@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Form builder for the global DFP settings form.
+ */
 function dfp_admin_settings($form, $form_state) {
   // Make sure that all the necessary files are included even on ajax callbacks.
   form_load_include($form_state, 'inc', 'dfp', 'plugins/export_ui/dfp_ctools_export_ui');
