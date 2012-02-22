@@ -73,7 +73,7 @@ function dfp_admin_settings($form, $form_state) {
   $form['javascript']['dfp_injected_js'] = array(
     '#type' => 'textarea',
     '#title' => t('Inject javascript'),
-    '#description' => t('Inject this javascript into the @tag on each page request.', array('@tag' => '<head>')),
+    '#description' => t('Inject this javascript into the @tag on every page request.', array('@tag' => '<head>')),
     '#default_value' => variable_get('dfp_injected_js', ''),
     '#rows' => 5,
   );

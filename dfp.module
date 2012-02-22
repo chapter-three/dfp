@@ -137,10 +137,19 @@ function _dfp_js_google_tag_service_include() {
  * slot definitions.
  */
 function _dfp_js_header_script() {
+  // Initialize the google varibales.
   $js = 'var googletag = googletag || {};' . "\n";
   $js .= 'googletag.cmd = googletag.cmd || [];' . "\n";
 
-  $js .= variable_get('dfp_injected_js', '');
+  // Inject user-defined javascript.
+  $js .= variable_get('dfp_injected_js', '') . "\n";
+
+  // Set global targeting values for this page.
+  $targeting = variable_get('dfp_targeting', array());
+  drupal_alter('dfp_page_targeting', $targeting);
+  foreach ($targeting as $key => $target) {
+    $js .= 'googletag.pubads().setTargeting("' . $target['target'] . '", ' . _dfp_format_target_value($target['value']) . ');' . "\n";
+  }
 
   $options = array(
     'type' => 'inline',
@@ -148,5 +157,25 @@ function _dfp_js_header_script() {
     'every_page' => TRUE,
     'weight' => -25,
   );
-  drupal_add_js($js, $options);
+  drupal_add_js(rtrim($js, "\n"), $options);
+}
+
+/**
+ * Format the given array of values to be displayed as part of a javascript.
+ */
+function _dfp_format_target_value($values) {
+  $formatted_values = '';
+
+  // Convert the values into an array and trim the whitespace from each value.
+  $values = explode(',', $values);
+  array_filter(array_map('trim', $values));
+
+  if (count($values) == 1) {
+    $formatted_values = '"' . $values[0] . '"';
+  }
+  elseif (count($values) > 1) {
+    $formatted_values = '["' . implode('","', $values) . '"]';
+  }
+
+  return $formatted_values;
 }
