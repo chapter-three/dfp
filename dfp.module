@@ -1,5 +1,7 @@
 <?php
 
+define('DFP_GOOGLE_TAG_SERVICES_URL', 'www.googletagservices.com/tag/js/gpt.js');
+
 /**
  * Implements hook_help().
  */
@@ -67,6 +69,14 @@ function dfp_menu() {
 }
 
 /**
+ * Implements hook_init()
+ */
+function dfp_init() {
+  _dfp_js_google_tag_service_include();
+  _dfp_js_header_script();
+}
+
+/**
  * Implements hook_ctools_plugin_directory().
  */
 function dfp_ctools_plugin_directory($module, $type) {
@@ -82,7 +92,7 @@ function dfp_ctools_plugin_directory($module, $type) {
 function dfp_tag_load($machinename = '') {
   ctools_include('export');
 
-  // Grab an array of all DART tags or the specificed DART tag.
+  // Grab an array of all DFP tags or the specificed DFP tag.
   if (empty($machinename)) {
     $tags = ctools_export_load_object('dfp_tags');
   }
@@ -90,19 +100,53 @@ function dfp_tag_load($machinename = '') {
     $tags = ctools_export_load_object('dfp_tags', 'names', array($machinename));
   }
 
+  // Build up the tag objects.
   foreach ($tags as &$tag) {
     $tag->settings = is_array($tag->settings) ? $tag->settings : unserialize($tag->settings);
   }
 
-  // Build up the tag objects
   return empty($machinename) ? $tags : array_shift($tags);
 }
 
 /**
-* Save a single tag.
-*/
+ * Save a single tag.
+ */
 function dfp_tag_save(&$tag) {
   $update = (isset($tag->adid) && is_numeric($tag->adid)) ? array('adid') : array();
   return drupal_write_record('dfp_tag', $tag, $update);
 }
 
+/**
+ * Helper function to include external tag service javascript file.
+ */
+function _dfp_js_google_tag_service_include() {
+  // Inlclude a script tag for the Google Tag Services.
+  // @todo: One day this should include an async=true attribute. See #1140356.
+  $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+  $options = array(
+    'type' => 'external',
+    'group' => JS_LIBRARY,
+    'every_page' => TRUE,
+    'weight' => -25,
+  );
+  drupal_add_js($protocol . DFP_GOOGLE_TAG_SERVICES_URL, $options);
+}
+
+/**
+ * Helper function to include javascript variables, etc in the header above all
+ * slot definitions.
+ */
+function _dfp_js_header_script() {
+  $js = 'var googletag = googletag || {};' . "\n";
+  $js .= 'googletag.cmd = googletag.cmd || [];' . "\n";
+
+  $js .= variable_get('dfp_injected_js', '');
+
+  $options = array(
+    'type' => 'inline',
+    'group' => JS_LIBRARY,
+    'every_page' => TRUE,
+    'weight' => -25,
+  );
+  drupal_add_js($js, $options);
+}
