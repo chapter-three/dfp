@@ -98,14 +98,14 @@ function dfp_tag_form(&$form, &$form_state) {
   );
 
   // Display settings.
-  $form['display_settings'] = array(
+  $form['tag_display_options'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Display Settings'),
+    '#title' => t('Display Options'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#group' => 'settings',
   );
-  $form['display_settings']['slug'] = array(
+  $form['tag_display_options']['slug'] = array(
     '#type' => 'textfield',
     '#title' => t('Slug'),
     '#description' => t('Override the default slug for this ad tag. Use !none for no slug. Leave this field empty to use the default slug. Example: Advertisement', array('!none' => check_plain('<none>'))),
@@ -113,13 +113,13 @@ function dfp_tag_form(&$form, &$form_state) {
     '#maxlength' => 64,
     '#default_value' => $tag->settings['slug'],
   );
-  $form['display_settings']['block'] = array(
+  $form['tag_display_options']['block'] = array(
     '#type' => 'checkbox',
     '#title' => t('Create a block for this ad tag'),
     '#description' => t('Create a block (configurable at !url) in which this ad tag is displayed.', array('!url' => l('admin/build/block', 'admin/build/block'))),
     '#default_value' => $tag->block,
   );
-  $form['display_settings']['scriptless'] = array(
+  $form['tag_display_options']['scriptless'] = array(
     '#type' => 'checkbox',
     '#title' => t('Render this tag without javascript'),
     '#description' => t('Use this option for ads included in emails.'),

@@ -14,34 +14,39 @@ function dfp_admin_settings($form, $form_state) {
   );
 
   // Default tag settings.
-  $form['tag_settings'] = array(
+  $form['global_tag_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Global Tag Settings'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#group' => 'settings',
+    '#attached' => array(
+      'js' => array(
+        'vertical-tabs' => drupal_get_path('module', 'dfp') . '/dfp.admin.js',
+      ),
+    ),
   );
-  $form['tag_settings']['dfp_network_id'] = array(
+  $form['global_tag_settings']['dfp_network_id'] = array(
     '#type' => 'textfield',
     '#title' => t('Network ID'),
     '#default_value' => variable_get('dfp_network_id', ''),
     '#required' => TRUE,
     '#description' => t('The Network ID to use on all tags.'),
   );
-  $form['tag_settings']['dfp_default_adunit'] = array(
+  $form['global_tag_settings']['dfp_default_adunit'] = array(
     '#type' => 'textfield',
     '#title' => t('Default Ad Unit'),
     '#default_value' => variable_get('dfp_default_adunit', ''),
     '#required' => FALSE,
     '#description' => t('Enter a default value to use only if a tag has no Ad Unit specified.'),
   );
-  $form['tag_settings']['dfp_async_rendering'] = array(
+  $form['global_tag_settings']['dfp_async_rendering'] = array(
     '#type' => 'checkbox',
     '#title' => t('Render ads asynchronously'),
     '#default_value' => variable_get('dfp_async_rendering', 1),
     '#description' => t('This can speed up page rendering time by loading page content without waiting for ads to load.'),
   );
-  $form['tag_settings']['dfp_single_request'] = array(
+  $form['global_tag_settings']['dfp_single_request'] = array(
     '#type' => 'checkbox',
     '#title' => t('Combine all ad requests into a single request'),
     '#default_value' => variable_get('dfp_single_request', 1),
@@ -49,27 +54,27 @@ function dfp_admin_settings($form, $form_state) {
   );
 
   // Global display options.
-  $form['display_options'] = array(
+  $form['global_display_options'] = array(
     '#type' => 'fieldset',
     '#title' => t('Global Display Options'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#group' => 'settings',
   );
-  $form['display_options']['dfp_slug'] = array(
+  $form['global_display_options']['dfp_slug'] = array(
     '#type' => 'textfield',
     '#title' => t('Global Slug'),
     '#default_value' => variable_get('dfp_slug', '<none>'),
     '#required' => FALSE,
     '#description' => t('Slug all ad tags with this label. Use @tag for no slug. Example: Advertisement', array('@tag' => '<none>')),
   );
-  $form['display_options']['dfp_use_noscript'] = array(
+  $form['global_display_options']['dfp_use_noscript'] = array(
     '#type' => 'checkbox',
     '#title' => t('include @tag tags', array('@tag' => '<noscript>')),
     '#default_value' => variable_get('dfp_use_noscript', 0),
     '#description' => t('Include @tag tags along with the javascript tags.', array('@tag' => '<noscript>')),
   );
-  $form['display_options']['dfp_collapse_empty_divs'] = array(
+  $form['global_display_options']['dfp_collapse_empty_divs'] = array(
     '#type' => 'checkbox',
     '#title' => t('Hide ad slots if no ad is served'),
     '#default_value' => variable_get('dfp_collapse_empty_divs', 1),
