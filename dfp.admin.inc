@@ -28,11 +28,17 @@ function dfp_admin_settings($form, $form_state) {
     '#required' => TRUE,
     '#description' => t('The Network ID to use on all tags.'),
   );
-  $form['tag_settings']['dfp_asynchronous'] = array(
+  $form['tag_settings']['dfp_async_rendering'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Load ads asynchronously'),
-    '#default_value' => variable_get('dfp_asynchronous', 1),
-    '#description' => t('Do not wait for ads finish loading before continuing to load the rest of the page.'),
+    '#title' => t('Render ads asynchronously'),
+    '#default_value' => variable_get('dfp_async_rendering', 1),
+    '#description' => t('This can speed up page rendering time by loading page content without waiting for ads to load.'),
+  );
+  $form['tag_settings']['dfp_single_request'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Combine all ad requests into a single request'),
+    '#default_value' => variable_get('dfp_single_request', 1),
+    '#description' => t('This can speed up page rendering time by limiting the number of external requests.'),
   );
 
   // Global display options.
@@ -55,6 +61,12 @@ function dfp_admin_settings($form, $form_state) {
     '#title' => t('include @tag tags', array('@tag' => '<noscript>')),
     '#default_value' => variable_get('dfp_use_noscript', 0),
     '#description' => t('Include @tag tags along with the javascript tags.', array('@tag' => '<noscript>')),
+  );
+  $form['display_options']['dfp_collapse_empty_divs'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Hide ad slots if no ad is served'),
+    '#default_value' => variable_get('dfp_collapse_empty_divs', 1),
+    '#description' => t('This can speed up page rendering time by limiting the number of external requests.'),
   );
 
   // Global display options.

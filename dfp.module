@@ -141,6 +141,22 @@ function _dfp_js_header_script() {
   $js = 'var googletag = googletag || {};' . "\n";
   $js .= 'googletag.cmd = googletag.cmd || [];' . "\n";
 
+  // Set global dfp settings.
+  $js .= 'googletag.cmd.push(function() {' . "\n";
+  if (variable_get('dfp_collapse_empty_divs', 1)) {
+    $js .= '  googletag.pubads().collapseEmptyDivs();' . "\n";
+  }
+  if (variable_get('dfp_async_rendering', 1)) {
+    $js .= '  googletag.pubads().enableAsyncRendering();' . "\n";
+  }
+  else {
+    $js .= '  googletag.pubads().enableSyncRendering();' . "\n";
+  }
+  if (variable_get('dfp_single_request', 1)) {
+    $js .= '  googletag.pubads().enableSingleRequest();' . "\n";
+  }
+  $js .= '});' . "\n";
+
   // Inject user-defined javascript.
   $js .= variable_get('dfp_injected_js', '') . "\n";
 
