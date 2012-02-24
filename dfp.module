@@ -141,8 +141,13 @@ function dfp_test_page() {
 
   foreach ($tags as $tag) {
     $output[] = array(
-      '#theme' => 'dfp_tag',
-      '#tag' => $tag,
+      'tag name' => array(
+        '#markup' => '<h3>' . $tag->name . '</h3>',
+      ),
+      'rendered tag' => array(
+        '#theme' => 'dfp_tag',
+        '#tag' => $tag,
+      ),
     );
   }
 
