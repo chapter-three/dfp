@@ -148,24 +148,6 @@ function dfp_more_targets_js($form, $form_state) {
 }
 
 /**
- * Theme function for the "target" form.
- */
-function theme_dfp_target($variables) {
-  $form = $variables['form'];
-
-  $more_button = drupal_render($form['dfp_more_targets']);
-  unset($form['dfp_more_targets']);
-
-  $headers = array(t('Target'), t('Value(s)'));
-  $rows = array();
-  foreach (element_children($form) as $key) {
-    $rows[] = array(drupal_render($form[$key]['target']), drupal_render($form[$key]['value']));
-  }
-
-  return theme('table', array('header' => $headers, 'rows' => $rows)) . $more_button;
-}
-
-/**
  * Helper form builder for the targeting form.
  */
 function _dfp_targeting_form(&$form, &$form_state, $existing_targeting = array()) {
@@ -253,6 +235,24 @@ function _dfp_get_existing_targeting($form_state, $default = array()) {
   }
 
   return $targeting;
+}
+
+/**
+ * Theme function for the "target" form.
+ */
+function theme_dfp_target($variables) {
+  $form = $variables['form'];
+
+  $more_button = drupal_render($form['dfp_more_targets']);
+  unset($form['dfp_more_targets']);
+
+  $headers = array(t('Target'), t('Value(s)'));
+  $rows = array();
+  foreach (element_children($form) as $key) {
+    $rows[] = array(drupal_render($form[$key]['target']), drupal_render($form[$key]['value']));
+  }
+
+  return theme('table', array('header' => $headers, 'rows' => $rows)) . $more_button;
 }
 
 
