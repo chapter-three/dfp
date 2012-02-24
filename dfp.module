@@ -110,15 +110,14 @@ function dfp_tag_load($machinename = '') {
   foreach ($tags as &$tag) {
     // Initialize the tag.
     $tag->settings = is_array($tag->settings) ? $tag->settings : unserialize($tag->settings);
-    $tag->sizes = explode(',', $tag->size));
 
     drupal_alter('dfp_tag_load', $tag);
 
     $tag->unit = '/' . variable_get('dfp_network_id', '') . '/' . $tag->name;
-    $tag->sizes = _dfp_format_size($tag->size);
+    $tag->formatted_size = _dfp_format_size($tag->size);
     $tag->wrapper_id = 'dfp-ad-' . $tag->machinename;
+    $tag->slug = $tag->settings['slug'] == '<none>' ? '' : $tag->settings['slug'];
 
-    // Create a $js variable to add the js needed at the site of the ad.
     drupal_alter('dfp_tag', $tag);
   }
 
@@ -245,7 +244,7 @@ function _dfp_format_target_value($values) {
  *   A string in the format 123x321,987x789;
  *
  * @return string
- *   A string in the format [[123, 321], [987, 789]]
+ *   A string in the format [456, 654] or [[123, 321], [987, 789]]
  *
  */
 function _dfp_format_size($size) {
@@ -257,7 +256,7 @@ function _dfp_format_size($size) {
     $formatted_sizes[] = '[' . implode(', ', $formatted_size) .']';
   }
 
-  return '[' . implode(', ', $formatted_sizes) . ']';
+  return count($formatted_sizes) == 1 ? $formatted_sizes[0] : '[' . implode(', ', $formatted_sizes) . ']';
 }
 
 /**
@@ -265,7 +264,7 @@ function _dfp_format_size($size) {
  */
 function template_preprocess_dfp_tag(&$variables) {
   $tag = $variables['tag'];
-
+dpm($tag);
   // Create the attributes for the wrapper div.
   $variables['wrapper_attributes'] = array(
     'id' => $tag->wrapper_id,
@@ -274,12 +273,8 @@ function template_preprocess_dfp_tag(&$variables) {
     ),
   );
 
-  googletag.cmd.push(function() {
-      googletag.display("<?php print $tag->wrapper_id ?>");
-    });
-
   // Add the js needed to define this adSlot to head.
-  $js = 'googletag.defineSlot("' . $tag->name . '", ' . $tag->size . ', "' . $tag->wrapper_id . '")' . "\n";
+  $js = 'googletag.defineSlot("' . $tag->name . '", ' . $tag->formatted_size . ', "' . $tag->wrapper_id . '")' . "\n";
   $js .= '  .addService(googletag.pubads())' . "\n";
   foreach ($tag->settings['targeting'] as $target) {
     $js .= '  .setTargeting("' . $target['target'] . '", ' . _dfp_format_target_value($target['value']) . ')' . "\n";
