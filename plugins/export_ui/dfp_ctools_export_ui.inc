@@ -36,7 +36,6 @@ $plugin = array(
 
   'form' => array(
     'settings' => 'dfp_tag_form',
-    'validate' => 'dfp_tag_form_validate',
   ),
 );
 
@@ -44,6 +43,8 @@ $plugin = array(
  * Form builder; Create an ad tag.
  */
 function dfp_tag_form(&$form, &$form_state) {
+  $form['#validate'][] = 'dfp_tag_form_validate';
+
   // Make sure that all the necessary files are included even on ajax callbacks.
   form_load_include($form_state, 'inc', 'dfp', 'plugins/export_ui/dfp_ctools_export_ui');
   form_load_include($form_state, 'inc', 'dfp', 'dfp.admin');
@@ -70,10 +71,11 @@ function dfp_tag_form(&$form, &$form_state) {
 
   $form['tag_settings']['name'] = array(
     '#type' => 'textfield',
-    '#title' => t('Name'),
+    '#title' => t('Ad Unit Name'),
     '#required' => TRUE,
     '#maxlength' => 64,
     '#default_value' => $tag->name,
+    '#description' => t('Example: leaderboard or sports/baseball/Yankees'),
   );
   $form['tag_settings']['machinename'] = array(
     '#type' => 'machine_name',
@@ -136,13 +138,9 @@ function dfp_tag_form(&$form, &$form_state) {
  * Form validation for the dfp_ad_tag form.
  */
 function dfp_tag_form_validate(&$form, &$form_state) {
-  foreach ($form_state['values']['targeting'] as $key => $value) {
-    if (empty($value['target']) && !empty($value['value'])) {
-      form_set_error('targeting][' . $key . '][target', t('The target cannot be empty if a value exists.'));
-    }
-    if (!empty($value['target']) && empty($value['value'])) {
-      form_set_error('targeting][' . $key . '][value', t('The value cannot be empty if a target exists.'));
-    }
+  // Ad Unit names can only have letters, numbers and slashes.¬
+  if (preg_match('@[^a-zA-Z0-9\/]+@', $form_state['values']['name'])) {
+    form_set_error('name', t('Ad Unit Names can only include letters, numbers and slashes.'));
   }
 }
 

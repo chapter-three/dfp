@@ -119,8 +119,14 @@ function dfp_admin_form_submit($form, &$form_state) {
  */
 function dfp_targeting_form_validate($form, &$form_state) {
   // Remove empty targeting values before storing them in the database.
-  foreach ($form_state['values']['targeting'] as $key => $target) {
-    if (empty($target['target']) && empty($target['value'])) {
+  foreach ($form_state['values']['targeting'] as $key => $value) {
+    if (empty($value['target']) && !empty($value['value'])) {
+      form_set_error('targeting][' . $key . '][target', t('The target cannot be empty if a value exists.'));
+    }
+    elseif (!empty($value['target']) && empty($value['value'])) {
+      form_set_error('targeting][' . $key . '][value', t('The value cannot be empty if a target exists.'));
+    }
+    elseif (empty($value['target']) && empty($value['value'])) {
       unset($form_state['values']['targeting'][$key]);
     }
   }

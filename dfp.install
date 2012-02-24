@@ -44,7 +44,7 @@ function dfp_schema() {
         'length' => 128,
         'not null' => TRUE,
         'default' => '',
-        'description' => "The tag's human-readable name.",
+        'description' => "The ad unit's name.",
       ),
       'size' => array(
         'type' => 'varchar',
