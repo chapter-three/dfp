@@ -40,6 +40,13 @@ function dfp_admin_settings($form, $form_state) {
     '#required' => FALSE,
     '#description' => t('Enter a default value to use only if a tag has no Ad Unit specified.'),
   );
+  $form['global_tag_settings']['dfp_default_adsense_channel_ids'] = array(
+    '#type' => 'textfield',
+    '#title' => t('AdSense Channel ID(s)'),
+    '#default_value' => variable_get('dfp_default_adsense_channel_ids', ''),
+    '#required' => FALSE,
+    '#description' => t('Example: 271828183+314159265'),
+  );
   $form['global_tag_settings']['dfp_async_rendering'] = array(
     '#type' => 'checkbox',
     '#title' => t('Render ads asynchronously'),
@@ -165,7 +172,7 @@ function _dfp_targeting_form(&$form, &$form_state, $existing_targeting = array()
     '#tree' => FALSE,
     '#prefix' => '<div id="dfp-targeting-wrapper">',
     '#suffix' => '</div>',
-    '#theme' => 'dfp_target',
+    '#theme' => 'dfp_target_settings',
   );
 
   // Add existing targets to the form.
@@ -240,7 +247,7 @@ function _dfp_get_existing_targeting($form_state, $default = array()) {
 /**
  * Theme function for the "target" form.
  */
-function theme_dfp_target($variables) {
+function theme_dfp_target_settings($variables) {
   $form = $variables['form'];
 
   $more_button = drupal_render($form['dfp_more_targets']);
@@ -254,6 +261,36 @@ function theme_dfp_target($variables) {
 
   return theme('table', array('header' => $headers, 'rows' => $rows)) . $more_button;
 }
+
+/**
+ * Theme function for the "target" form.
+ */
+function theme_dfp_color_settings($variables) {
+  $form = $variables['form'];
+
+  $caption = t('AdSense Color Settings');
+  $header = array(t('Color Setting'), t('Hex color value'), t('Sample'));
+  $rows = array();
+  foreach (element_children($form) as $key) {
+    $rows[] = array(
+      $form[$key]['#title'],
+      drupal_render($form[$key]),
+      "<div class='color-sample' style='background-color: #" . $form[$key]['#default_value'] . ";'>&nbsp;</div>",
+    );
+  }
+
+  $output = '<div class="form-item">';
+  $output .= '  <label>' . t('Color Settings') . '</label>';
+  $output .= '  <div class="description">' . t('Primarily used for text ads these settings can be used to override the color settings defined in the DFP tool.') . '</div>';
+  $output .= theme('table', array('attributes' => array('id' => 'color-settings'), 'header' => $header, 'rows' => $rows));
+  $output .= '</div>';
+
+  return $output;
+}
+
+
+
+
 
 
 

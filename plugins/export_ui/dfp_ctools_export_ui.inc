@@ -89,7 +89,6 @@ function dfp_tag_form(&$form, &$form_state) {
     ),
   ) + $form['info']['machinename'];
   unset($form['info']);
-
   $form['tag_settings']['size'] = array(
     '#type' => 'textfield',
     '#title' => t('Size(s)'),
@@ -98,6 +97,19 @@ function dfp_tag_form(&$form, &$form_state) {
     '#maxlength' => 64,
     '#default_value' => $tag->size,
   );
+  $form['tag_settings']['ad_types'] = array(
+    '#type' => 'select',
+    '#title' => t('AdSense Ad Type'),
+    '#default_value' => $tag->settings['ad_types'],
+    '#required' => TRUE,
+    '#options' => array(
+      'text_image' => t('Both image and text ads'),
+      'image' => t('Only image ads'),
+      'text' => t('Only text ads'),
+    ),
+    '#description' => t('Choose what type of ads this tag can display.'),
+  );
+
 
   // Display settings.
   $form['tag_display_options'] = array(
@@ -127,6 +139,33 @@ function dfp_tag_form(&$form, &$form_state) {
     '#description' => t('Use this option for ads included in emails.'),
     '#default_value' => $tag->settings['scriptless'],
   );
+  $form['tag_display_options']['color_settings'] = array(
+    '#theme' => 'dfp_color_settings',
+    '#attached' => array(
+      'js' => array(
+        'vertical-tabs' => drupal_get_path('module', 'dfp') . '/dfp.admin.js',
+      ),
+    ),
+  );
+  $color_settings = array(
+    'background' => t('Background color'),
+    'border' => t('Border color'),
+    'link' => t('Link color'),
+    'text' => t('Text color'),
+    'url' => t('URL color'),
+  );
+  foreach ($color_settings as $setting => $title) {
+    $form['tag_display_options']['color_settings'][$setting] = array(
+      '#type' => 'textfield',
+      '#title' => $title,
+      '#attributes' => array('class' => array('color-setting')),
+      '#field_prefix' => '#',
+      '#title_display' => 'invisible',
+      '#default_value' => isset($tag->settings['colors'][$setting]) ? $tag->settings['colors'][$setting] : '',
+      '#size' => 6,
+      '#parents' => array('colors', $setting),
+    );
+  }
 
   // Global display options.
   $existing_targeting = _dfp_get_existing_targeting($form_state, isset($tag->settings['targeting']) ? $tag->settings['targeting'] : array());

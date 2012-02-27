@@ -1,5 +1,17 @@
 (function ($) {
 
+Drupal.behaviors.dfpAdminColors = {
+  attach: function (context) {
+
+    var reg = /^(#)?([0-9a-fA-F]{3})([0-9a-fA-F]{3})?$/;
+    $('#color-settings .color-setting', context).bind('change keyup', function (context) {
+      hexcolor = reg.test($(this).val()) ? '#' + $(this).val() : 'transparent';
+      $(this).closest('tr').find('.color-sample').css('background-color', hexcolor);
+    });
+    console.log($('#color-settings .color-setting', context));
+  }
+};
+
 /**
  * Custom summary for the module vertical tab.
  */
