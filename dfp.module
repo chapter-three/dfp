@@ -87,6 +87,32 @@ function dfp_init() {
 }
 
 /**
+ * Implements hook_block_info().
+ */
+function dfp_block_info() {
+  $tags = _dfp_block_tags();
+
+  $blocks = array();
+  foreach ($tags as $tag) {
+    $blocks[$tag->machinename]['info'] = t('DFP tag: !tagname', array('!tagname' => $tag->name));
+  }
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function dfp_block_view($delta) {
+  $block['content'] = array(
+    '#theme' => 'dfp_tag',
+    '#tag' => dfp_tag_load($delta),
+  );
+
+  return $block;
+}
+
+
+/**
  * Implements hook_ctools_plugin_directory().
  */
 function dfp_ctools_plugin_directory($module, $type) {
@@ -268,6 +294,22 @@ function _dfp_format_size($size) {
   }
 
   return count($formatted_sizes) == 1 ? $formatted_sizes[0] : '[' . implode(', ', $formatted_sizes) . ']';
+}
+
+/**
+ * Helper function to return an array pf tags marked to be displayed as a block.
+ */
+function _dfp_block_tags() {
+  $block_tags = array();
+  $tags = dfp_tag_load();
+
+  foreach ($tags as $tag) {
+    if ($tag->block) {
+      $block_tags[] = $tag;
+    }
+  }
+
+  return $block_tags;
 }
 
 /**
