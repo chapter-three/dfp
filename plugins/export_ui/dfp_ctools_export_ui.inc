@@ -107,6 +107,7 @@ function dfp_tag_form(&$form, &$form_state) {
       'image' => t('Only image ads'),
       'text' => t('Only text ads'),
     ),
+    '#parents' => array('settings', 'ad_types'),
     '#description' => t('Choose what type of ads this tag can display.'),
   );
 
@@ -126,6 +127,7 @@ function dfp_tag_form(&$form, &$form_state) {
     '#required' => FALSE,
     '#maxlength' => 64,
     '#default_value' => $tag->settings['slug'],
+    '#parents' => array('settings', 'slug'),
   );
   $form['tag_display_options']['block'] = array(
     '#type' => 'checkbox',
@@ -138,6 +140,7 @@ function dfp_tag_form(&$form, &$form_state) {
     '#title' => t('Render this tag without javascript'),
     '#description' => t('Use this option for ads included in emails.'),
     '#default_value' => $tag->settings['scriptless'],
+    '#parents' => array('settings', 'scriptless'),
   );
   $form['tag_display_options']['color_settings'] = array(
     '#theme' => 'dfp_color_settings',
@@ -163,7 +166,7 @@ function dfp_tag_form(&$form, &$form_state) {
       '#title_display' => 'invisible',
       '#default_value' => isset($tag->settings['colors'][$setting]) ? $tag->settings['colors'][$setting] : '',
       '#size' => 6,
-      '#parents' => array('colors', $setting),
+      '#parents' => array('settings', 'colors', $setting),
     );
   }
 

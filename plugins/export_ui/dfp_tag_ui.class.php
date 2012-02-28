@@ -14,14 +14,12 @@ class dfp_tag_ui extends ctools_export_ui {
    * Prepare the tag values before they are added to the database.
    */
   function edit_form_submit(&$form, &$form_state) {
-    // Create an array of values that should not be included in $settings.
-    $mask = array_flip(array(
-      'adid', 'machinename', 'name', 'size', 'block', 'settings__active_tab',
-      'dfp_more_targets', 'subimt', 'delete', 'form_build_id', 'form_token',
-      'form_id', 'op'
-    ));
+    $settings = $form_state['values']['settings'];
 
-    $settings = array_diff_key($form_state['values'], $mask);
+    // Since the targeting form is reusable it isn't already in the settings
+    // array so we grab it here.
+    $settings['targeting'] = $form_state['values']['targeting'];
+
     $form_state['values']['settings'] = serialize($settings);
     parent::edit_form_submit($form, $form_state);
   }
