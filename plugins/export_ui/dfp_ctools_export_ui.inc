@@ -135,13 +135,13 @@ function dfp_tag_form(&$form, &$form_state) {
     '#description' => t('Create a block (configurable at !url) in which this ad tag is displayed.', array('!url' => l('admin/build/block', 'admin/build/block'))),
     '#default_value' => $tag->block,
   );
-  $form['tag_display_options']['scriptless'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Render this tag without javascript'),
-    '#description' => t('Use this option for ads included in emails.'),
-    '#default_value' => $tag->settings['scriptless'],
-    '#parents' => array('settings', 'scriptless'),
-  );
+  // $form['tag_display_options']['scriptless'] = array(
+  //   '#type' => 'checkbox',
+  //   '#title' => t('Render this tag without javascript'),
+  //   '#description' => t('Use this option for ads included in emails.'),
+  //   '#default_value' => $tag->settings['scriptless'],
+  //   '#parents' => array('settings', 'scriptless'),
+  // );
   $form['tag_display_options']['color_settings'] = array(
     '#theme' => 'dfp_color_settings',
     '#attached' => array(

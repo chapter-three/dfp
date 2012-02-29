@@ -75,12 +75,12 @@ function dfp_admin_settings($form, $form_state) {
     '#required' => FALSE,
     '#description' => t('Slug all ad tags with this label. Use @tag for no slug. Example: Advertisement', array('@tag' => '<none>')),
   );
-  $form['global_display_options']['dfp_use_noscript'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('include @tag tags', array('@tag' => '<noscript>')),
-    '#default_value' => variable_get('dfp_use_noscript', 0),
-    '#description' => t('Include @tag tags along with the javascript tags.', array('@tag' => '<noscript>')),
-  );
+  // $form['global_display_options']['dfp_use_noscript'] = array(
+  //   '#type' => 'checkbox',
+  //   '#title' => t('include @tag tags', array('@tag' => '<noscript>')),
+  //   '#default_value' => variable_get('dfp_use_noscript', 0),
+  //   '#description' => t('Include @tag tags along with the javascript tags.', array('@tag' => '<noscript>')),
+  // );
   $form['global_display_options']['dfp_collapse_empty_divs'] = array(
     '#type' => 'checkbox',
     '#title' => t('Hide ad slots if no ad is served'),
