@@ -139,6 +139,48 @@ function dfp_ctools_plugin_directory($module, $type) {
 }
 
 /**
+ * Implements hook_context_registry().
+ */
+function dfp_context_registry() {
+  return array(
+    'reactions' => array(
+      'dfp_tags' => array(
+        'title' => t('DFP tags'),
+        'plugin' => 'dfp_context_reaction_tags',
+      ),
+      'dfp_settings' => array(
+        'title' => t('DFP settings'),
+        'plugin' => 'dfp_context_reaction_settings',
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_context_plugins().
+ */
+function dfp_context_plugins() {
+  $plugins = array();
+  $plugins['dfp_context_reaction_tags'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'dfp') . '/plugins/contexts',
+      'file' => 'dfp_context_reaction_tags.inc',
+      'class' => 'dfp_context_reaction_tags',
+      'parent' => 'context_reaction',
+    ),
+  );
+  $plugins['dfp_context_reaction_settings'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'dfp') . '/plugins/contexts',
+      'file' => 'dfp_context_reaction_settings.inc',
+      'class' => 'dfp_context_reaction_settings',
+      'parent' => 'context_reaction',
+    ),
+  );
+  return $plugins;
+}
+
+/**
  * Load function.
  */
 function dfp_tag_load($machinename = '') {
@@ -171,7 +213,8 @@ function dfp_tag_load($machinename = '') {
     // Configure this tag based on the defined settings.
     $tag->unit = '/' . variable_get('dfp_network_id', '') . '/' . $tag->name;
     $tag->formatted_size = theme('dfp_size', array('size' => $tag->size));
-    $tag->wrapper_id = 'dfp-ad-' . $tag->machinename;
+    $tag->wrapper_id = 'dfp-ad-' . $tag->machinename . '-wrapper';
+    $tag->placeholder_id = 'dfp-ad-' . $tag->machinename;
     $tag->slug = theme('dfp_slug', array('slug' => $tag->slug));
 
     drupal_alter('dfp_tag', $tag);
@@ -196,7 +239,7 @@ function dfp_test_page() {
   $tags = dfp_tag_load();
 
   foreach ($tags as $tag) {
-    $output[] = array(
+    $tag_output = array(
       'tag name' => array(
         '#markup' => '<h3>' . $tag->name . '</h3>',
       ),
@@ -205,6 +248,12 @@ function dfp_test_page() {
         '#tag' => $tag,
       ),
     );
+    if (module_exists('devel')) {
+      $tag_output['object'] = array(
+        '#markup' => kpr($tag, TRUE),
+      );
+    }
+    $output[] = $tag_output;
   }
 
   return $output;
@@ -292,17 +341,23 @@ function _dfp_block_tags() {
  */
 function template_preprocess_dfp_tag(&$variables) {
   $tag = $variables['tag'];
-dpm($tag);
-  // Create the attributes for the wrapper div.
+
+  // Create the attributes for the wrapper div and placeholder div.
+  $variables['placeholder_attributes'] = array(
+    'id' => $tag->placeholder_id,
+    'class' => array(
+      'dfp-tag-wrapper',
+    ),
+  );
   $variables['wrapper_attributes'] = array(
     'id' => $tag->wrapper_id,
     'class' => array(
-      'dfp-tag',
+      'dfp-tag-wrapper',
     ),
   );
 
   // Add the js needed to define this adSlot to <head>.
-  $js = 'googletag.defineSlot("' . $tag->name . '", ' . $tag->formatted_size . ', "' . $tag->wrapper_id . '")' . "\n";
+  $js = 'googletag.defineSlot("' . $tag->name . '", ' . $tag->formatted_size . ', "' . $tag->placeholder_id . '")' . "\n";
   $js .= '  .addService(googletag.pubads())' . "\n";
   if (!empty($tag->ad_types)) {
     $js .= '  .set("adsense_ad_types", "' . $tag->ad_types . '")' . "\n";
@@ -337,7 +392,7 @@ dpm($tag);
  *   has more than one item, then a string in the format ["val1","val2","val3"].
  *
  */
-function theme_dfp_targetting_values($variables) {
+function theme_dfp_targeting_values($variables) {
   $formatted_values = '';
 
   // Convert the values into an array and trim the whitespace from each value.
