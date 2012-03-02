@@ -3,7 +3,7 @@ description = Integrates DFP Google Publisher Tags onto a site.
 core = 7.x
 package = Advertising
 dependencies[] = ctools
-version = "7.x-3.x"
+version = "7.x-1.x"
 project = "dfp"
 
 files[] = dfp.install
