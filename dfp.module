@@ -95,6 +95,7 @@ function dfp_block_info() {
   $blocks = array();
   foreach ($tags as $tag) {
     $blocks[$tag->machinename]['info'] = t('DFP tag: !tagname', array('!tagname' => $tag->name));
+    $blocks[$tag->machinename]['cache'] = DRUPAL_CACHE_PER_PAGE;
   }
   return $blocks;
 }
