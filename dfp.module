@@ -148,10 +148,10 @@ function dfp_context_registry() {
         'title' => t('DFP tags'),
         'plugin' => 'dfp_context_reaction_tags',
       ),
-      'dfp_settings' => array(
-        'title' => t('DFP settings'),
-        'plugin' => 'dfp_context_reaction_settings',
-      ),
+      // 'dfp_settings' => array(
+      //   'title' => t('DFP settings'),
+      //   'plugin' => 'dfp_context_reaction_settings',
+      // ),
     ),
   );
 }
@@ -169,14 +169,14 @@ function dfp_context_plugins() {
       'parent' => 'context_reaction',
     ),
   );
-  $plugins['dfp_context_reaction_settings'] = array(
-    'handler' => array(
-      'path' => drupal_get_path('module', 'dfp') . '/plugins/contexts',
-      'file' => 'dfp_context_reaction_settings.inc',
-      'class' => 'dfp_context_reaction_settings',
-      'parent' => 'context_reaction',
-    ),
-  );
+  // $plugins['dfp_context_reaction_settings'] = array(
+  //   'handler' => array(
+  //     'path' => drupal_get_path('module', 'dfp') . '/plugins/contexts',
+  //     'file' => 'dfp_context_reaction_settings.inc',
+  //     'class' => 'dfp_context_reaction_settings',
+  //     'parent' => 'context_reaction',
+  //   ),
+  // );
   return $plugins;
 }
 
@@ -207,6 +207,18 @@ function dfp_tag_load($machinenames = array(), $include_disabled = FALSE) {
   // Build up the tag objects.
   foreach ($tags as $key => &$tag) {
     // Remove any disabled tags.
+
+    if (module_exists('context')) {
+      // Hide the tag based on the current context.
+      if ($plugin = context_get_plugin('reaction', 'dfp_tags')) {
+        $plugin->execute($tag);
+      }
+      // Override the tag's settings based on the current context.
+      // if ($plugin = context_get_plugin('reaction', 'dart_settings')) {
+      //   $plugin->execute($tag);
+      // }
+    }
+
     if (!$include_disabled && isset($tag->disabled) && $tag->disabled) {
       unset($tags[$key]);
     }
