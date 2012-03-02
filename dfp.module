@@ -182,16 +182,26 @@ function dfp_context_plugins() {
 
 /**
  * Load function.
+ *
+ * @param array or string $machinenames
+ *
+ * @param boolean $include_disabled
+ *
+ * @return array or object
+ *
  */
-function dfp_tag_load($machinename = '', $include_disabled = FALSE) {
+function dfp_tag_load($machinenames = array(), $include_disabled = FALSE) {
   ctools_include('export');
 
+  // Ensure that $machinenames is an array in case a string was passed in.
+  $machinenames = is_array($machinenames) ? $machinenames : array($machinenames);
+
   // Grab an array of all DFP tags or the specificed DFP tag.
-  if (empty($machinename)) {
+  if (empty($machinenames)) {
     $tags = ctools_export_crud_load_all('dfp_tags');
   }
   else {
-    $tags = array(ctools_export_crud_load('dfp_tags', $machinename));
+    $tags = ctools_export_crud_load_multiple('dfp_tags', $machinenames);
   }
 
   // Build up the tag objects.
@@ -225,7 +235,7 @@ function dfp_tag_load($machinename = '', $include_disabled = FALSE) {
     drupal_alter('dfp_tag', $tag);
   }
 
-  return empty($machinename) ? $tags : array_shift($tags);
+  return empty($machinenames) ? $tags : array_shift($tags);
 }
 
 /**
