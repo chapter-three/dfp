@@ -183,19 +183,24 @@ function dfp_context_plugins() {
 /**
  * Load function.
  */
-function dfp_tag_load($machinename = '') {
+function dfp_tag_load($machinename = '', $include_disabled = FALSE) {
   ctools_include('export');
 
   // Grab an array of all DFP tags or the specificed DFP tag.
   if (empty($machinename)) {
-    $tags = ctools_export_load_object('dfp_tags');
+    $tags = ctools_export_crud_load_all('dfp_tags');
   }
   else {
-    $tags = ctools_export_load_object('dfp_tags', 'names', array($machinename));
+    $tags = array(ctools_export_crud_load('dfp_tags', $machinename));
   }
 
   // Build up the tag objects.
-  foreach ($tags as &$tag) {
+  foreach ($tags as $key => &$tag) {
+    // Remove any disabled tags.
+    if (!$include_disabled && isset($tag->disabled) && $tag->disabled) {
+      unset($tags[$key]);
+    }
+
     // Initialize the tag before allowing other modules to alter it.
     $tag->settings = is_array($tag->settings) ? $tag->settings : unserialize($tag->settings);
 
