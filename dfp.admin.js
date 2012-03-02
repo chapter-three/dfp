@@ -40,7 +40,7 @@ Drupal.behaviors.dfpVerticalTabs = {
       var collapse = Drupal.checkPlain($('#edit-dfp-collapse-empty-divs', context).is(':checked'));
 
       summary = 'Global Slug: ' + slug + '<br/>';
-      summary += (noscript == "true" ? checkmark : exmark) + ' Include <code>&lt;noscript&gt;</code> tags' + '<br/>';
+      // summary += (noscript == "true" ? checkmark : exmark) + ' Include <code>&lt;noscript&gt;</code> tags' + '<br/>';
       summary += (collapse == "true" ? checkmark : exmark) + ' Hide ad slots if no ad is served';
 
       return summary;

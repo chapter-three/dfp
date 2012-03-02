@@ -33,13 +33,6 @@ function dfp_admin_settings($form, $form_state) {
     '#required' => TRUE,
     '#description' => t('The Network ID to use on all tags.'),
   );
-  $form['global_tag_settings']['dfp_default_adunit'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Default Ad Unit'),
-    '#default_value' => variable_get('dfp_default_adunit', ''),
-    '#required' => FALSE,
-    '#description' => t('Enter a default value to use only if a tag has no Ad Unit specified.'),
-  );
   $form['global_tag_settings']['dfp_default_adsense_channel_ids'] = array(
     '#type' => 'textfield',
     '#title' => t('AdSense Channel ID(s)'),
@@ -85,11 +78,17 @@ function dfp_admin_settings($form, $form_state) {
     '#type' => 'checkbox',
     '#title' => t('Hide ad slots if no ad is served'),
     '#default_value' => variable_get('dfp_collapse_empty_divs', 1),
-    '#description' => t('This can speed up page rendering time by limiting the number of external requests.'),
   );
 
   // Global display options.
-   $existing_targeting = _dfp_get_existing_targeting($form_state, variable_get('dfp_targeting', array()));
+  // //@todo: put this in a sep dfp_taxonomy module
+  // $form['targeting_settings']['dfp_targeting_terms'] = array(
+  //   '#type' => 'checkbox',
+  //   '#title' => t('Automatically target taxonomy terms on node and term pages'),
+  //   '#default_value' => variable_get('dfp_collapse_empty_divs', 1),
+  //   '#description' => t('The target will be "terms" and the value will be the term name(s).'),
+  // );
+  $existing_targeting = _dfp_get_existing_targeting($form_state, variable_get('dfp_targeting', array()));
   _dfp_targeting_form($form, $form_state, $existing_targeting);
 
   // Javascript.
