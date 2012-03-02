@@ -37,6 +37,21 @@ function dfp_theme($existing, $type, $theme, $path) {
       ),
       'template' => 'theme/dfp_tag',
     ),
+    'dfp_targeting_values' => array(
+      'variables' => array(
+        'values' => array(),
+      ),
+    ),
+    'dfp_slug' => array(
+      'variables' => array(
+        'slug' => '',
+      ),
+    ),
+    'dfp_size' => array(
+      'variables' => array(
+        'size' => '',
+      ),
+    ),
     'dfp_target_settings' => array(
       'render element' => 'form',
       'file' => 'dfp.admin.inc',
@@ -155,9 +170,9 @@ function dfp_tag_load($machinename = '') {
 
     // Configure this tag based on the defined settings.
     $tag->unit = '/' . variable_get('dfp_network_id', '') . '/' . $tag->name;
-    $tag->formatted_size = _dfp_format_size($tag->size);
+    $tag->formatted_size = theme('dfp_size', array('size' => $tag->size));
     $tag->wrapper_id = 'dfp-ad-' . $tag->machinename;
-    $tag->slug = _dfp_format_slug($tag->slug);
+    $tag->slug = theme('dfp_slug', array('slug' => $tag->slug));
 
     drupal_alter('dfp_tag', $tag);
   }
@@ -226,7 +241,7 @@ function _dfp_js_header_script() {
   $targeting = variable_get('dfp_targeting', array());
   drupal_alter('dfp_page_targeting', $targeting);
   foreach ($targeting as $key => $target) {
-    $js .= 'googletag.pubads().setTargeting("' . $target['target'] . '", ' . _dfp_format_target_value($target['value']) . ');' . "\n";
+    $js .= 'googletag.pubads().setTargeting("' . $target['target'] . '", ' . theme('dfp_targeting_values', array('values' => $target['value'])) . ');' . "\n";
   }
 
   // Add global settings.
@@ -257,81 +272,6 @@ function _dfp_js_header_script() {
 }
 
 /**
- * Format the given array of values to be displayed as part of a javascript.
- *
- * @param array $values
- *   A simple array of targeting values. Ex. val1, val2, val3
- *
- * @return string
- *   If $values had one item, then a string in the format ["val1"]. If $values
- *   has more than one item, then a string in the format ["val1","val2","val3"].
- *
- */
-function _dfp_format_target_value($values) {
-  $formatted_values = '';
-
-  // Convert the values into an array and trim the whitespace from each value.
-  $values = explode(',', $values);
-  array_filter(array_map('trim', $values));
-
-  if (count($values) == 1) {
-    $formatted_values = '"' . $values[0] . '"';
-  }
-  elseif (count($values) > 1) {
-    $formatted_values = '["' . implode('","', $values) . '"]';
-  }
-
-  return $formatted_values;
-}
-
-/**
- * Format the the size of an ad tag.
- *
- * @param string $size
- *   A string in the format 123x321,987x789.
- *
- * @return string
- *   A string in the format [456, 654] or [[123, 321], [987, 789]].
- *
- */
-function _dfp_format_size($size) {
-  $formatted_sizes = array();
-
-  $sizes = explode(',', $size);
-  foreach ($sizes as $size) {
-    $formatted_size = explode('x', trim($size));
-    $formatted_sizes[] = '[' . implode(', ', $formatted_size) .']';
-  }
-
-  return count($formatted_sizes) == 1 ? $formatted_sizes[0] : '[' . implode(', ', $formatted_sizes) . ']';
-}
-
-/**
- * Format the the size of an ad tag.
- *
- * @param string $slug
- *   A label for for this particular ad tag.
- *
- * @return string
- *   If $slug is none, an empty string will be returned; if $slug is a non-empty
- *   string then it will be returned unchanged; if $slug is empty, then the
- *   default slug will be returned.
- *
- */
-function _dfp_format_slug($slug) {
-  $formatted_slug = variable_get('dfp_default_slug', '');
-
-  if ($slug == '<none>') {
-    $formatted_slug = "";
-  }
-  elseif (!empty($slug)) {
-    $formatted_slug = $slug;
-  }
-
-  return $formatted_slug;
-}
-
-/**
  * Helper function to return an array pf tags marked to be displayed as a block.
  */
 function _dfp_block_tags() {
@@ -352,7 +292,7 @@ function _dfp_block_tags() {
  */
 function template_preprocess_dfp_tag(&$variables) {
   $tag = $variables['tag'];
-
+dpm($tag);
   // Create the attributes for the wrapper div.
   $variables['wrapper_attributes'] = array(
     'id' => $tag->wrapper_id,
@@ -375,7 +315,7 @@ function template_preprocess_dfp_tag(&$variables) {
     }
   }
   foreach ($tag->targeting as $target) {
-    $js .= '  .setTargeting("' . $target['target'] . '", ' . _dfp_format_target_value($target['value']) . ')' . "\n";
+    $js .= '  .setTargeting("' . $target['target'] . '", ' . theme('dfp_targeting_values', array('values' => $target['value'])) . ')' . "\n";
   }
   $js = rtrim($js, "\n") . ';' . "\n";
 
@@ -384,4 +324,81 @@ function template_preprocess_dfp_tag(&$variables) {
     'group' => JS_LIBRARY,
   );
   drupal_add_js($js, $options);
+}
+
+/**
+ * Format the given array of values to be displayed as part of a javascript.
+ *
+ * @param array $variables
+ *  'values' => A simple array of targeting values. Ex. val1, val2, val3
+ *
+ * @return string
+ *   If $values had one item, then a string in the format ["val1"]. If $values
+ *   has more than one item, then a string in the format ["val1","val2","val3"].
+ *
+ */
+function theme_dfp_targetting_values($variables) {
+  $formatted_values = '';
+
+  // Convert the values into an array and trim the whitespace from each value.
+  $values = explode(',', $variables['values']);
+  array_filter(array_map('trim', $values));
+
+  if (count($values) == 1) {
+    $formatted_values = '"' . $values[0] . '"';
+  }
+  elseif (count($values) > 1) {
+    $formatted_values = '["' . implode('","', $values) . '"]';
+  }
+
+  return $formatted_values;
+}
+
+/**
+ * Format the the size of an ad tag.
+ *
+ * @param array $variables
+ *   'size' => A string in the format 123x321,987x789.
+ *
+ * @return string
+ *   A string in the format [456, 654] or [[123, 321], [987, 789]].
+ *
+ */
+function theme_dfp_size($variables) {
+  $size = $variables['size'];
+  $formatted_sizes = array();
+
+  $sizes = explode(',', $size);
+  foreach ($sizes as $size) {
+    $formatted_size = explode('x', trim($size));
+    $formatted_sizes[] = '[' . implode(', ', $formatted_size) .']';
+  }
+
+  return count($formatted_sizes) == 1 ? $formatted_sizes[0] : '[' . implode(', ', $formatted_sizes) . ']';
+}
+
+/**
+ * Format the the size of an ad tag.
+ *
+ * @param array $variables
+ *   'slug' => A label for for this particular ad tag.
+ *
+ * @return string
+ *   If $slug is none, an empty string will be returned; if $slug is a non-empty
+ *   string then it will be returned unchanged; if $slug is empty, then the
+ *   default slug will be returned.
+ *
+ */
+function theme_dfp_slug($variables) {
+  $slug = $variables['slug'];
+  $formatted_slug = variable_get('dfp_default_slug', '');
+
+  if ($slug == '<none>') {
+    $formatted_slug = "";
+  }
+  elseif (!empty($slug)) {
+    $formatted_slug = $slug;
+  }
+
+  return $formatted_slug;
 }
