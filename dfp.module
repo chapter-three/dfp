@@ -142,14 +142,22 @@ function dfp_tag_load($machinename = '') {
     // Initialize the tag before allowing other modules to alter it.
     $tag->settings = is_array($tag->settings) ? $tag->settings : unserialize($tag->settings);
 
-    // Allow modules to alter the raw tag object.
+    // Allow modules to alter the (almost) raw tag object.
     drupal_alter('dfp_tag_load', $tag);
+
+    // Store the original tag. This is used by the tag edit form.
+    $tag->object = $tag;
+
+    // Move the settings out of the settings array.
+    foreach ($tag->settings as $key => $val) {
+      $tag->{$key} = $val;
+    }
 
     // Configure this tag based on the defined settings.
     $tag->unit = '/' . variable_get('dfp_network_id', '') . '/' . $tag->name;
     $tag->formatted_size = _dfp_format_size($tag->size);
     $tag->wrapper_id = 'dfp-ad-' . $tag->machinename;
-    $tag->slug = $tag->settings['slug'] == '<none>' ? '' : $tag->settings['slug'];
+    $tag->slug = _dfp_format_slug($tag->slug);
 
     drupal_alter('dfp_tag', $tag);
   }
@@ -224,17 +232,18 @@ function _dfp_js_header_script() {
   // Add global settings.
   $js = '';
   $js .= 'googletag.cmd.push(function() {' . "\n";
-  if (variable_get('dfp_collapse_empty_divs', 1)) {
-    $js .= '  googletag.pubads().collapseEmptyDivs();' . "\n";
-  }
   if (variable_get('dfp_async_rendering', 1)) {
     $js .= '  googletag.pubads().enableAsyncRendering();' . "\n";
   }
-  else {
-    $js .= '  googletag.pubads().enableSyncRendering();' . "\n";
-  }
   if (variable_get('dfp_single_request', 1)) {
     $js .= '  googletag.pubads().enableSingleRequest();' . "\n";
+  }
+  if (variable_get('dfp_collapse_empty_divs', 1)) {
+    $js .= '  googletag.pubads().collapseEmptyDivs();' . "\n";
+  }
+  $channel_ids = variable_get('dfp_default_adsense_channel_ids', '');
+  if (variable_get('dfp_default_adsense_channel_ids', '')) {
+    $js .= '  googletag.pubads().set("adsense_channel_ids", "' . $channel_ids . '");' . "\n";
   }
   $js .= '});' . "\n";
   $js .= 'googletag.enableServices();' . "\n";
@@ -279,10 +288,10 @@ function _dfp_format_target_value($values) {
  * Format the the size of an ad tag.
  *
  * @param string $size
- *   A string in the format 123x321,987x789;
+ *   A string in the format 123x321,987x789.
  *
  * @return string
- *   A string in the format [456, 654] or [[123, 321], [987, 789]]
+ *   A string in the format [456, 654] or [[123, 321], [987, 789]].
  *
  */
 function _dfp_format_size($size) {
@@ -295,6 +304,31 @@ function _dfp_format_size($size) {
   }
 
   return count($formatted_sizes) == 1 ? $formatted_sizes[0] : '[' . implode(', ', $formatted_sizes) . ']';
+}
+
+/**
+ * Format the the size of an ad tag.
+ *
+ * @param string $slug
+ *   A label for for this particular ad tag.
+ *
+ * @return string
+ *   If $slug is none, an empty string will be returned; if $slug is a non-empty
+ *   string then it will be returned unchanged; if $slug is empty, then the
+ *   default slug will be returned.
+ *
+ */
+function _dfp_format_slug($slug) {
+  $formatted_slug = variable_get('dfp_default_slug', '');
+
+  if ($slug == '<none>') {
+    $formatted_slug = "";
+  }
+  elseif (!empty($slug)) {
+    $formatted_slug = $slug;
+  }
+
+  return $formatted_slug;
 }
 
 /**
@@ -330,17 +364,17 @@ function template_preprocess_dfp_tag(&$variables) {
   // Add the js needed to define this adSlot to <head>.
   $js = 'googletag.defineSlot("' . $tag->name . '", ' . $tag->formatted_size . ', "' . $tag->wrapper_id . '")' . "\n";
   $js .= '  .addService(googletag.pubads())' . "\n";
-  if (!empty($tag->settings['ad_types'])) {
-    $js .= '  .set("adsense_ad_types", "' . $tag->settings['ad_types'] . '")' . "\n";
+  if (!empty($tag->ad_types)) {
+    $js .= '  .set("adsense_ad_types", "' . $tag->ad_types . '")' . "\n";
   }
-  foreach ($tag->settings['colors'] as $key => $val) {
+  foreach ($tag->colors as $key => $val) {
     if (!empty($val)){
       $key = 'adsense_' . $key . '_color';
       $val = '#' . strtoupper($val);
       $js .= '  .set("' . $key . '", "' . $val . '")' . "\n";
     }
   }
-  foreach ($tag->settings['targeting'] as $target) {
+  foreach ($tag->targeting as $target) {
     $js .= '  .setTargeting("' . $target['target'] . '", ' . _dfp_format_target_value($target['value']) . ')' . "\n";
   }
   $js = rtrim($js, "\n") . ';' . "\n";

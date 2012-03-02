@@ -61,12 +61,12 @@ function dfp_admin_settings($form, $form_state) {
     '#collapsed' => FALSE,
     '#group' => 'settings',
   );
-  $form['global_display_options']['dfp_slug'] = array(
+  $form['global_display_options']['dfp_default_slug'] = array(
     '#type' => 'textfield',
     '#title' => t('Global Slug'),
-    '#default_value' => variable_get('dfp_slug', '<none>'),
+    '#default_value' => variable_get('dfp_default_slug', ''),
     '#required' => FALSE,
-    '#description' => t('Slug all ad tags with this label. Use @tag for no slug. Example: Advertisement', array('@tag' => '<none>')),
+    '#description' => t('Slug all ad tags with this label. Example: Advertisement', array('@tag' => '<none>')),
   );
   // $form['global_display_options']['dfp_use_noscript'] = array(
   //   '#type' => 'checkbox',

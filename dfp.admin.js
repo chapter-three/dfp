@@ -35,7 +35,7 @@ Drupal.behaviors.dfpVerticalTabs = {
     });
 
     $('fieldset#edit-global-display-options', context).drupalSetSummary(function (context) {
-      var slug = Drupal.checkPlain($('#edit-dfp-slug', context).val());
+      var slug = Drupal.checkPlain($('#edit-dfp-default-slug', context).val());
       var noscript = Drupal.checkPlain($('#edit-dfp-use-noscript', context).is(':checked'));
       var collapse = Drupal.checkPlain($('#edit-dfp-collapse-empty-divs', context).is(':checked'));
 
