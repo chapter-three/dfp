@@ -142,7 +142,7 @@ function dfp_targeting_form_validate($form, &$form_state) {
  * Submit handler to add more targets to an ad tag.
  */
 function dfp_more_targets_submit($form, &$form_state) {
-  $form_state['targeting'] = $form_state['values']['targeting'];
+  $form_state['targeting'] = $form_state['input']['targeting'];
   $form_state['rebuild'] = TRUE;
 }
 
