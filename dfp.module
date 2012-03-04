@@ -127,7 +127,6 @@ function dfp_block_view($delta) {
   return $block;
 }
 
-
 /**
  * Implements hook_ctools_plugin_directory().
  */
@@ -148,10 +147,10 @@ function dfp_context_registry() {
         'title' => t('DFP tags'),
         'plugin' => 'dfp_context_reaction_tags',
       ),
-      // 'dfp_settings' => array(
-      //   'title' => t('DFP settings'),
-      //   'plugin' => 'dfp_context_reaction_settings',
-      // ),
+      'dfp_settings' => array(
+        'title' => t('DFP settings'),
+        'plugin' => 'dfp_context_reaction_settings',
+      ),
     ),
   );
 }
@@ -169,14 +168,14 @@ function dfp_context_plugins() {
       'parent' => 'context_reaction',
     ),
   );
-  // $plugins['dfp_context_reaction_settings'] = array(
-  //   'handler' => array(
-  //     'path' => drupal_get_path('module', 'dfp') . '/plugins/contexts',
-  //     'file' => 'dfp_context_reaction_settings.inc',
-  //     'class' => 'dfp_context_reaction_settings',
-  //     'parent' => 'context_reaction',
-  //   ),
-  // );
+  $plugins['dfp_context_reaction_settings'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'dfp') . '/plugins/contexts',
+      'file' => 'dfp_context_reaction_settings.inc',
+      'class' => 'dfp_context_reaction_settings',
+      'parent' => 'context_reaction',
+    ),
+  );
   return $plugins;
 }
 
@@ -197,34 +196,17 @@ function dfp_tag_load($machinenames = array(), $include_disabled = FALSE) {
   $machinenames = is_array($machinenames) ? $machinenames : array($machinenames);
 
   // Grab an array of all DFP tags or the specificed DFP tag.
-  if (empty($machinenames)) {
-    $tags = ctools_export_crud_load_all('dfp_tags');
-  }
-  else {
+  if (!empty($machinenames)) {
     // @todo: once the next version of ctools is released, use this instead
     // $tags = ctools_export_crud_load_multiple('dfp_tags', $machinenames);
     $tags = ctools_export_load_object('dfp_tags', 'names', $machinenames);
   }
+  else {
+    $tags = ctools_export_crud_load_all('dfp_tags');
+  }
 
   // Build up the tag objects.
   foreach ($tags as $key => &$tag) {
-    // Remove any disabled tags.
-
-    if (module_exists('context')) {
-      // Hide the tag based on the current context.
-      if ($plugin = context_get_plugin('reaction', 'dfp_tags')) {
-        $plugin->execute($tag);
-      }
-      // Override the tag's settings based on the current context.
-      // if ($plugin = context_get_plugin('reaction', 'dart_settings')) {
-      //   $plugin->execute($tag);
-      // }
-    }
-
-    if (!$include_disabled && isset($tag->disabled) && $tag->disabled) {
-      unset($tags[$key]);
-    }
-
     // Initialize the tag before allowing other modules to alter it.
     $tag->settings = is_array($tag->settings) ? $tag->settings : unserialize($tag->settings);
 
@@ -246,11 +228,35 @@ function dfp_tag_load($machinenames = array(), $include_disabled = FALSE) {
     $tag->placeholder_id = 'dfp-ad-' . $tag->machinename;
     $tag->slug = theme('dfp_slug', array('slug' => $tag->slug));
 
+    // Allow modules to alter the fully-loaded tag object.
     drupal_alter('dfp_tag', $tag);
+
+    // Handle disabled tags last so that other modules have the opportunity to
+    // change the disabled status if needed.
+    if (!$include_disabled && isset($tag->disabled) && $tag->disabled) {
+      unset($tags[$key]);
+    }
   }
 
   return empty($machinenames) ? $tags : array_shift($tags);
 }
+
+
+function dfp_dfp_tag_load_alter(&$tag) {
+  // Remove any disabled tags.
+  if (module_exists('context')) {
+    // Hide the tag based on the current context.
+    if ($plugin = context_get_plugin('reaction', 'dfp_tags')) {
+      $plugin->execute($tag);
+    }
+    // Override the tag's settings based on the current context. This must
+    // come after settings is unserialized.
+    if ($plugin = context_get_plugin('reaction', 'dfp_settings')) {
+      $plugin->execute($tag);
+    }
+  }
+}
+
 
 /**
  * Save a single tag.
@@ -258,6 +264,20 @@ function dfp_tag_load($machinenames = array(), $include_disabled = FALSE) {
 function dfp_tag_save(&$tag) {
   $update = (isset($tag->adid) && is_numeric($tag->adid)) ? array('adid') : array();
   return drupal_write_record('dfp_tag', $tag, $update);
+}
+
+/**
+ * Form alter for the ctools_export_ui_edit_item_form.
+ */
+function dfp_form_ctools_export_ui_edit_item_form_alter(&$form, &$form_state) {
+  if (arg(2) == 'context') {
+    // Make sure that dfp.admin.inc is included on teh context ui form to avoid
+    // errors when doing an ajax submit.
+    form_load_include($form_state, 'inc', 'dfp', 'dfp.admin');
+
+    // Add the target form validation.
+    $form['#validate'][] = 'dfp_targeting_form_validate';
+  }
 }
 
 /**
