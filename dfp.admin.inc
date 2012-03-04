@@ -88,8 +88,16 @@ function dfp_admin_settings($form, $form_state) {
   //   '#default_value' => variable_get('dfp_collapse_empty_divs', 1),
   //   '#description' => t('The target will be "terms" and the value will be the term name(s).'),
   // );
+
+  $form['targeting_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Global Targeting'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#group' => 'settings',
+  );
   $existing_targeting = _dfp_get_existing_targeting($form_state, variable_get('dfp_targeting', array()));
-  _dfp_targeting_form($form, $form_state, $existing_targeting);
+  _dfp_targeting_form($form['targeting_settings'], $form_state, $existing_targeting);
 
   // Javascript.
   $form['javascript'] = array(
@@ -160,14 +168,7 @@ function _dfp_targeting_form(&$form, &$form_state, $existing_targeting = array()
   $form['#validate'][] = 'dfp_targeting_form_validate';
 
   // Display settings.
-  $form['targeting_settings'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Targeting'),
-    '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
-    '#group' => 'settings',
-  );
-  $form['targeting_settings']['targeting'] = array(
+  $form['targeting'] = array(
     '#tree' => FALSE,
     '#prefix' => '<div id="dfp-targeting-wrapper">',
     '#suffix' => '</div>',
@@ -181,7 +182,7 @@ function _dfp_targeting_form(&$form, &$form_state, $existing_targeting = array()
   // Add one blank set of target fields.
   _dfp_target_form($form, count($existing_targeting) + 1);
 
-  $form['targeting_settings']['targeting']['dfp_more_targets'] = array(
+  $form['targeting']['dfp_more_targets'] = array(
     '#type' => 'submit',
     '#value' => t('Add another target'),
     '#submit' => array('dfp_more_targets_submit'),
@@ -199,11 +200,11 @@ function _dfp_targeting_form(&$form, &$form_state, $existing_targeting = array()
  * Helper form builder for an individual target.
  */
 function _dfp_target_form(&$form, $key, $data = array()) {
-  $form['targeting_settings']['targeting'][$key] = array(
+  $form['targeting'][$key] = array(
     '#prefix' => '<div class="target" id="target-' . $key . '">',
     '#suffix' => '</div>',
   );
-  $form['targeting_settings']['targeting'][$key]['target'] = array(
+  $form['targeting'][$key]['target'] = array(
     '#type' => 'textfield',
     '#title_display' => 'invisible',
     '#title' => t('Target Name'),
@@ -212,7 +213,7 @@ function _dfp_target_form(&$form, $key, $data = array()) {
     '#parents' => array('targeting', $key, 'target'),
     '#attributes' => array('class' => array('field-target-target')),
   );
-  $form['targeting_settings']['targeting'][$key]['value'] = array(
+  $form['targeting'][$key]['value'] = array(
     '#type' => 'textfield',
     '#title_display' => 'invisible',
     '#title' => t('Target Value'),
@@ -222,8 +223,8 @@ function _dfp_target_form(&$form, $key, $data = array()) {
     '#attributes' => array('class' => array('field-target-value')),
   );
   if (empty($data)) {
-    $form['targeting_settings']['targeting'][$key]['target']['#description'] = t('Example: state');
-    $form['targeting_settings']['targeting'][$key]['value']['#description'] = t('Example: ny, nj, ct');
+    $form['targeting'][$key]['target']['#description'] = t('Example: state');
+    $form['targeting'][$key]['value']['#description'] = t('Example: ny, nj, ct');
   }
 }
 

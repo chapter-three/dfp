@@ -171,8 +171,15 @@ function dfp_tag_form(&$form, &$form_state) {
   }
 
   // Global display options.
+  $form['targeting_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Targeting'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#group' => 'settings',
+  );
   $existing_targeting = _dfp_get_existing_targeting($form_state, isset($tag->settings['targeting']) ? $tag->settings['targeting'] : array());
-  _dfp_targeting_form($form, $form_state, $existing_targeting);
+  _dfp_targeting_form($form['targeting_settings'], $form_state, $existing_targeting);
 
 }
 
