@@ -201,7 +201,9 @@ function dfp_tag_load($machinenames = array(), $include_disabled = FALSE) {
     $tags = ctools_export_crud_load_all('dfp_tags');
   }
   else {
-    $tags = ctools_export_crud_load_multiple('dfp_tags', $machinenames);
+    // @todo: once the next version of ctools is released, use this instead
+    // $tags = ctools_export_crud_load_multiple('dfp_tags', $machinenames);
+    $tags = ctools_export_load_object('dfp_tags', 'names', $machinenames);
   }
 
   // Build up the tag objects.
