@@ -97,7 +97,7 @@ function dfp_admin_settings($form, $form_state) {
     '#group' => 'settings',
   );
   $existing_targeting = _dfp_get_existing_targeting($form_state, variable_get('dfp_targeting', array()));
-  _dfp_targeting_form($form['targeting_settings'], $form_state, $existing_targeting);
+  _dfp_targeting_form($form['targeting_settings'], $form, $existing_targeting);
 
   // Javascript.
   $form['javascript'] = array(
@@ -164,11 +164,11 @@ function dfp_more_targets_js($form, $form_state) {
 /**
  * Helper form builder for the targeting form.
  */
-function _dfp_targeting_form(&$form, &$form_state, $existing_targeting = array()) {
+function _dfp_targeting_form(&$targeting_form, &$form, $existing_targeting = array()) {
   $form['#validate'][] = 'dfp_targeting_form_validate';
 
   // Display settings.
-  $form['targeting'] = array(
+  $targeting_form['targeting'] = array(
     '#tree' => FALSE,
     '#prefix' => '<div id="dfp-targeting-wrapper">',
     '#suffix' => '</div>',
@@ -177,12 +177,12 @@ function _dfp_targeting_form(&$form, &$form_state, $existing_targeting = array()
 
   // Add existing targets to the form.
   foreach ($existing_targeting as $key => $data) {
-    _dfp_target_form($form, $key, $data);
+    _dfp_target_form($targeting_form, $key, $data);
   }
   // Add one blank set of target fields.
-  _dfp_target_form($form, count($existing_targeting) + 1);
+  _dfp_target_form($targeting_form, count($existing_targeting) + 1);
 
-  $form['targeting']['dfp_more_targets'] = array(
+  $targeting_form['targeting']['dfp_more_targets'] = array(
     '#type' => 'submit',
     '#value' => t('Add another target'),
     '#submit' => array('dfp_more_targets_submit'),
