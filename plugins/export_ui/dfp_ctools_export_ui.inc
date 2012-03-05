@@ -49,7 +49,7 @@ function dfp_tag_form(&$form, &$form_state) {
   form_load_include($form_state, 'inc', 'dfp', 'plugins/export_ui/dfp_ctools_export_ui');
   form_load_include($form_state, 'inc', 'dfp', 'dfp.admin');
 
-  $tag = $form_state['item']->object;
+  $tag = ($form_state['op'] == 'add' ? $form_state['item'] : $form_state['item']->object);
 
   $form['settings'] = array(
     '#type' => 'vertical_tabs',
