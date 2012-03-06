@@ -241,7 +241,9 @@ function dfp_tag_load($machinenames = array(), $include_disabled = FALSE) {
   return empty($machinenames) ? $tags : array_shift($tags);
 }
 
-
+/**
+ * Alter a dfp tag object to integrate with the contexts module.
+ */
 function dfp_dfp_tag_load_alter(&$tag) {
   // Remove any disabled tags.
   if (module_exists('context')) {
@@ -257,6 +259,13 @@ function dfp_dfp_tag_load_alter(&$tag) {
   }
 }
 
+/**
+ * Alter the vertical tabs group in which the exportable scheduler form should
+ * live.
+ */
+function dfp_exportable_scheduler_form_group_alter(&$group) {
+  $group = 'settings';
+}
 
 /**
  * Save a single tag.

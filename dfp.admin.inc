@@ -155,7 +155,7 @@ function dfp_more_targets_submit($form, &$form_state) {
 }
 
 /**
- * Ajax callback for adding new messages to the broadcast messages form.
+ * Ajax callback for adding targets to the targeting form.
  */
 function dfp_more_targets_js($form, $form_state) {
   return $form['targeting_settings']['targeting'];

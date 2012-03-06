@@ -112,7 +112,7 @@ function dfp_tag_form(&$form, &$form_state) {
   );
 
 
-  // Display settings.
+  // Global Display settings.
   $form['tag_display_options'] = array(
     '#type' => 'fieldset',
     '#title' => t('Display Options'),
@@ -170,7 +170,7 @@ function dfp_tag_form(&$form, &$form_state) {
     );
   }
 
-  // Global display options.
+  // Targeting options.
   $form['targeting_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Targeting'),
