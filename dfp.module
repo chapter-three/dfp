@@ -56,7 +56,7 @@ function dfp_theme($existing, $type, $theme, $path) {
       'render element' => 'form',
       'file' => 'dfp.admin.inc',
     ),
-    'dfp_color_settings' => array(
+    'dfp_adsense_color_settings' => array(
       'render element' => 'form',
       'file' => 'dfp.admin.inc',
     ),

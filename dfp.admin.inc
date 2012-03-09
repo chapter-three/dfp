@@ -265,7 +265,7 @@ function theme_dfp_target_settings($variables) {
 /**
  * Theme function for the "target" form.
  */
-function theme_dfp_color_settings($variables) {
+function theme_dfp_adsense_color_settings($variables) {
   $form = $variables['form'];
 
   $caption = t('AdSense Color Settings');
@@ -279,11 +279,8 @@ function theme_dfp_color_settings($variables) {
     );
   }
 
-  $output = '<div class="form-item">';
-  $output .= '  <label>' . t('Color Settings') . '</label>';
-  $output .= '  <div class="description">' . t('Primarily used for text ads these settings can be used to override the color settings defined in the DFP tool.') . '</div>';
+  $output = '  <label>' . t('Color Settings for Text Ads') . '</label>';
   $output .= theme('table', array('attributes' => array('id' => 'color-settings'), 'header' => $header, 'rows' => $rows));
-  $output .= '</div>';
 
   return $output;
 }

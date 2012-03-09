@@ -97,20 +97,6 @@ function dfp_tag_form(&$form, &$form_state) {
     '#maxlength' => 64,
     '#default_value' => $tag->size,
   );
-  $form['tag_settings']['ad_types'] = array(
-    '#type' => 'select',
-    '#title' => t('AdSense Ad Type'),
-    '#default_value' => $tag->settings['ad_types'],
-    '#required' => TRUE,
-    '#options' => array(
-      'text_image' => t('Both image and text ads'),
-      'image' => t('Only image ads'),
-      'text' => t('Only text ads'),
-    ),
-    '#parents' => array('settings', 'ad_types'),
-    '#description' => t('Choose what type of ads this tag can display.'),
-  );
-
 
   // Global Display settings.
   $form['tag_display_options'] = array(
@@ -132,7 +118,7 @@ function dfp_tag_form(&$form, &$form_state) {
   $form['tag_display_options']['block'] = array(
     '#type' => 'checkbox',
     '#title' => t('Create a block for this ad tag'),
-    '#description' => t('Create a block (configurable at !url) in which this ad tag is displayed.', array('!url' => l('admin/build/block', 'admin/build/block'))),
+    '#description' => t('Display this ad in a block configurable at !url.', array('!url' => l('admin/build/block', 'admin/build/block'))),
     '#default_value' => $tag->block,
   );
   // $form['tag_display_options']['scriptless'] = array(
@@ -142,31 +128,62 @@ function dfp_tag_form(&$form, &$form_state) {
   //   '#default_value' => $tag->settings['scriptless'],
   //   '#parents' => array('settings', 'scriptless'),
   // );
-  $form['tag_display_options']['color_settings'] = array(
-    '#theme' => 'dfp_color_settings',
+
+
+  $form['backfill_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Backfill Ad Settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#group' => 'settings',
+    //'#description' => t('If you are backfilling your ads with AdSense ads, override the settings defined in DFP below.'),
+  );
+  $form['backfill_settings']['adsense_ad_types'] = array(
+    '#type' => 'select',
+    '#title' => t('AdSense Ad Type'),
+    '#empty_option' => t('- None -'),
+    '#empty_value' => '',
+    '#default_value' => $tag->settings['adsense_ad_types'],
+    '#options' => array(
+      'text_image' => t('Both image and text ads'),
+      'image' => t('Only image ads'),
+      'text' => t('Only text ads'),
+    ),
+    '#parents' => array('settings', 'adsense_ad_types'),
+    '#description' => t('Choose what type of ads this tag can display when AdSense ads are used for backfill.'),
+  );
+  $form['backfill_settings']['adsense_color_settings'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('form-item')),
+    '#theme' => 'dfp_adsense_color_settings',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="settings[adsense_ad_types]"]' => array('value' => 'text'), //@todo: figure out the "or" for text_image
+      ),
+    ),
     '#attached' => array(
       'js' => array(
         'vertical-tabs' => drupal_get_path('module', 'dfp') . '/dfp.admin.js',
       ),
     ),
   );
-  $color_settings = array(
+  $adsense_color_settings = array(
     'background' => t('Background color'),
     'border' => t('Border color'),
     'link' => t('Link color'),
     'text' => t('Text color'),
     'url' => t('URL color'),
   );
-  foreach ($color_settings as $setting => $title) {
-    $form['tag_display_options']['color_settings'][$setting] = array(
+  foreach ($adsense_color_settings as $setting => $title) {
+    $form['backfill_settings']['adsense_color_settings'][$setting] = array(
       '#type' => 'textfield',
       '#title' => $title,
       '#attributes' => array('class' => array('color-setting')),
       '#field_prefix' => '#',
       '#title_display' => 'invisible',
-      '#default_value' => isset($tag->settings['colors'][$setting]) ? $tag->settings['colors'][$setting] : '',
+      '#default_value' => isset($tag->settings['adsense_colors'][$setting]) ? $tag->settings['adsense_colors'][$setting] : '',
       '#size' => 6,
-      '#parents' => array('settings', 'colors', $setting),
+      '#parents' => array('settings', 'adsense_colors', $setting),
     );
   }
 

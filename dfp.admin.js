@@ -8,7 +8,6 @@ Drupal.behaviors.dfpAdminColors = {
       hexcolor = reg.test($(this).val()) ? '#' + $(this).val() : 'transparent';
       $(this).closest('tr').find('.color-sample').css('background-color', hexcolor);
     });
-    console.log($('#color-settings .color-setting', context));
   }
 };
 
