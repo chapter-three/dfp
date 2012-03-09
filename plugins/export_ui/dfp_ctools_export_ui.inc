@@ -121,13 +121,13 @@ function dfp_tag_form(&$form, &$form_state) {
     '#description' => t('Display this ad in a block configurable at !url.', array('!url' => l('admin/build/block', 'admin/build/block'))),
     '#default_value' => $tag->block,
   );
-  // $form['tag_display_options']['scriptless'] = array(
-  //   '#type' => 'checkbox',
-  //   '#title' => t('Render this tag without javascript'),
-  //   '#description' => t('Use this option for ads included in emails.'),
-  //   '#default_value' => $tag->settings['scriptless'],
-  //   '#parents' => array('settings', 'scriptless'),
-  // );
+  $form['tag_display_options']['short_tag'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Render this tag without javascript'),
+    '#description' => t('Use this option for ads included in emails.'),
+    '#default_value' => $tag->settings['short_tag'],
+    '#parents' => array('settings', 'short_tag'),
+  );
 
   // Targeting options.
   $form['targeting_settings'] = array(

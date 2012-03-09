@@ -1,6 +1,7 @@
 <?php
 
 define('DFP_GOOGLE_TAG_SERVICES_URL', 'www.googletagservices.com/tag/js/gpt.js');
+define('DFP_GOOGLE_SHORT_TAG_SERVICES_URL', 'pubads.g.doubleclick.net/gampad');
 
 /**
  * Implements hook_help().
@@ -36,6 +37,12 @@ function dfp_theme($existing, $type, $theme, $path) {
         'tag' => NULL,
       ),
       'template' => 'theme/dfp_tag',
+    ),
+    'dfp_short_tag' => array(
+      'variables' => array(
+        'tag' => NULL,
+      ),
+      'template' => 'theme/dfp_short_tag',
     ),
     'dfp_targeting_values' => array(
       'variables' => array(
@@ -119,10 +126,7 @@ function dfp_block_info() {
  * Implements hook_block_view().
  */
 function dfp_block_view($delta) {
-  $block['content'] = array(
-    '#theme' => 'dfp_tag',
-    '#tag' => dfp_tag_load($delta),
-  );
+  $block['content'] = dfp_tag($delta);
 
   return $block;
 }
@@ -177,6 +181,48 @@ function dfp_context_plugins() {
     ),
   );
   return $plugins;
+}
+
+/**
+ * Return a render array for the tag specified by machinename.
+ */
+function dfp_tag($machinename) {
+  $tag = dfp_tag_load($machinename);
+  $render_array = array();
+
+  if (!empty($tag)) {
+    $render_array = array(
+      'dfp_wrapper' => array(
+        '#type' => 'container',
+        '#attributes' => array(
+          'id' => $tag->wrapper_id,
+          'class' => array(
+            'dfp-tag-wrapper',
+          ),
+        ),
+        'tag' => array(
+          '#theme' => $tag->short_tag ? 'dfp_short_tag' : 'dfp_tag',
+          '#tag' => $tag,
+        ),
+      ),
+    );
+    if (!empty($tag->slug)) {
+      $render_array['dfp_wrapper']['slug_wrapper'] = array(
+        '#type' => 'container',
+        '#attributes' => array(
+          'class' => array(
+            'slug',
+          ),
+        ),
+        'slug' => array(
+          '#markup' => $tag->slug,
+        ),
+        '#weight' => -1,
+      );
+    }
+  }
+
+  return $render_array;
 }
 
 /**
@@ -280,7 +326,7 @@ function dfp_tag_save(&$tag) {
  */
 function dfp_form_ctools_export_ui_edit_item_form_alter(&$form, &$form_state) {
   if (arg(2) == 'context') {
-    // Make sure that dfp.admin.inc is included on teh context ui form to avoid
+    // Make sure that dfp.admin.inc is included on the context ui form to avoid
     // errors when doing an ajax submit.
     form_load_include($form_state, 'inc', 'dfp', 'dfp.admin');
 
@@ -297,21 +343,19 @@ function dfp_test_page() {
   $tags = dfp_tag_load();
 
   foreach ($tags as $tag) {
-    $tag_output = array(
+    $tag_name = array(
       'tag name' => array(
         '#markup' => '<h3>' . $tag->name . '</h3>',
       ),
-      'rendered tag' => array(
-        '#theme' => 'dfp_tag',
-        '#tag' => $tag,
-      ),
     );
+    $tag_tag = dfp_tag($tag->name);
+    $tag_devel = array();
     if (module_exists('devel')) {
-      $tag_output['object'] = array(
+      $tag_devel['object'] = array(
         '#markup' => kpr($tag, TRUE),
       );
     }
-    $output[] = $tag_output;
+    $output[] = array($tag_name, $tag_tag, $tag_devel);
   }
 
   return $output;
@@ -379,7 +423,38 @@ function _dfp_js_header_script() {
 }
 
 /**
- * Helper function to return an array pf tags marked to be displayed as a block.
+ * Helper function to build the javascript needed to define an ad slot and add
+ * it to the head tag.
+ */
+function _dfp_js_slot_definition($tag) {
+  // Add the js needed to define this adSlot to <head>.
+  $js = 'googletag.defineSlot("' . $tag->name . '", ' . $tag->formatted_size . ', "' . $tag->placeholder_id . '")' . "\n";
+  $js .= '  .addService(googletag.pubads())' . "\n";
+  if (!empty($tag->ad_types)) {
+    $js .= '  .set("adsense_ad_types", "' . $tag->ad_types . '")' . "\n";
+  }
+
+  foreach ($tag->adsense_colors as $key => $val) {
+    if (!empty($val)){
+      $key = 'adsense_' . $key . '_color';
+      $val = '#' . strtoupper($val);
+      $js .= '  .set("' . $key . '", "' . $val . '")' . "\n";
+    }
+  }
+  foreach ($tag->targeting as $target) {
+    $js .= '  .setTargeting("' . $target['target'] . '", ' . theme('dfp_targeting_values', array('values' => $target['value'])) . ')' . "\n";
+  }
+  $js = rtrim($js, "\n") . ';' . "\n";
+
+  $options = array(
+    'type' => 'inline',
+    'group' => JS_LIBRARY,
+  );
+  drupal_add_js($js, $options);
+}
+
+/**
+ * Returns an array dfp tags marked to be displayed as a block.
  */
 function _dfp_block_tags() {
   $block_tags = array();
@@ -407,36 +482,36 @@ function template_preprocess_dfp_tag(&$variables) {
       'dfp-tag-wrapper',
     ),
   );
-  $variables['wrapper_attributes'] = array(
-    'id' => $tag->wrapper_id,
-    'class' => array(
-      'dfp-tag-wrapper',
-    ),
-  );
 
-  // Add the js needed to define this adSlot to <head>.
-  $js = 'googletag.defineSlot("' . $tag->name . '", ' . $tag->formatted_size . ', "' . $tag->placeholder_id . '")' . "\n";
-  $js .= '  .addService(googletag.pubads())' . "\n";
-  if (!empty($tag->ad_types)) {
-    $js .= '  .set("adsense_ad_types", "' . $tag->ad_types . '")' . "\n";
-  }
-  foreach ($tag->colors as $key => $val) {
-    if (!empty($val)){
-      $key = 'adsense_' . $key . '_color';
-      $val = '#' . strtoupper($val);
-      $js .= '  .set("' . $key . '", "' . $val . '")' . "\n";
-    }
-  }
-  foreach ($tag->targeting as $target) {
-    $js .= '  .setTargeting("' . $target['target'] . '", ' . theme('dfp_targeting_values', array('values' => $target['value'])) . ')' . "\n";
-  }
-  $js = rtrim($js, "\n") . ';' . "\n";
+  // Define an ad slot for this tag.
+  _dfp_js_slot_definition($tag);
+}
 
-  $options = array(
-    'type' => 'inline',
-    'group' => JS_LIBRARY,
-  );
-  drupal_add_js($js, $options);
+/**
+ * Preprocess function for DFP tags.
+ */
+function template_preprocess_dfp_short_tag(&$variables) {
+  static $tile = 0;
+  $tag = $variables['tag'];
+
+  // Build a key|vals array and allow third party modules to modify it.
+  $keyvals = array();
+  $keyvals['iu'] = $tag->name;
+  $keyvals['c'] = 10000 + rand(99999);
+  $keyvals['size'] = str_replace(',', '|', $tag->size);
+  $keyvals['tile'] = ++$tile;
+
+  $targets = array();
+  foreach ($tag->targeting as $data) {
+    $tagets[] = $data['target'] . '=' . $data['value'];
+  }
+  if (!empty($targets)) {
+    $keyvals['t'] = implode('&', $targets);
+  }
+  drupal_alter('dfp_short_tag_keyvals', $keyvals);
+
+  $variables['url_jump'] = 'http://' . DFP_GOOGLE_SHORT_TAG_SERVICES_URL . '/jump?' . http_build_query($keyvals);
+  $variables['url_ad'] = 'http://' . DFP_GOOGLE_SHORT_TAG_SERVICES_URL . '/ad?' . http_build_query($keyvals);
 }
 
 /**

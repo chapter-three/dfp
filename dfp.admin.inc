@@ -7,8 +7,6 @@ function dfp_admin_settings($form, $form_state) {
   // Make sure that all the necessary files are included even on ajax callbacks.
   form_load_include($form_state, 'inc', 'dfp', 'plugins/export_ui/dfp_ctools_export_ui');
 
-  $form['#submit'][] = 'dfp_admin_form_submit';
-
   $form['settings'] = array(
     '#type' => 'vertical_tabs',
   );
@@ -117,15 +115,6 @@ function dfp_admin_settings($form, $form_state) {
   );
 
   return system_settings_form($form);
-}
-
-/**
- * Form submit function for the DFP admin form.
- */
-function dfp_admin_form_submit($form, &$form_state) {
-  // Rename the targeting variable to avoid namespace collisions.
-  $form_state['values']['dfp_targeting'] = $form_state['values']['targeting'];
-  unset($form_state['values']['targeting']);
 }
 
 /**
