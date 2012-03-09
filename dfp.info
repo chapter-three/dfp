@@ -2,9 +2,13 @@ name = Doubleclick for Publishers
 description = Integrates DFP Google Publisher Tags onto a site.
 core = 7.x
 package = Advertising
-dependencies[] = ctools
 version = "7.x-1.x"
 project = "dfp"
+
+configure = admin/structure/dfp_ads/settings
+
+dependencies[] = ctools
+dependencies[] = system (>=7.13)
 
 files[] = dfp.install
 files[] = dfp.module
