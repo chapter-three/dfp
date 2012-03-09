@@ -39,21 +39,30 @@ Drupal.behaviors.dfpVerticalTabs = {
       var collapse = Drupal.checkPlain($('#edit-dfp-collapse-empty-divs', context).is(':checked'));
 
       summary = 'Global Slug: ' + slug + '<br/>';
-      // summary += (noscript == "true" ? checkmark : exmark) + ' Include <code>&lt;noscript&gt;</code> tags' + '<br/>';
       summary += (collapse == "true" ? checkmark : exmark) + ' Hide ad slots if no ad is served';
 
       return summary;
     });
 
+    $('fieldset#edit-backfill-settings', context).drupalSetSummary(function (context) {
+      var adType = Drupal.checkPlain($('#edit-settings-adsense-ad-types option:selected', context).text());
+      var adTypeVal = Drupal.checkPlain($('#edit-settings-adsense-ad-types', context).val());
+
+      summary = adTypeVal != '' ? Drupal.t('Ad Type: ') + adType : '';
+      return summary;
+    });
+
     $('fieldset#edit-tag-settings', context).drupalSetSummary(function (context) {
-      var summary = Drupal.t('General configuration options');
       var name = Drupal.checkPlain($('#edit-name', context).val());
       var size = Drupal.checkPlain($('#edit-size', context).val());
-      return summary + (name != '' ? '<br/>' + name  + ' [' + size + ']' : '');
+
+      summary = name != '' ?  name  + ' [' + size + ']' : '';
+      return summary;
     });
 
     $('fieldset#edit-tag-display-options', context).drupalSetSummary(function (context) {
-      return Drupal.t('Configure how the ad will be displayed');
+      summary = Drupal.t('Configure how the ad will be displayed');
+      return summary;
     });
 
     $('fieldset#edit-targeting-settings', context).drupalSetSummary(function (context) {

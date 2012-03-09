@@ -71,7 +71,7 @@ function dfp_tag_form(&$form, &$form_state) {
 
   $form['tag_settings']['name'] = array(
     '#type' => 'textfield',
-    '#title' => t('Ad Unit Name'),
+    '#title' => t('Ad Slot Name'),
     '#required' => TRUE,
     '#maxlength' => 64,
     '#default_value' => $tag->name,
@@ -158,7 +158,10 @@ function dfp_tag_form(&$form, &$form_state) {
     '#theme' => 'dfp_adsense_color_settings',
     '#states' => array(
       'visible' => array(
-        ':input[name="settings[adsense_ad_types]"]' => array('value' => 'text'), //@todo: figure out the "or" for text_image
+        // @todo: Find a better solution to having an "or" condition. This hack
+        // was borrowed from http://bit.ly/xYgNbV.
+        ':input[name="settings[adsense_ad_types]"], none' => array('!value' => ''),
+        ':input[name="settings[adsense_ad_types]"], image' => array('!value' => 'image'),
       ),
     ),
     '#attached' => array(
