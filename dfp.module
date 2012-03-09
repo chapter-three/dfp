@@ -557,7 +557,7 @@ function template_preprocess_dfp_short_tag(&$variables) {
   // Build a key|vals array and allow third party modules to modify it.
   $keyvals = array();
   $keyvals['iu'] = $tag->name;
-  $keyvals['c'] = 10000 + rand(99999);
+  $keyvals['c'] = rand(100000, 99999);
   $keyvals['size'] = str_replace(',', '|', $tag->size);
   $keyvals['tile'] = ++$tile;
 
