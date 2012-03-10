@@ -273,6 +273,14 @@ function dfp_tag_load($machinenames = array(), $include_disabled = FALSE) {
 }
 
 /**
+ * Save a single tag.
+ */
+function dfp_tag_save(&$tag) {
+  $update = (isset($tag->adid) && is_numeric($tag->adid)) ? array('adid') : array();
+  return drupal_write_record('dfp_tag', $tag, $update);
+}
+
+/**
  * Alter a dfp tag object to integrate with the contexts module.
  */
 function dfp_dfp_tag_load_alter(&$tag) {
@@ -296,14 +304,6 @@ function dfp_dfp_tag_load_alter(&$tag) {
  */
 function dfp_exportable_scheduler_form_group_alter(&$group) {
   $group = 'settings';
-}
-
-/**
- * Save a single tag.
- */
-function dfp_tag_save(&$tag) {
-  $update = (isset($tag->adid) && is_numeric($tag->adid)) ? array('adid') : array();
-  return drupal_write_record('dfp_tag', $tag, $update);
 }
 
 /**
