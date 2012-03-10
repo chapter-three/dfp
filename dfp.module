@@ -169,6 +169,68 @@ function dfp_context_plugins() {
 }
 
 /**
+ * Implements of hook_token_info().
+ */
+function dfp_token_info() {
+  $type = array(
+    'name' => t('DFP Ad Tags'),
+    'description' => t('Tokens used for building ad tags.'),
+    'needs-data' => 'tag',
+  );
+
+  $tag['slot'] = array(
+    'name' => t('Slot Name'),
+    'description' => t("The name of the ad slot defined by this tag."),
+  );
+  $tag['network_id'] = array(
+    'name' => t("Network ID"),
+    'description' => t("The unique ID provided by Google."),
+  );
+  $tag['url:n'] = array(
+    'name' => t("URL Parts (n)"),
+    'description' => t("Given the current URL of http://site.com/path/to/page, [dfp_tag:url:2] will be replaced with 'path/to'."),
+  );
+
+  return array(
+    'types' => array('dfp_tag' => $type),
+    'tokens' => array('dfp_tag' => $tag),
+  );
+}
+
+/**
+ * Implements of hook_token().
+ */
+function dfp_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $replacements = array();
+
+  if ($type == 'dfp_tag' && !empty($data['tag'])) {
+    $tag = $data['tag'];
+
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'slot':
+          $replacements[$original] = check_plain($tag->name);
+          break;
+
+        case 'network_id':
+          $replacements[$original] = check_plain(variable_get('dfp_network_id', ''));
+          break;
+
+      }
+    }
+
+    if ($created_tokens = token_find_with_prefix($tokens, 'url:n')) {
+      foreach ($created_tokens as $name => $original) {
+        $url_parts = explode('/', $_GET['q']);
+        $replacements[$original] = implode('/', array_slice($url_parts, 0, $name));
+      }
+    }
+  }
+
+  return $replacements;
+}
+
+/**
  * Return a render array for the tag specified by machinename.
  */
 function dfp_tag($machinename) {

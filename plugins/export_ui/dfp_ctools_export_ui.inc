@@ -77,6 +77,14 @@ function dfp_tag_form(&$form, &$form_state) {
     '#default_value' => $tag->name,
     '#description' => t('Example: leaderboard or sports/baseball/Yankees'),
   );
+
+// $form['tag_settings']['tokens'] = array(
+//   '#theme' => 'token_tree',
+//   '#token_types' => array('dfp_tag'), // The token types that have specific context. Can be multiple token types like 'term' and/or 'user'
+//   '#global_types' => FALSE, // A boolean TRUE or FALSE whether to include 'global' context tokens like [current-user:*] or [site:*]. Defaults to TRUE.
+//   '#click_insert' => TRUE, // A boolean whether to include the 'Click this token to insert in into the the focused textfield' JavaScript functionality. Defaults to TRUE.
+// );
+
   $form['tag_settings']['machinename'] = array(
     '#type' => 'machine_name',
     '#title' => t('Unique Name'),
