@@ -300,10 +300,7 @@ function dfp_tag_load($machinenames = array(), $include_disabled = FALSE) {
 
   // Build up the tag objects.
   foreach ($tags as $key => &$tag) {
-    // Initialize the tag before allowing other modules to alter it.
-//    $tag->settings = is_array($tag->settings) ? $tag->settings : unserialize($tag->settings);
-
-    // Allow modules to alter the (almost) raw tag object.
+    // Allow modules to alter the raw tag object.
     drupal_alter('dfp_tag_load', $tag);
 
     // Store the original tag. This is used by the tag edit form.

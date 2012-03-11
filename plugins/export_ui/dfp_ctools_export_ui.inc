@@ -222,8 +222,8 @@ function dfp_tag_form(&$form, &$form_state) {
  */
 function dfp_tag_form_validate(&$form, &$form_state) {
   // Ad Unit names can only have letters, numbers and slashes.¬
-  if (preg_match('@[^a-zA-Z0-9\/\-_\.]+@', $form_state['values']['adunit'])) {
-    form_set_error('adunit', t('Ad Unit Patterns can only include letters, numbers, hyphens, dashes, periods and slashes.'));
+  if (preg_match('@[^a-zA-Z0-9\/\-_\.\[\]\:]+@', $form_state['values']['adunit'])) {
+    form_set_error('adunit', t('Ad Unit Patterns can only include letters, numbers, hyphens, dashes, periods, slashes and tokens.'));
   }
 }
 
