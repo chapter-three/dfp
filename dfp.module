@@ -253,7 +253,7 @@ function dfp_tag($machinename) {
         ),
       ),
     );
-    if (!empty($tag->formatted_slug)) {
+    if (!empty($tag->slug)) {
       $render_array['dfp_wrapper']['slug_wrapper'] = array(
         '#type' => 'container',
         '#attributes' => array(
@@ -262,7 +262,7 @@ function dfp_tag($machinename) {
           ),
         ),
         'slug' => array(
-          '#markup' => $tag->formatted_slug,
+          '#markup' => $tag->slug,
         ),
         '#weight' => -1,
       );
@@ -275,36 +275,32 @@ function dfp_tag($machinename) {
 /**
  * Load function.
  *
- * @param array or string $machinenames
+ * @param string $machinename
  *
- * @param boolean $include_disabled
- *
- * @return array or object
+ * @return object
  *
  */
-function dfp_tag_load($machinenames = array(), $include_disabled = FALSE) {
+function dfp_tag_load($machinename) {
   ctools_include('export');
 
-  // Ensure that $machinenames is an array in case a string was passed in.
-  $machinenames = is_array($machinenames) ? $machinenames : array($machinenames);
+  $tags = &drupal_static(__FUNCTION__);
+  $tags = empty($tags) ? array() : $tags;
 
-  // Grab an array of all DFP tags or the specificed DFP tag.
-  if (!empty($machinenames)) {
-    // @todo: once the next version of ctools is released, use this instead
-    // $tags = ctools_export_crud_load_multiple('dfp_tags', $machinenames);
-    $tags = ctools_export_load_object('dfp_tags', 'names', $machinenames);
-  }
-  else {
-    $tags = ctools_export_crud_load_all('dfp_tags');
-  }
-
-  // Build up the tag objects.
-  foreach ($tags as $key => &$tag) {
-    // Allow modules to alter the raw tag object.
-    drupal_alter('dfp_tag_load', $tag);
+  if (!isset($tags[$machinename])) {
+    // Load the tag.
+    $result = ctools_export_load_object('dfp_tags', 'names', array($machinename));
+    if (isset($result[$machinename])) {
+      $tag = $result[$machinename];
+    }
+    else {
+      return NULL;
+    }
 
     // Store the original tag. This is used by the tag edit form.
-    $tag->object = $tag;
+    $tag->raw = clone $tag;
+
+    // Allow modules to alter the raw tag object.
+    drupal_alter('dfp_tag_load', $tag);
 
     // Move the settings out of the settings array.
     foreach ($tag->settings as $key => $val) {
@@ -312,9 +308,9 @@ function dfp_tag_load($machinenames = array(), $include_disabled = FALSE) {
     }
 
     // Configure this tag based on the defined settings.
-    $tag->formatted_adunit = token_replace($this->adunit, array('tag' => $tag));
-    $tag->formatted_size = dfp_format_size($tag->size);
-    $tag->formatted_slug = dfp_format_slug($tag->slug);
+    $tag->adunit = token_replace($tag->adunit, array('tag' => $tag));
+    $tag->size = dfp_format_size($tag->size);
+    $tag->slug = dfp_format_slug($tag->slug);
     $tag->wrapper_id = 'dfp-ad-' . $tag->machinename . '-wrapper';
     $tag->placeholder_id = 'dfp-ad-' . $tag->machinename;
 
@@ -323,14 +319,31 @@ function dfp_tag_load($machinenames = array(), $include_disabled = FALSE) {
     // Allow modules to alter the fully-loaded tag object.
     drupal_alter('dfp_tag', $tag);
 
-    // Handle disabled tags last so that other modules have the opportunity to
-    // change the disabled status if needed.
-    if (!$include_disabled && isset($tag->disabled) && $tag->disabled) {
-      unset($tags[$key]);
-    }
+    // Statically cache the fully loaded tag.
+    $tags[$machinename] = $tag;
+  }
+  else {
+    // Use the statically cached tag object.
+    $tag = $tags[$machinename];
   }
 
-  return empty($machinenames) ? $tags : array_shift($tags);
+  return $tag;
+}
+
+/**
+ * Load all dfp ad tags.
+ *
+ * @param boolean $include_disabled
+ *
+ * @return array of tags.
+ */
+function dfp_tag_load_all($include_disabled = FALSE) {
+  $tags = ctools_export_crud_load_all('dfp_tags');
+  foreach ($tags as $key => $tag) {
+    unset($tags[$key]);
+  }
+
+  return $tags;
 }
 
 /**
@@ -386,7 +399,7 @@ function dfp_form_ctools_export_ui_edit_item_form_alter(&$form, &$form_state) {
  */
 function dfp_test_page() {
   $output = array();
-  $tags = dfp_tag_load();
+  $tags = dfp_tag_load_all();
 
   foreach ($tags as $tag) {
     $tag_slot = array(
@@ -565,7 +578,7 @@ function _dfp_js_header_script() {
  */
 function _dfp_js_slot_definition($tag) {
   // Add the js needed to define this adSlot to <head>.
-  $js = 'googletag.defineSlot("' . $tag->slot . '", ' . $tag->formatted_size . ', "' . $tag->placeholder_id . '")' . "\n";
+  $js = 'googletag.defineSlot("' . $tag->slot . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
   $js .= '  .addService(googletag.pubads())' . "\n";
 
   if (!empty($tag->ad_types)) {
@@ -617,7 +630,7 @@ function template_preprocess_dfp_short_tag(&$variables) {
 
   // Build a key|vals array and allow third party modules to modify it.
   $keyvals = array();
-  $keyvals['iu'] = $tag->formatted_adunit;
+  $keyvals['iu'] = $tag->adunit;
   $keyvals['c'] = rand(100000, 99999);
   $keyvals['size'] = str_replace(',', '|', $tag->size);
   $keyvals['tile'] = ++$tile;
