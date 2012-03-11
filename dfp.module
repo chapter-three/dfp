@@ -186,9 +186,9 @@ function dfp_token_info() {
     'name' => t("Network ID"),
     'description' => t("The unique ID provided by Google."),
   );
-  $tag['url:n'] = array(
+  $tag['url_parts'] = array(
     'name' => t("URL Parts (n)"),
-    'description' => t("Given the current URL of http://site.com/path/to/page, [dfp_tag:url:2] will be replaced with 'path/to'."),
+    'description' => t("Given the current URL of http://site.com/path/to/page, [dfp_tag:url_parts:2] will be replaced with 'path/to'."),
   );
 
   return array(
@@ -219,7 +219,8 @@ function dfp_tokens($type, $tokens, array $data = array(), array $options = arra
       }
     }
 
-    if ($created_tokens = token_find_with_prefix($tokens, 'url:n')) {
+    if ($created_tokens = token_find_with_prefix($tokens, 'url_parts')) {
+dpm($created_tokens, 'create tokens');
       foreach ($created_tokens as $name => $original) {
         $url_parts = explode('/', $_GET['q']);
         $replacements[$original] = implode('/', array_slice($url_parts, 0, $name));
