@@ -429,21 +429,23 @@ function dfp_test_page() {
  *   has more than one item, then a string in the format ["val1","val2","val3"].
  *
  */
-function dfp_format_targeting_values($values) {
-  // Convert the values into an array and trim the whitespace from each value.
-  $values = explode(',', check_plain($values));
-  array_filter(array_map('trim', $values));
+function dfp_format_targeting_values($targeting) {
+  foreach ($targeting as &$target) {
+    $target['target'] = check_plain($target['target']);
 
-  $formatted_values = '';
+    // Convert the values into an array and trim the whitespace from each value.
+    $values = explode(',', check_plain($target['value']));
+    array_filter(array_map('trim', $values));
 
-  if (count($values) == 1) {
-    $formatted_values = '"' . $values[0] . '"';
+    if (count($values) == 1) {
+      $value = '"' . $values[0] . '"';
+    }
+    elseif (count($values) > 1) {
+      $value = '["' . implode('","', $values) . '"]';
+    }
   }
-  elseif (count($values) > 1) {
-    $formatted_values = '["' . implode('","', $values) . '"]';
-  }
 
-  return $formatted_values;
+  return $targeting;
 }
 
 /**
@@ -539,8 +541,9 @@ function _dfp_js_header_script() {
   // Set global targeting values for this page.
   $targeting = variable_get('dfp_targeting', array());
   drupal_alter('dfp_page_targeting', $targeting);
+  dfp_format_targeting_values($targeting);
   foreach ($targeting as $key => $target) {
-    $js .= 'googletag.pubads().setTargeting("' . check_plain($target['target']) . '", ' . dfp_format_targeting_values($target['value']) . ');' . "\n";
+    $js .= 'googletag.pubads().setTargeting("' . $target['target'] . '", ' . $target['value'] . ');' . "\n";
   }
 
   // Add global settings.
@@ -589,8 +592,9 @@ function _dfp_js_slot_definition($tag) {
       $js .= '  .set("' . $key . '", "' . $val . '")' . "\n";
     }
   }
-  foreach ($tag->targeting as $target) {
-    $js .= '  .setTargeting("' . check_plain($target['target']) . '", ' . dfp_format_targeting_values($target['value']) . ')' . "\n";
+  $targeting = dfp_format_targeting_values($tag->targeting);
+  foreach ($targeting as $target) {
+    $js .= '  .setTargeting("' . $target['target'] . '", ' .$target['value'] . ')' . "\n";
   }
   $js = rtrim($js, "\n") . ';' . "\n";
 
@@ -615,7 +619,7 @@ function template_preprocess_dfp_tag(&$variables) {
     ),
   );
 
-  // Define an ad slot for this tag.
+  // Define a javascript ad slot for this tag.
   _dfp_js_slot_definition($tag);
 }
 
@@ -630,7 +634,7 @@ function template_preprocess_dfp_short_tag(&$variables) {
   $keyvals = array();
   $keyvals['iu'] = $tag->adunit;
   $keyvals['c'] = rand(100000, 99999);
-  $keyvals['size'] = str_replace(',', '|', $tag->size);
+  $keyvals['size'] = str_replace(',', '|', check_plain($tag->raw->size));
   $keyvals['tile'] = ++$tile;
 
   $targets = array();
