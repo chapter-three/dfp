@@ -66,7 +66,7 @@ class dfp_tag_ui extends ctools_export_ui {
   function list_table_header() {
     $header = array();
 
-    $header[] = array('data' => t('Ad Slot'), 'class' => array('ctools-export-ui-name'));
+    $header[] = array('data' => t('Ad Slot'), 'class' => array('ctools-export-ui-slot'));
     $header[] = array('data' => t('Size'), 'class' => array('ctools-export-ui-size'));
     $header[] = array('data' => t('Block'), 'class' => array('ctools-export-ui-block'));
     $header[] = array('data' => t('Storage'), 'class' => array('ctools-export-ui-storage'));
