@@ -253,7 +253,7 @@ function dfp_tag($machinename) {
         ),
       ),
     );
-    if (!empty($tag->slug)) {
+    if (!empty($tag->formatted_slug)) {
       $render_array['dfp_wrapper']['slug_wrapper'] = array(
         '#type' => 'container',
         '#attributes' => array(
@@ -262,7 +262,7 @@ function dfp_tag($machinename) {
           ),
         ),
         'slug' => array(
-          '#markup' => $tag->slug,
+          '#markup' => $tag->formatted_slug,
         ),
         '#weight' => -1,
       );
@@ -312,11 +312,13 @@ function dfp_tag_load($machinenames = array(), $include_disabled = FALSE) {
     }
 
     // Configure this tag based on the defined settings.
-    $tag->unit = token_replace($this->adunit);
+    $tag->formatted_adunit = token_replace($this->adunit, array('tag' => $tag));
     $tag->formatted_size = dfp_format_size($tag->size);
+    $tag->formatted_slug = dfp_format_slug($tag->slug);
     $tag->wrapper_id = 'dfp-ad-' . $tag->machinename . '-wrapper';
     $tag->placeholder_id = 'dfp-ad-' . $tag->machinename;
-    $tag->slug = dfp_format_slug($tag->slug);
+
+// @todo: run the targeting info through check_plain and remove any empties
 
     // Allow modules to alter the fully-loaded tag object.
     drupal_alter('dfp_tag', $tag);
@@ -446,7 +448,7 @@ function dfp_format_targeting_values($values) {
 function dfp_format_size($size) {
   $formatted_sizes = array();
 
-  $sizes = explode(',', $size);
+  $sizes = explode(',', check_plain($size));
   foreach ($sizes as $size) {
     $formatted_size = explode('x', trim($size));
     $formatted_sizes[] = '[' . implode(', ', $formatted_size) .']';
@@ -468,7 +470,7 @@ function dfp_format_size($size) {
  *
  */
 function dfp_format_slug($slug) {
-  $formatted_slug = variable_get('dfp_default_slug', '');
+  $formatted_slug = check_plain(variable_get('dfp_default_slug', ''));
 
   if ($slug == '<none>') {
     $formatted_slug = "";
@@ -565,10 +567,10 @@ function _dfp_js_slot_definition($tag) {
   // Add the js needed to define this adSlot to <head>.
   $js = 'googletag.defineSlot("' . $tag->slot . '", ' . $tag->formatted_size . ', "' . $tag->placeholder_id . '")' . "\n";
   $js .= '  .addService(googletag.pubads())' . "\n";
+
   if (!empty($tag->ad_types)) {
     $js .= '  .set("adsense_ad_types", "' . $tag->ad_types . '")' . "\n";
   }
-
   foreach ($tag->adsense_colors as $key => $val) {
     if (!empty($val)){
       $key = 'adsense_' . $key . '_color';
@@ -615,7 +617,7 @@ function template_preprocess_dfp_short_tag(&$variables) {
 
   // Build a key|vals array and allow third party modules to modify it.
   $keyvals = array();
-  $keyvals['iu'] = $tag->slot;
+  $keyvals['iu'] = $tag->formatted_adunit;
   $keyvals['c'] = rand(100000, 99999);
   $keyvals['size'] = str_replace(',', '|', $tag->size);
   $keyvals['tile'] = ++$tile;
