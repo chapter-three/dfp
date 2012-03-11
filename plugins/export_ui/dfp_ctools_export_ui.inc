@@ -69,13 +69,13 @@ function dfp_tag_form(&$form, &$form_state) {
     ),
   );
 
-  $form['tag_settings']['name'] = array(
+  $form['tag_settings']['slot'] = array(
     '#type' => 'textfield',
     '#title' => t('Ad Slot Name'),
     '#required' => TRUE,
     '#maxlength' => 64,
-    '#default_value' => $tag->name,
-    '#description' => t('Example: leaderboard or sports/baseball/Yankees'),
+    '#default_value' => $tag->slot,
+    '#description' => t('Example: leaderboard or box1'),
   );
 
 // $form['tag_settings']['tokens'] = array(
@@ -93,7 +93,7 @@ function dfp_tag_form(&$form, &$form_state) {
     '#description' => t('Only use letters, numbers and underscores. Example: top-banner'),
     '#machine_name' => array(
       'exists' => 'dfp_tag_name_exists',
-      'source' => array('tag_settings', 'name'),
+      'source' => array('tag_settings', 'slot'),
     ),
   ) + $form['info']['machinename'];
   unset($form['info']);
@@ -216,8 +216,8 @@ function dfp_tag_form(&$form, &$form_state) {
  */
 function dfp_tag_form_validate(&$form, &$form_state) {
   // Ad Unit names can only have letters, numbers and slashes.¬
-  if (preg_match('@[^a-zA-Z0-9\/\-_\.]+@', $form_state['values']['name'])) {
-    form_set_error('name', t('Ad Unit Names can only include letters, numbers, hyphens, dashes, periods and slashes.'));
+  if (preg_match('@[^a-zA-Z0-9\/\-_\.]+@', $form_state['values']['slot'])) {
+    form_set_error('slot', t('Ad Slot Names can only include letters, numbers, hyphens, dashes, periods and slashes.'));
   }
 }
 

@@ -53,10 +53,10 @@ Drupal.behaviors.dfpVerticalTabs = {
     });
 
     $('fieldset#edit-tag-settings', context).drupalSetSummary(function (context) {
-      var name = Drupal.checkPlain($('#edit-name', context).val());
+      var slot = Drupal.checkPlain($('#edit-slot', context).val());
       var size = Drupal.checkPlain($('#edit-size', context).val());
 
-      summary = name != '' ?  name  + ' [' + size + ']' : '';
+      summary = slot != '' ?  slot  + ' [' + size + ']' : '';
       return summary;
     });
 

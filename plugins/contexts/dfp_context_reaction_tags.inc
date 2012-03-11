@@ -14,7 +14,7 @@ class dfp_context_reaction_tags extends context_reaction {
     // Get a list of all DART tags.
     $tags = dfp_tag_load();
     foreach ($tags as $tag) {
-      $options[$tag->machinename] = $tag->name;
+      $options[$tag->machinename] = $tag->slot;
     }
 
     $form = array(

@@ -50,7 +50,7 @@ class dfp_tag_ui extends ctools_export_ui {
 
     $this->rows[$name]['data'] = array();
     $this->rows[$name]['class'] = !empty($item->disabled) ? array('ctools-export-ui-disabled') : array('ctools-export-ui-enabled');
-    $this->rows[$name]['data'][] = array('data' => check_plain($item->name), 'class' => array('ctools-export-ui-name'));
+    $this->rows[$name]['data'][] = array('data' => check_plain($item->slot), 'class' => array('ctools-export-ui-slot'));
     $this->rows[$name]['data'][] = array('data' => check_plain($item->size), 'class' => array('ctools-export-ui-size'));
     $this->rows[$name]['data'][] = array('data' => (check_plain($item->block) ? t('Yes') : t('No')), 'class' => array('ctools-export-ui-block'));
     $this->rows[$name]['data'][] = array('data' => check_plain($item->{$schema['export']['export type string']}), 'class' => array('ctools-export-ui-storage'));
@@ -69,7 +69,7 @@ class dfp_tag_ui extends ctools_export_ui {
   function list_table_header() {
     $header = array();
 
-    $header[] = array('data' => t('Name'), 'class' => array('ctools-export-ui-name'));
+    $header[] = array('data' => t('Ad Slot'), 'class' => array('ctools-export-ui-name'));
     $header[] = array('data' => t('Size'), 'class' => array('ctools-export-ui-size'));
     $header[] = array('data' => t('Block'), 'class' => array('ctools-export-ui-block'));
     $header[] = array('data' => t('Storage'), 'class' => array('ctools-export-ui-storage'));
