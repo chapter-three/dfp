@@ -206,8 +206,8 @@ function _dfp_target_form(&$form, $key, $data = array()) {
     '#attributes' => array('class' => array('field-target-value')),
   );
   if (empty($data)) {
-    $form['targeting'][$key]['target']['#description'] = t('Example: state');
-    $form['targeting'][$key]['value']['#description'] = t('Example: ny, nj, ct');
+    $form['targeting'][$key]['target']['#description'] = t('Example: color');
+    $form['targeting'][$key]['value']['#description'] = t('Example: red,white,blue');
   }
 }
 
