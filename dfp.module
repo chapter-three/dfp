@@ -312,7 +312,7 @@ function dfp_tag_load($machinenames = array(), $include_disabled = FALSE) {
     }
 
     // Configure this tag based on the defined settings.
-    $tag->unit = '/' . variable_get('dfp_network_id', '') . '/' . $tag->slot;
+    $tag->unit = token_replace($this->adunit);
     $tag->formatted_size = dfp_format_size($tag->size);
     $tag->wrapper_id = 'dfp-ad-' . $tag->machinename . '-wrapper';
     $tag->placeholder_id = 'dfp-ad-' . $tag->machinename;
