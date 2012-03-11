@@ -220,7 +220,6 @@ function dfp_tokens($type, $tokens, array $data = array(), array $options = arra
     }
 
     if ($created_tokens = token_find_with_prefix($tokens, 'url_parts')) {
-dpm($created_tokens, 'create tokens');
       foreach ($created_tokens as $name => $original) {
         $url_parts = explode('/', $_GET['q']);
         $replacements[$original] = implode('/', array_slice($url_parts, 0, $name));
@@ -314,8 +313,6 @@ function dfp_tag_load($machinename) {
     $tag->slug = dfp_format_slug($tag->slug);
     $tag->wrapper_id = 'dfp-ad-' . $tag->machinename . '-wrapper';
     $tag->placeholder_id = 'dfp-ad-' . $tag->machinename;
-
-// @todo: run the targeting info through check_plain and remove any empties
 
     // Allow modules to alter the fully-loaded tag object.
     drupal_alter('dfp_tag', $tag);
@@ -434,7 +431,7 @@ function dfp_test_page() {
  */
 function dfp_format_targeting_values($values) {
   // Convert the values into an array and trim the whitespace from each value.
-  $values = explode(',', $values);
+  $values = explode(',', check_plain($values));
   array_filter(array_map('trim', $values));
 
   $formatted_values = '';
@@ -543,7 +540,7 @@ function _dfp_js_header_script() {
   $targeting = variable_get('dfp_targeting', array());
   drupal_alter('dfp_page_targeting', $targeting);
   foreach ($targeting as $key => $target) {
-    $js .= 'googletag.pubads().setTargeting("' . $target['target'] . '", ' . dfp_format_targeting_values($target['value']) . ');' . "\n";
+    $js .= 'googletag.pubads().setTargeting("' . check_plain($target['target']) . '", ' . dfp_format_targeting_values($target['value']) . ');' . "\n";
   }
 
   // Add global settings.
@@ -593,7 +590,7 @@ function _dfp_js_slot_definition($tag) {
     }
   }
   foreach ($tag->targeting as $target) {
-    $js .= '  .setTargeting("' . $target['target'] . '", ' . dfp_format_targeting_values($target['value']) . ')' . "\n";
+    $js .= '  .setTargeting("' . check_plain($target['target']) . '", ' . dfp_format_targeting_values($target['value']) . ')' . "\n";
   }
   $js = rtrim($js, "\n") . ';' . "\n";
 
@@ -638,7 +635,7 @@ function template_preprocess_dfp_short_tag(&$variables) {
 
   $targets = array();
   foreach ($tag->targeting as $data) {
-    $tagets[] = $data['target'] . '=' . $data['value'];
+    $tagets[] = check_plain($data['target']) . '=' . check_plain($data['value']);
   }
   if (!empty($targets)) {
     $keyvals['t'] = implode('&', $targets);
