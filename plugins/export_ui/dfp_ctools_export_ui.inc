@@ -77,14 +77,6 @@ function dfp_tag_form(&$form, &$form_state) {
     '#default_value' => $tag->slot,
     '#description' => t('Example: leaderboard or box1'),
   );
-
-// $form['tag_settings']['tokens'] = array(
-//   '#theme' => 'token_tree',
-//   '#token_types' => array('dfp_tag'), // The token types that have specific context. Can be multiple token types like 'term' and/or 'user'
-//   '#global_types' => FALSE, // A boolean TRUE or FALSE whether to include 'global' context tokens like [current-user:*] or [site:*]. Defaults to TRUE.
-//   '#click_insert' => TRUE, // A boolean whether to include the 'Click this token to insert in into the the focused textfield' JavaScript functionality. Defaults to TRUE.
-// );
-
   $form['tag_settings']['machinename'] = array(
     '#type' => 'machine_name',
     '#title' => t('Unique Name'),
@@ -104,6 +96,20 @@ function dfp_tag_form(&$form, &$form_state) {
     '#required' => TRUE,
     '#maxlength' => 64,
     '#default_value' => $tag->size,
+  );
+  $form['tag_settings']['adunit'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Ad Unit Pattern'),
+    '#required' => FALSE,
+    '#maxlength' => 64,
+    '#default_value' => $tag->adunit,
+    '#description' => t('Use the tokens below to define how the ad unit should display. You can programatically alter this value during any page request. Example: [dfp_tag:network_id]/[dfp_tag:url:4]/[dfp_tag:slot]'),
+  );
+  $form['tag_settings']['tokens'] = array(
+    '#theme' => 'token_tree',
+    '#token_types' => array('dfp_tag'), // The token types that have specific context. Can be multiple token types like 'term' and/or 'user'
+    '#global_types' => FALSE, // A boolean TRUE or FALSE whether to include 'global' context tokens like [current-user:*] or [site:*]. Defaults to TRUE.
+    '#click_insert' => TRUE, // A boolean whether to include the 'Click this token to insert in into the the focused textfield' JavaScript functionality. Defaults to TRUE.
   );
 
   // Global Display settings.
@@ -216,8 +222,8 @@ function dfp_tag_form(&$form, &$form_state) {
  */
 function dfp_tag_form_validate(&$form, &$form_state) {
   // Ad Unit names can only have letters, numbers and slashes.¬
-  if (preg_match('@[^a-zA-Z0-9\/\-_\.]+@', $form_state['values']['slot'])) {
-    form_set_error('slot', t('Ad Slot Names can only include letters, numbers, hyphens, dashes, periods and slashes.'));
+  if (preg_match('@[^a-zA-Z0-9\/\-_\.]+@', $form_state['values']['adunit'])) {
+    form_set_error('adunit', t('Ad Unit Patterns can only include letters, numbers, hyphens, dashes, periods and slashes.'));
   }
 }
 

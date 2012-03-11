@@ -46,13 +46,13 @@ function dfp_schema() {
         'default' => '',
         'description' => "The ad slot's name.",
       ),
-      // 'adunit' => array(
-      //   'type' => 'varchar',
-      //   'length' => 255,
-      //   'not null' => FALSE,
-      //   'default' => '',
-      //   'description' => "The ad unit name.",
-      // ),
+      'adunit' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'default' => '',
+        'description' => "The ad unit name.",
+      ),
       'size' => array(
         'type' => 'varchar',
         'length' => 255,
@@ -66,13 +66,15 @@ function dfp_schema() {
         'description' => 'If true, a block will be created in which to display this ad tag.',
       ),
       'settings' => array(
-        'type' => 'longblob',
+        'type' => 'blob',
         'description' => "Serialized array of settings.",
+        'size' => 'big',
+        'serialize' => TRUE,
       ),
     ),
     'primary key' => array('adid'),
     'unique keys' => array(
-      'name' => array('machinename'),
+      'machinename' => array('machinename'),
     ),
   );
 

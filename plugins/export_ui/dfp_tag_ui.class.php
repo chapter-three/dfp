@@ -14,13 +14,10 @@ class dfp_tag_ui extends ctools_export_ui {
    * Prepare the tag values before they are added to the database.
    */
   function edit_form_submit(&$form, &$form_state) {
-    $settings = $form_state['values']['settings'];
-
     // Since the targeting form is reusable it isn't already in the settings
     // array so we grab it here.
-    $settings['targeting'] = $form_state['values']['targeting'];
+    $form_state['values']['settings']['targeting'] = $form_state['values']['targeting'];
 
-    $form_state['values']['settings'] = serialize($settings);
     parent::edit_form_submit($form, $form_state);
   }
 
