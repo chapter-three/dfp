@@ -407,7 +407,7 @@ function dfp_test_page() {
         '#markup' => '<h3>' . $tag->slot . '</h3>',
       ),
     );
-    $tag_tag = dfp_tag($tag->slot);
+    $tag_tag = dfp_tag($tag->machinename);
     $tag_devel = array();
     if (module_exists('devel')) {
       $tag_devel['object'] = array(
