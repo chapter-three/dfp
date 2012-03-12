@@ -174,7 +174,7 @@ function dfp_context_plugins() {
 function dfp_token_info() {
   $type = array(
     'name' => t('DFP Ad Tags'),
-    'description' => t('Tokens used for building ad tags.'),
+    'description' => t('Tokens related to a given DFP ad tag.'),
     'needs-data' => 'tag',
   );
 
@@ -431,12 +431,28 @@ function dfp_test_page() {
  *   has more than one item, then a string in the format ["val1","val2","val3"].
  *
  */
-function dfp_format_targeting_values($targeting) {
+function dfp_format_targeting($targeting, $tag = '') {
+  if (!empty($targeting)) {
+    // Prepare information needed for token replacements.
+    global $user;
+    $data = array('user' => $user);
+    if (!empty($tag)) {
+      $data['tag'] = $tag;
+    }
+    if (arg(0) == 'node' && is_numeric(arg(1))) {
+      $data['node'] = node_load(arg(1));
+    }
+    if (arg(0) == 'taxonomy' && is_numeric(arg(2))) {
+      $data['term'] = taxonomy_term_load(arg(2));
+    }
+  }
+
   foreach ($targeting as &$target) {
     $target['target'] = check_plain($target['target']);
+    $target['value'] = token_replace(check_plain($target['value']), $data);
 
     // Convert the values into an array and trim the whitespace from each value.
-    $values = explode(',', check_plain($target['value']));
+    $values = explode(',', $target['value']);
     array_filter(array_map('trim', $values));
 
     if (count($values) == 1) {
@@ -502,7 +518,7 @@ function dfp_format_slug($slug) {
  */
 function _dfp_block_tags() {
   $block_tags = array();
-  $tags = dfp_tag_load();
+  $tags = dfp_tag_load_all();
 
   foreach ($tags as $tag) {
     if ($tag->block) {
@@ -543,7 +559,7 @@ function _dfp_js_header_script() {
   // Set global targeting values for this page.
   $targeting = variable_get('dfp_targeting', array());
   drupal_alter('dfp_page_targeting', $targeting);
-  dfp_format_targeting_values($targeting);
+  dfp_format_targeting($targeting);
   foreach ($targeting as $key => $target) {
     $js .= 'googletag.pubads().setTargeting("' . $target['target'] . '", ' . $target['value'] . ');' . "\n";
   }
@@ -581,7 +597,7 @@ function _dfp_js_header_script() {
  */
 function _dfp_js_slot_definition($tag) {
   // Add the js needed to define this adSlot to <head>.
-  $js = 'googletag.defineSlot("' . $tag->slot . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
+  $js = 'googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
   $js .= '  .addService(googletag.pubads())' . "\n";
 
   if (!empty($tag->ad_types)) {
@@ -594,7 +610,7 @@ function _dfp_js_slot_definition($tag) {
       $js .= '  .set("' . $key . '", "' . $val . '")' . "\n";
     }
   }
-  $targeting = dfp_format_targeting_values($tag->targeting);
+  $targeting = dfp_format_targeting($tag->targeting, $tag);
   foreach ($targeting as $target) {
     $js .= '  .setTargeting("' . $target['target'] . '", ' .$target['value'] . ')' . "\n";
   }

@@ -177,12 +177,12 @@ function _dfp_targeting_form(&$targeting_form, &$form, $existing_targeting = arr
       'file' => 'plugins/export_ui/dfp_ctools_export_ui.inc',
     ),
   );
-  // $targeting_form['tokens'] = array(
-  //   '#theme' => 'token_tree',
-  //   '#token_types' => array('dfp_tag', 'node', 'term', 'user'), // The token types that have specific context. Can be multiple token types like 'term' and/or 'user'
-  //   '#global_types' => TRUE, // A boolean TRUE or FALSE whether to include 'global' context tokens like [current-user:*] or [site:*]. Defaults to TRUE.
-  //   '#click_insert' => TRUE, // A boolean whether to include the 'Click this token to insert in into the the focused textfield' JavaScript functionality. Defaults to TRUE.
-  // );
+  $targeting_form['tokens'] = array(
+    '#theme' => 'token_tree',
+    '#token_types' => array('dfp_tag', 'node', 'term', 'user'), // The token types that have specific context. Can be multiple token types like 'term' and/or 'user'
+    '#global_types' => TRUE, // A boolean TRUE or FALSE whether to include 'global' context tokens like [current-user:*] or [site:*]. Defaults to TRUE.
+    '#click_insert' => TRUE, // A boolean whether to include the 'Click this token to insert in into the the focused textfield' JavaScript functionality. Defaults to TRUE.
+  );
 }
 
 /**
