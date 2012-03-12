@@ -338,7 +338,9 @@ function dfp_tag_load($machinename) {
 function dfp_tag_load_all($include_disabled = FALSE) {
   $tags = ctools_export_crud_load_all('dfp_tags');
   foreach ($tags as $key => $tag) {
-    unset($tags[$key]);
+    if (!$include_disabled && $tag->disabled) {
+      unset($tags[$key]);
+    }
   }
 
   return $tags;
