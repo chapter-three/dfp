@@ -11,6 +11,8 @@ function dfp_admin_settings($form, $form_state) {
     '#type' => 'vertical_tabs',
   );
 
+  $form['#submit'][] = 'dfp_admin_form_submit';
+
   // Default tag settings.
   $form['global_tag_settings'] = array(
     '#type' => 'fieldset',
@@ -111,10 +113,20 @@ function dfp_admin_settings($form, $form_state) {
   return system_settings_form($form);
 }
 
+function dfp_admin_form_submit($form, &$form_state) {
+  // Since the targeting form is reusable it isn't already in the settings
+  // array so we grab it here.
+  $form_state['values']['dfp_targeting'] = $form_state['values']['targeting'];
+  unset($form_state['values']['targeting']);
+}
+
 /**
  * Validation function used by the targeting form.
  */
 function dfp_targeting_form_validate($form, &$form_state) {
+  // @todo: "$form_state['values']['targeting']" is not always valid. We need to
+  // figure out a better way to know where this info will live in a given form.
+
   // Remove empty targeting values before storing them in the database.
   foreach ($form_state['values']['targeting'] as $key => $value) {
     if (empty($value['target']) && !empty($value['value'])) {

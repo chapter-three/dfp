@@ -338,7 +338,7 @@ function dfp_tag_load($machinename) {
 function dfp_tag_load_all($include_disabled = FALSE) {
   $tags = ctools_export_crud_load_all('dfp_tags');
   foreach ($tags as $key => $tag) {
-    if (!$include_disabled && $tag->disabled) {
+    if (!$include_disabled && isset($tag->disabled) && $tag->disabled) {
       unset($tags[$key]);
     }
   }
@@ -448,7 +448,7 @@ function dfp_format_targeting($targeting, $tag = '') {
   }
 
   foreach ($targeting as &$target) {
-    $target['target'] = check_plain($target['target']);
+    $target['target'] = '"' . check_plain($target['target']) . '"';
     $target['value'] = token_replace(check_plain($target['value']), $data);
 
     // Convert the values into an array and trim the whitespace from each value.
@@ -456,10 +456,10 @@ function dfp_format_targeting($targeting, $tag = '') {
     array_filter(array_map('trim', $values));
 
     if (count($values) == 1) {
-      $value = '"' . $values[0] . '"';
+      $target['value'] = '"' . $values[0] . '"';
     }
     elseif (count($values) > 1) {
-      $value = '["' . implode('","', $values) . '"]';
+      $target['value'] = '["' . implode('","', $values) . '"]';
     }
   }
 
@@ -556,16 +556,7 @@ function _dfp_js_header_script() {
   // Inject user-defined javascript.
   $js .= variable_get('dfp_injected_js', '') . "\n";
 
-  // Set global targeting values for this page.
-  $targeting = variable_get('dfp_targeting', array());
-  drupal_alter('dfp_page_targeting', $targeting);
-  dfp_format_targeting($targeting);
-  foreach ($targeting as $key => $target) {
-    $js .= 'googletag.pubads().setTargeting("' . $target['target'] . '", ' . $target['value'] . ');' . "\n";
-  }
-
   // Add global settings.
-  $js = '';
   $js .= 'googletag.cmd.push(function() {' . "\n";
   if (variable_get('dfp_async_rendering', 1)) {
     $js .= '  googletag.pubads().enableAsyncRendering();' . "\n";
@@ -580,8 +571,17 @@ function _dfp_js_header_script() {
   if (variable_get('dfp_default_adsense_channel_ids', '')) {
     $js .= '  googletag.pubads().set("adsense_channel_ids", "' . $channel_ids . '");' . "\n";
   }
+
+  // Set global targeting values for this page.
+  $targeting = variable_get('dfp_targeting', '');
+  drupal_alter('dfp_page_targeting', $targeting);
+  $targeting = dfp_format_targeting($targeting);
+  foreach ($targeting as $key => $target) {
+    $js .= '  googletag.pubads().setTargeting(' . $target['target'] . ', ' . $target['value'] . ');' . "\n";
+  }
+
   $js .= '});' . "\n";
-  $js .= 'googletag.enableServices();' . "\n";
+  $js .= 'googletag.enableServices();';
 
   $options = array(
     'type' => 'inline',
@@ -600,8 +600,8 @@ function _dfp_js_slot_definition($tag) {
   $js = 'googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
   $js .= '  .addService(googletag.pubads())' . "\n";
 
-  if (!empty($tag->ad_types)) {
-    $js .= '  .set("adsense_ad_types", "' . $tag->ad_types . '")' . "\n";
+  if (!empty($tag->adsense_ad_types)) {
+    $js .= '  .set("adsense_ad_types", "' . $tag->adsense_ad_types . '")' . "\n";
   }
   foreach ($tag->adsense_colors as $key => $val) {
     if (!empty($val)){
@@ -612,9 +612,9 @@ function _dfp_js_slot_definition($tag) {
   }
   $targeting = dfp_format_targeting($tag->targeting, $tag);
   foreach ($targeting as $target) {
-    $js .= '  .setTargeting("' . $target['target'] . '", ' .$target['value'] . ')' . "\n";
+    $js .= '  .setTargeting(' . $target['target'] . ', ' .$target['value'] . ')' . "\n";
   }
-  $js = rtrim($js, "\n") . ';' . "\n";
+  $js = rtrim($js, "\n") . ';';
 
   $options = array(
     'type' => 'inline',
