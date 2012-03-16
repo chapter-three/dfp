@@ -74,15 +74,7 @@ function dfp_admin_settings($form, $form_state) {
     '#default_value' => variable_get('dfp_collapse_empty_divs', 1),
   );
 
-  // Global display options.
-  // //@todo: put this in a sep dfp_taxonomy module
-  // $form['targeting_settings']['dfp_targeting_terms'] = array(
-  //   '#type' => 'checkbox',
-  //   '#title' => t('Automatically target taxonomy terms on node and term pages'),
-  //   '#default_value' => variable_get('dfp_collapse_empty_divs', 1),
-  //   '#description' => t('The target will be "terms" and the value will be the term name(s).'),
-  // );
-
+  // Global targeting options.
   $form['targeting_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Global Targeting'),
