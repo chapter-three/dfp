@@ -15,7 +15,7 @@ class dfp_context_reaction_settings extends context_reaction {
 
     // Build the targeting form.
     $form = array();
-    _dfp_targeting_form($form, $form, $values['targeting']);
+    _dfp_targeting_form($form, $form, isset($values['targeting']) ? $values['targeting'] : array());
 
     // Modify the #parents property to make sure values are stored in the
     // location that contexts expects them.
