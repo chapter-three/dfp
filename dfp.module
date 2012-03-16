@@ -388,9 +388,6 @@ function dfp_form_ctools_export_ui_edit_item_form_alter(&$form, &$form_state) {
     // Make sure that dfp.admin.inc is included on the context ui form to avoid
     // errors when doing an ajax submit.
     form_load_include($form_state, 'inc', 'dfp', 'dfp.admin');
-
-    // Add the target form validation.
-    $form['#validate'][] = 'dfp_targeting_form_validate';
   }
 }
 
