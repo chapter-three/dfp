@@ -115,22 +115,16 @@ function dfp_admin_form_submit($form, &$form_state) {
 /**
  * Validation function used by the targeting form.
  */
-function dfp_targeting_form_validate($form, &$form_state) {
-  // @todo: "$form_state['values']['targeting']" is not always valid. We need to
-  // figure out a better way to know where this info will live in a given form.
-
-  // Remove empty targeting values before storing them in the database.
-  foreach ($form_state['values']['targeting'] as $key => $value) {
-    if (empty($value['target']) && !empty($value['value'])) {
-      form_set_error('targeting][' . $key . '][target', t('The target cannot be empty if a value exists.'));
-    }
-    elseif (!empty($value['target']) && empty($value['value'])) {
-      form_set_error('targeting][' . $key . '][value', t('The value cannot be empty if a target exists.'));
-    }
-    elseif (empty($value['target']) && empty($value['value'])) {
-      unset($form_state['values']['targeting'][$key]);
-    }
+function dfp_target_form_validate($element, &$form_state, $form) {
+  if (empty($element['target']['#value']) && !empty($element['value']['#value'])) {
+    form_error($element['target'], t('The target cannot be empty if a value exists.'));
   }
+  elseif (!empty($element['target']['#value']) && empty($element['value']['#value'])) {
+    form_error($element['value'], t('The value cannot be empty if a target exists.'));
+  }
+  // elseif (empty($element['target']['#value']) && empty($element['value']['#value'])) {
+  //   unset($form_state['values']['targeting'][$key]);
+  // }
 }
 
 /**
@@ -152,8 +146,6 @@ function dfp_more_targets_js($form, $form_state) {
  * Helper form builder for the targeting form.
  */
 function _dfp_targeting_form(&$targeting_form, &$form, $existing_targeting = array()) {
-  $form['#validate'][] = 'dfp_targeting_form_validate';
-
   // Display settings.
   $targeting_form['targeting'] = array(
     '#tree' => FALSE,
@@ -196,6 +188,7 @@ function _dfp_target_form(&$form, $key, $data = array()) {
   $form['targeting'][$key] = array(
     '#prefix' => '<div class="target" id="target-' . $key . '">',
     '#suffix' => '</div>',
+    '#element_validate' => array('dfp_target_form_validate'),
   );
   $form['targeting'][$key]['target'] = array(
     '#type' => 'textfield',
