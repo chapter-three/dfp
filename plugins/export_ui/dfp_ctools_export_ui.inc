@@ -150,7 +150,7 @@ function dfp_tag_form(&$form, &$form_state) {
     '#collapsed' => FALSE,
     '#group' => 'settings',
   );
-  $existing_targeting = _dfp_get_existing_targeting($form_state, isset($tag->settings['targeting']) ? $tag->settings['targeting'] : array());
+  $existing_targeting = _dfp_targeting_get_existing($form_state, isset($tag->settings['targeting']) ? $tag->settings['targeting'] : array());
   _dfp_targeting_form($form['targeting_settings'], $form, $existing_targeting);
 
   // Backfill ad settings options.

@@ -82,7 +82,7 @@ function dfp_admin_settings($form, $form_state) {
     '#collapsed' => FALSE,
     '#group' => 'settings',
   );
-  $existing_targeting = _dfp_get_existing_targeting($form_state, variable_get('dfp_targeting', array()));
+  $existing_targeting = _dfp_targeting_get_existing($form_state, variable_get('dfp_targeting', array()));
   _dfp_targeting_form($form['targeting_settings'], $form, $existing_targeting);
 
   // Javascript.
@@ -105,6 +105,9 @@ function dfp_admin_settings($form, $form_state) {
   return system_settings_form($form);
 }
 
+/**
+ * Submit handler ensures that targeting values are saved with the "dfp" prefix.
+ */
 function dfp_admin_form_submit($form, &$form_state) {
   // Since the targeting form is reusable it isn't already in the settings
   // array so we grab it here.
@@ -122,9 +125,33 @@ function dfp_target_form_validate($element, &$form_state, $form) {
   elseif (!empty($element['target']['#value']) && empty($element['value']['#value'])) {
     form_error($element['value'], t('The value cannot be empty if a target exists.'));
   }
-  // elseif (empty($element['target']['#value']) && empty($element['value']['#value'])) {
-  //   unset($form_state['values']['targeting'][$key]);
-  // }
+}
+
+/**
+ * Submit handler ensures that empty targeting values are not saved.
+ */
+function dps_targeting_form_submit($form, &$form_state) {
+  if (array_key_exists('targeting', $form_state['values'])) {
+    _dfp_targeting_remove_empty($form_state['values']['targeting']);
+  }
+  else {
+    // Use the #array_parents property to walk through form_state['values'].
+    // This should only be necessary if the #parents property was set for
+    // the targeting form.
+    $targeting = _dfp_get_form_item('targeting', $form);
+    $item = &$form_state['values'];
+    foreach ($targeting['#array_parents'] as $parent) {
+      if (array_key_exists($parent, $item)) {
+        $item = &$item[$parent];
+      }
+      else {
+        $item = array();
+        break;
+      }
+    }
+
+    _dfp_targeting_remove_empty($item);
+  }
 }
 
 /**
@@ -146,6 +173,10 @@ function dfp_more_targets_js($form, $form_state) {
  * Helper form builder for the targeting form.
  */
 function _dfp_targeting_form(&$targeting_form, &$form, $existing_targeting = array()) {
+  if (isset($form['#submit']) && is_array($form['#submit'])) {
+    array_unshift($form['#submit'], 'dps_targeting_form_submit');
+  }
+
   // Display settings.
   $targeting_form['targeting'] = array(
     '#tree' => FALSE,
@@ -218,7 +249,7 @@ function _dfp_target_form(&$form, $key, $data = array()) {
  * Returns the current targets. The default value will be used unless an "input"
  * exists in the form_state variable, in which case that will be used.
  */
-function _dfp_get_existing_targeting($form_state, $default = array()) {
+function _dfp_targeting_get_existing($form_state, $default = array()) {
   $targeting = array();
   if (isset($form_state['input']['targeting'])) {
     $targeting = $form_state['input']['targeting'];
@@ -228,6 +259,44 @@ function _dfp_get_existing_targeting($form_state, $default = array()) {
   }
 
   return $targeting;
+}
+
+/**
+ * Helper function to remove empty target values from a given array.
+ */
+function _dfp_targeting_remove_empty(&$target) {
+  foreach ($target as $key => $val) {
+    if (empty($val['target']) && empty($val['value'])) {
+      unset($target[$key]);
+    }
+  }
+  // Reset the target array's indexes to prevents strange behavior when users
+  // leave a blank row in the targeting form followed by a filled-in row. In
+  // this case clicking "Add another target" will not work as expected.
+  $target = array_values($target);
+}
+
+/**
+ * Helper function returns the a value from a givne multidimensional array given
+ * a specific key. If the key exists in more than one place, the first occurance
+ * is used.
+ */
+function _dfp_get_form_item($needle_key, $array) {
+  $children = element_children($array);
+
+  foreach ($children as $child) {
+    if($child == $needle_key) {
+      return $array[$child];
+    }
+    elseif(is_array($array[$child])) {
+      $result = _dfp_get_form_item($needle_key, $array[$child]);
+      if($result) {
+        return $result;
+      }
+    }
+  }
+
+  return FALSE;
 }
 
 /**
