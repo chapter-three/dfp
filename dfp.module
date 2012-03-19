@@ -209,19 +209,19 @@ function dfp_token_info() {
     'needs-data' => 'tag',
   );
 
-  $tag['dfp_slot'] = array(
+  $tag['slot'] = array(
     'name' => t('Slot Name'),
     'description' => t("The name of the ad slot defined by this tag."),
   );
-  $tag['dfp_network_id'] = array(
+  $tag['network_id'] = array(
     'name' => t("Network ID"),
     'description' => t("The unique ID provided by Google."),
   );
-  $tag['dfp_ad_categories'] = array(
+  $tag['ad_categories'] = array(
     'name' => t("DFP Ad Categories"),
     'description' => t("The DFP Ad Categories or uncategorized taxonomy terms attached to the entities currently being displayed to the user."),
   );
-  $tag['dfp_url_parts'] = array(
+  $tag['url_parts'] = array(
     'name' => t("URL Parts (n)"),
     'description' => t("Given the current URL of http://site.com/path/to/page, [dfp_tag:url_parts:2] will be replaced with 'path/to'."),
   );
@@ -241,24 +241,24 @@ function dfp_tokens($type, $tokens, array $data = array(), array $options = arra
   if ($type == 'dfp_tag') {
     foreach ($tokens as $name => $original) {
       switch ($name) {
-        case 'dfp_slot':
+        case 'slot':
           if (!empty($data['tag'])) {
             $replacements[$original] = check_plain($data['tag']->slot);
           }
           break;
 
-        case 'dfp_network_id':
+        case 'network_id':
           $replacements[$original] = check_plain(variable_get('dfp_network_id', ''));
           break;
 
-        case 'dfp_ad_categories':
+        case 'ad_categories':
           $term_names = dfp_entity_view(NULL, NULL, NULL, NULL, TRUE);
           $replacements[$original] = implode(',', $term_names);
           break;
       }
     }
 
-    if ($created_tokens = token_find_with_prefix($tokens, 'dfp_url_parts')) {
+    if ($created_tokens = token_find_with_prefix($tokens, 'url_parts')) {
       foreach ($created_tokens as $name => $original) {
         $url_parts = explode('/', $_GET['q']);
         $replacements[$original] = implode('/', array_slice($url_parts, 0, $name));
