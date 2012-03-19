@@ -52,6 +52,32 @@ function dfp_admin_settings($form, $form_state) {
     '#default_value' => variable_get('dfp_single_request', 1),
     '#description' => t('This can speed up page rendering time by limiting the number of external requests.'),
   );
+  $form['global_tag_settings']['dfp_enable_ad_categories'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable DFP Ad Categories'),
+    '#default_value' => variable_get('dfp_enable_ad_categories', 0),
+    '#description' => t('Example: if you have an "animals" vocabulary and you want to target the same ads to "dogs", "cats" and "hamsters" you can edit each of those terms and set the DFP Ad Category to "pets". Whenever the taxonomy terms are included as targeting values, anything tagged "cats" will target "pets" instead.'),
+  );
+  $bundles = field_info_bundles('taxonomy_term');
+  $options = array();
+  foreach ($bundles as $key => $value) {
+    if ($key != 'dfp_ad_categories') {
+      $options[$key] = $value['label'];
+    }
+  }
+  $form['global_tag_settings']['dfp_enable_ad_categories_bundles'] = array(
+    '#type' => 'checkboxes',
+    '#options' => $options,
+    '#prefix' => '<div style="margin-left: 20px">',
+    '#suffix' => '</div>',
+    '#default_value' => variable_get('dfp_enable_ad_categories_bundles', array()),
+    '#description' => t('Select the vocabularies on which DFP Ad Categories should be enabled.'),
+    '#states' => array(
+      'visible' => array(
+        'input[name="dfp_enable_ad_categories"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
 
   // Global display options.
   $form['global_display_options'] = array(
@@ -113,6 +139,29 @@ function dfp_admin_form_submit($form, &$form_state) {
   // array so we grab it here.
   $form_state['values']['dfp_targeting'] = $form_state['values']['targeting'];
   unset($form_state['values']['targeting']);
+
+  // Attach (or delete) an instance of the dfp_ad_categories term_reference
+  // field for each vocabulary that should (or should not) have DFP Ad
+  // Categories enabled.
+  foreach ($form_state['values']['dfp_enable_ad_categories_bundles'] as $bundle => $enable) {
+    $field = field_read_field('field_dfp_ad_categories');
+    if ($enable && $field === FALSE) {
+      $instance = array(
+        'field_name' => 'field_dfp_ad_categories',
+        'entity_type' => 'taxonomy_term',
+        'label' => t('DFP Ad Category'),
+        'bundle' => $bundle,
+        'required' => FALSE,
+        'widget' => array(
+          'type' => 'options_select'
+        ),
+      );
+      field_create_instance($instance);
+    }
+    elseif (!$enable && $field !== FALSE) {
+      field_delete_instance($field);
+    }
+  }
 }
 
 /**

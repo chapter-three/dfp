@@ -80,3 +80,41 @@ function dfp_schema() {
 
   return $schema;
 }
+
+/**
+ * Implements hook_install().
+ */
+function dfp_install() {
+  $vocabulary_machinename = 'dfp_ad_categories';
+
+  // If it doesn't already exist, create a vocabulary so that terms can be
+  // targeted in groups.
+  $existing_vocabulary = taxonomy_vocabulary_machine_name_load($vocabulary_machinename);
+  if (!$existing_vocabulary) {
+    taxonomy_vocabulary_save((object) array(
+      'name' => 'DFP Ad Catergories',
+      'machine_name' => $vocabulary_machinename,
+    ));
+  }
+
+  // Create a new term_reference field for the new vocabulary.
+  $field = array(
+    'field_name' => 'field_dfp_ad_categories',
+    'type' => 'taxonomy_term_reference',
+    'settings' => array(
+      'allowed_values' => array(
+        array(
+          'vocabulary' => $vocabulary_machinename,
+          'parent' => 0
+        ),
+      ),
+    ),
+  );
+  field_create_field($field);
+
+}
+
+
+
+
+
