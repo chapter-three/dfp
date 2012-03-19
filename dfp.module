@@ -230,11 +230,6 @@ function dfp_tokens($type, $tokens, array $data = array(), array $options = arra
   return $replacements;
 }
 
-
-function dfp_form_taxonomy_form_term_alter(&$form, &$form_state) {
-  dpm($form);
-}
-
 /**
  * Return a render array for the tag specified by machinename.
  */
