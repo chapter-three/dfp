@@ -90,7 +90,6 @@ function dfp_menu() {
  */
 function dfp_init() {
   _dfp_js_google_tag_service();
-  _dfp_js_header_script();
 }
 
 /**
@@ -114,6 +113,38 @@ function dfp_block_view($delta) {
   $block['content'] = dfp_tag($delta);
 
   return $block;
+}
+
+/**
+ * Implements hook_entity_view().
+ */
+function dfp_entity_view($entity, $type, $view_mode, $langcode, $return = FALSE) {
+  $dfp_targeting_terms = &drupal_static(__FUNCTION__);
+
+  // If this is the fist time this function is run, initialize the static
+  // dfp_targeting_terms array.
+  $dfp_targeting_terms = !isset($dfp_targeting_terms) ? array() : $dfp_targeting_terms;
+
+  // Return the cached dfp_targeting_terms array.
+  if ($return) {
+    return array_unique($dfp_targeting_terms);
+  }
+
+  // Find all taxonomy terms attached to the given entity and add them to the
+  // dfp_targeting_terms array. Check each term to see if a DFP Ad Category has
+  // been assigned to it. If so, add that term to the array instead.
+  foreach (element_children($entity->content) as $key) {
+    if (array_key_exists('#field_type', $entity->content[$key]) && $entity->content[$key]['#field_type'] == 'taxonomy_term_reference') {
+      $terms = field_view_field($type, $entity, $key);
+      foreach ($terms['#items'] as $item) {
+        $term = $item['taxonomy_term'];
+        if (!empty($term->field_dfp_ad_categories)) {
+          $term = taxonomy_term_load($term->field_dfp_ad_categories[LANGUAGE_NONE][0]['tid']);
+        }
+        $dfp_targeting_terms[] = $term->name;
+      }
+    }
+  }
 }
 
 /**
@@ -178,15 +209,19 @@ function dfp_token_info() {
     'needs-data' => 'tag',
   );
 
-  $tag['slot'] = array(
+  $tag['dfp_slot'] = array(
     'name' => t('Slot Name'),
     'description' => t("The name of the ad slot defined by this tag."),
   );
-  $tag['network_id'] = array(
+  $tag['dfp_network_id'] = array(
     'name' => t("Network ID"),
     'description' => t("The unique ID provided by Google."),
   );
-  $tag['url_parts'] = array(
+  $tag['dfp_ad_categories'] = array(
+    'name' => t("DFP Ad Categories"),
+    'description' => t("The DFP Ad Categories or uncategorized taxonomy terms attached to the entities currently being displayed to the user."),
+  );
+  $tag['dfp_url_parts'] = array(
     'name' => t("URL Parts (n)"),
     'description' => t("Given the current URL of http://site.com/path/to/page, [dfp_tag:url_parts:2] will be replaced with 'path/to'."),
   );
@@ -203,23 +238,27 @@ function dfp_token_info() {
 function dfp_tokens($type, $tokens, array $data = array(), array $options = array()) {
   $replacements = array();
 
-  if ($type == 'dfp_tag' && !empty($data['tag'])) {
-    $tag = $data['tag'];
-
+  if ($type == 'dfp_tag') {
     foreach ($tokens as $name => $original) {
       switch ($name) {
-        case 'slot':
-          $replacements[$original] = check_plain($tag->slot);
+        case 'dfp_slot':
+          if (!empty($data['tag'])) {
+            $replacements[$original] = check_plain($data['tag']->slot);
+          }
           break;
 
-        case 'network_id':
+        case 'dfp_network_id':
           $replacements[$original] = check_plain(variable_get('dfp_network_id', ''));
           break;
 
+        case 'dfp_ad_categories':
+          $term_names = dfp_entity_view(NULL, NULL, NULL, NULL, TRUE);
+          $replacements[$original] = implode(',', $term_names);
+          break;
       }
     }
 
-    if ($created_tokens = token_find_with_prefix($tokens, 'url_parts')) {
+    if ($created_tokens = token_find_with_prefix($tokens, 'dfp_url_parts')) {
       foreach ($created_tokens as $name => $original) {
         $url_parts = explode('/', $_GET['q']);
         $replacements[$original] = implode('/', array_slice($url_parts, 0, $name));
@@ -229,6 +268,16 @@ function dfp_tokens($type, $tokens, array $data = array(), array $options = arra
 
   return $replacements;
 }
+
+/**
+ * Implements preprocess_page().
+ */
+function dfp_preprocess_page($variables) {
+  // Add the header js here so that enough information has been
+  // loaded for tokens to work properly.
+  _dfp_js_header_script();
+}
+
 
 /**
  * Return a render array for the tag specified by machinename.
@@ -284,7 +333,7 @@ function dfp_tag_load($machinename) {
   ctools_include('export');
 
   $tags = &drupal_static(__FUNCTION__);
-  $tags = empty($tags) ? array() : $tags;
+  $tags = !isset($tags) ? array() : $tags;
 
   if (!isset($tags[$machinename])) {
     // Load the tag.
@@ -336,6 +385,8 @@ function dfp_tag_load($machinename) {
  * @return array of tags.
  */
 function dfp_tag_load_all($include_disabled = FALSE) {
+  ctools_include('export');
+
   $tags = ctools_export_crud_load_all('dfp_tags');
   foreach ($tags as $key => $tag) {
     if (!$include_disabled && isset($tag->disabled) && $tag->disabled) {
@@ -445,9 +496,15 @@ function dfp_format_targeting($targeting, $tag = '') {
     }
   }
 
-  foreach ($targeting as &$target) {
+  foreach ($targeting as $key => &$target) {
     $target['target'] = '"' . check_plain($target['target']) . '"';
     $target['value'] = token_replace(check_plain($target['value']), $data);
+
+    // The target value could be blank if tokens are used. If so, removed it.
+    if (empty($target['value'])) {
+      unset($targeting[$key]);
+      break;
+    }
 
     // Convert the values into an array and trim the whitespace from each value.
     $values = explode(',', $target['value']);
@@ -610,7 +667,7 @@ function _dfp_js_slot_definition($tag) {
   }
   $targeting = dfp_format_targeting($tag->targeting, $tag);
   foreach ($targeting as $target) {
-    $js .= '  .setTargeting(' . $target['target'] . ', ' .$target['value'] . ')' . "\n";
+    $js .= '  .setTargeting(' . $target['target'] . ', ' . $target['value'] . ')' . "\n";
   }
   $js = rtrim($js, "\n") . ';';
 
