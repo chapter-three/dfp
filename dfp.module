@@ -130,18 +130,20 @@ function dfp_entity_view($entity, $type, $view_mode, $langcode, $return = FALSE)
     return array_unique($dfp_targeting_terms);
   }
 
-  // Find all taxonomy terms attached to the given entity and add them to the
-  // dfp_targeting_terms array. Check each term to see if a DFP Ad Category has
-  // been assigned to it. If so, add that term to the array instead.
-  foreach (element_children($entity->content) as $key) {
-    if (array_key_exists('#field_type', $entity->content[$key]) && $entity->content[$key]['#field_type'] == 'taxonomy_term_reference') {
-      $terms = field_view_field($type, $entity, $key);
-      foreach ($terms['#items'] as $item) {
-        $term = $item['taxonomy_term'];
-        if (!empty($term->field_dfp_ad_categories)) {
-          $term = taxonomy_term_load($term->field_dfp_ad_categories[LANGUAGE_NONE][0]['tid']);
+  if ($view_mode == 'full') {
+    // Find all taxonomy terms attached to the given entity and add them to the
+    // dfp_targeting_terms array. Check each term to see if a DFP Ad Category has
+    // been assigned to it. If so, add that term to the array instead.
+    foreach (element_children($entity->content) as $key) {
+      if (array_key_exists('#field_type', $entity->content[$key]) && $entity->content[$key]['#field_type'] == 'taxonomy_term_reference') {
+        $terms = field_view_field($type, $entity, $key);
+        foreach ($terms['#items'] as $item) {
+          $term = $item['taxonomy_term'];
+          if (!empty($term->field_dfp_ad_categories)) {
+            $term = taxonomy_term_load($term->field_dfp_ad_categories[LANGUAGE_NONE][0]['tid']);
+          }
+          $dfp_targeting_terms[] = $term->name;
         }
-        $dfp_targeting_terms[] = $term->name;
       }
     }
   }
@@ -629,7 +631,7 @@ function _dfp_js_header_script() {
 
   // Set global targeting values for this page.
   $targeting = variable_get('dfp_targeting', '');
-  drupal_alter('dfp_page_targeting', $targeting);
+  drupal_alter('dfp_global_targeting', $targeting);
   $targeting = dfp_format_targeting($targeting);
   foreach ($targeting as $key => $target) {
     $js .= '  googletag.pubads().setTargeting(' . $target['target'] . ', ' . $target['value'] . ');' . "\n";
