@@ -189,6 +189,16 @@ class dfpGlobalsTest extends dfpBaseTest {
     $this->assertRaw($injected_js, 'Injected javascript correctly appears on the page.');
   }
 
+  function testGlobalTargets() {
+    $target = array(
+      'target' => $this->randomName(8),
+      'value' => $this->randomName(8),
+    );
+    variable_set('dfp_targeting', array($target));
+    $this->drupalGet('/');
+    $this->assertRaw('googletag.pubads().setTargeting("' . $target['target'] . '", "' . $target['value'] . '");', 'Global targetting values appear correclty in javascript.');
+  }
+
 }
 
 class DFPUnitTest extends DrupalWebTestCase {
