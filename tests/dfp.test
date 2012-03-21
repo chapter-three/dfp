@@ -1,7 +1,7 @@
 <?php
 
 class dfpBaseTest extends DrupalWebTestCase {
-  protected $profile = 'testing';
+  //protected $profile = 'testing';
 
   /**
    * Implementation of setUp().
