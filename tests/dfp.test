@@ -20,6 +20,10 @@ class dfpBaseTest extends DrupalWebTestCase {
     variable_set('dfp_default_slug', $this->randomName(8));
   }
 
+  /**
+   * Create a simple $edit array to be used on the DFP tag form to create a new
+   * DFP tag object.
+   */
   function dfpBasicTagEditValues() {
     $machinename = strtolower($this->randomName(8));
     $basic_tag = array(
@@ -42,18 +46,12 @@ class dfpBaseTest extends DrupalWebTestCase {
     return $basic_tag;
   }
 
+  /**
+   * Generate a random size (or array or sizes) to use when testing tags
+   * formatted as ###x###.
+   */
   function dfpGenerateSize($count = 1) {
-    $sizes = array(
-      '300x250',
-      '300x600',
-      '728x90',
-      '728x10',
-      '160x600',
-      '120x80',
-      '300x100',
-      '50x50',
-      '160x300'
-    );
+    $sizes = array('300x250', '300x600', '728x90', '728x10', '160x600', '120x80', '300x100', '50x50', '160x300');
     shuffle($sizes);
 
     return $count == 1 ? array_pop($sizes) : array_slice($sizes, min($count, count($sizes)));
@@ -79,6 +77,9 @@ class dfpBaseTest extends DrupalWebTestCase {
     return $tag;
   }
 
+  /**
+   * Edit a given tag specified by $machinename with the given values.
+   */
   function editTag($machinename, $edit) {
     // Make sure there is no machinename set when we are editing.
     if (isset($edit['machinename'])) {
@@ -91,6 +92,9 @@ class dfpBaseTest extends DrupalWebTestCase {
     return $tag;
   }
 
+  /**
+   * Delete a tag specified by $machinename.
+   */
   function deleteTag($machinename) {
     $this->drupalPost('admin/structure/dfp_ads/list/' . $machinename . '/delete', array(), t('Delete'));
   }
