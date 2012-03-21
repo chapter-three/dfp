@@ -630,7 +630,7 @@ function _dfp_js_header_script() {
   }
 
   // Set global targeting values for this page.
-  $targeting = variable_get('dfp_targeting', '');
+  $targeting = variable_get('dfp_targeting', array());
   drupal_alter('dfp_global_targeting', $targeting);
   $targeting = dfp_format_targeting($targeting);
   foreach ($targeting as $key => $target) {

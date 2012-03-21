@@ -1,0 +1,201 @@
+<?php
+
+class dfpBaseTest extends DrupalWebTestCase {
+  protected $profile = 'testing';
+
+  /**
+   * Implementation of setUp().
+   */
+  function setUp() {
+    // Enable a couple modules.
+    parent::setUp('ctools', 'dfp');
+    menu_rebuild();
+
+    // Create an admin user with all the permissions needed to run tests.
+    $this->admin_user = $this->drupalCreateUser(array('administer DFP', 'administer taxonomy', 'access administration pages', 'administer blocks', 'administer nodes', 'edit terms in 1', 'edit terms in 2'));
+    $this->drupalLogin($this->admin_user);
+
+    // Add the some global settings needed for dfp ads to work.
+    variable_set('dfp_network_id', '12345');
+    variable_set('dfp_default_slug', $this->randomName(8));
+  }
+
+  function dfpBasicTagEditValues() {
+    $machinename = strtolower($this->randomName(8));
+    $basic_tag = array(
+      'machinename' => $machinename,
+      'slot' => $machinename,
+      'size' => implode(',', $this->dfpGenerateSize(2)),
+      'adunit' => '12345/' . $this->randomName(8),
+      'block' => 1,
+      'settings[slug]' => $this->randomName(32),
+      'settings[adsense_ad_types]' => '',
+      'settings[adsense_colors][background]' => '',
+      'settings[adsense_colors][border]' => '',
+      'settings[adsense_colors][link]' => '',
+      'settings[adsense_colors][text]' => '',
+      'settings[adsense_colors][url]' => '',
+      'targeting[1][target]' => $this->randomName(8),
+      'targeting[1][value]' => $this->randomName(8),
+    );
+
+    return $basic_tag;
+  }
+
+  function dfpGenerateSize($count = 1) {
+    $sizes = array(
+      '300x250',
+      '300x600',
+      '728x90',
+      '728x10',
+      '160x600',
+      '120x80',
+      '300x100',
+      '50x50',
+      '160x300'
+    );
+    shuffle($sizes);
+
+    return $count == 1 ? array_pop($sizes) : array_slice($sizes, min($count, count($sizes)));
+  }
+
+  /**
+   * Creates a basic dfp ad tag.
+   */
+  function createTag($edit = array()) {
+    // Create a new tag.
+    $edit = empty($edit) ? $this->dfpBasicTagEditValues() : $edit;
+    $this->drupalPost('admin/structure/dfp_ads/add', $edit, t('Save'));
+
+    // Load the tag object.
+    $tag = dfp_tag_load($edit['machinename']);
+    $this->assertTrue(is_object($tag) && $tag->machinename = $edit['machinename'], 'The new tag was saved correctly.');
+
+    // Display the new tag.
+    $edit = array();
+    $edit['blocks[dfp_' . $tag->machinename . '][region]'] = 'sidebar_first';
+    $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
+
+    return $tag;
+  }
+
+  function editTag($machinename, $edit) {
+    // Make sure there is no machinename set when we are editing.
+    if (isset($edit['machinename'])) {
+      unset($edit['machinename']);
+    }
+
+    $this->drupalPost('admin/structure/dfp_ads/list/' . $machinename . '/edit', $edit, t('Save'));
+    $tag = dfp_tag_load($machinename);
+
+    return $tag;
+  }
+
+  function deleteTag($machinename) {
+    $this->drupalPost('admin/structure/dfp_ads/list/' . $machinename . '/delete', array(), t('Delete'));
+  }
+}
+
+class dfpDisplayTagTest extends dfpBaseTest {
+
+  /**
+   * Implements getInfo().
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Displaying DFP Tags'),
+      'description' => t('Tests for displaying DFP tags.'),
+      'group' => t('DFP'),
+    );
+  }
+
+  function testDisplayTag() {
+    // Create a simple tag as a block.
+    $tag = $this->createTag();
+
+    // Varify the slot is defined in javascript.
+    $this->assertRaw('googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "dfp-ad-' . $tag->slot . '")', 'The ad slot has been correctly defined in javascript.');
+
+    $this->deleteTag($tag->machinename);
+  }
+
+  function testSlug() {
+    $edit = $this->dfpBasicTagEditValues();
+
+    // Create a tag without a slug, display it and ensure the default slug is
+    // displayed.
+    $edit['settings[slug]'] = '';
+    $tag = $this->createTag($edit);
+    $this->assertRaw('<div class="slug">' . variable_get('dfp_default_slug', '') . '</div>', 'The default slug is correctly used when no slug exists for an individual tag.');
+
+    // Change the slug to <none> and ensure that no slug is displayed.
+    $edit['settings[slug]'] = '<none>';
+    $this->editTag($tag->machinename, $edit);
+    $this->assertNoRaw('<div class="slug">', t('No slug is appearing when "@none" is used.', array('@none' => '<none>')));
+
+    // Specify a slug and check that it shows instead of the default slug.
+    $slug = $this->randomName(8);
+    $edit['settings[slug]'] = $slug;
+    $this->editTag($tag->machinename, $edit);
+    $this->assertRaw('<div class="slug">' . $slug . '</div>', 'The provided slug is correctly displayed with its tag.');
+
+    $this->deleteTag($tag->machinename);
+  }
+
+}
+
+class DFPUnitTest extends DrupalWebTestCase {
+  protected $profile = 'testing';
+
+  public static function getInfo() {
+    return array(
+      'name' => t('DFP unit tests'),
+      'description' => t('Checks the integrity of certain DFP functions.'),
+      'group' => t('DFP'),
+    );
+  }
+
+  function testDFPformatSize() {
+    $sizes = '300x250';
+    $expected_result = '[300, 250]';
+    debug(dfp_format_size($sizes));
+    $this->assertTrue(dfp_format_size($sizes) == $expected_result, 'The dfp_format_sizes function correctly handles an single size.');
+
+    $sizes = '300x250,728x90';
+    $expected_result = '[[300, 250], [728, 90]]';
+    debug(dfp_format_size($sizes));
+    $this->assertTrue(dfp_format_size($sizes) == $expected_result, 'The dfp_format_sizes function correctly handles multiple sizes.');
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

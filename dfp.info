@@ -12,4 +12,6 @@ dependencies[] = ctools
 
 files[] = dfp.install
 files[] = dfp.module
+files[] = plugins/export_ui/dfp_tag_ui.class.inc
 files[] = plugins/export_ui/dfp_ctools_export_ui.inc
+files[] = tests/dfp.test
