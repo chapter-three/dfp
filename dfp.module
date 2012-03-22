@@ -2,6 +2,7 @@
 
 define('DFP_GOOGLE_TAG_SERVICES_URL', 'www.googletagservices.com/tag/js/gpt.js');
 define('DFP_GOOGLE_SHORT_TAG_SERVICES_URL', 'pubads.g.doubleclick.net/gampad');
+define('DFP_ENTITY_TARGETING_TERMS', 'dfp_entity_targeting_terms');
 
 /**
  * Implements hook_help().
@@ -118,17 +119,12 @@ function dfp_block_view($delta) {
 /**
  * Implements hook_entity_view().
  */
-function dfp_entity_view($entity, $type, $view_mode, $langcode, $return = FALSE) {
-  $dfp_targeting_terms = &drupal_static(__FUNCTION__);
+function dfp_entity_view($entity, $type, $view_mode, $langcode) {
+  $dfp_targeting_terms = &drupal_static(DFP_ENTITY_TARGETING_TERMS);
 
   // If this is the fist time this function is run, initialize the static
   // dfp_targeting_terms array.
   $dfp_targeting_terms = !isset($dfp_targeting_terms) ? array() : $dfp_targeting_terms;
-
-  // Return the cached dfp_targeting_terms array.
-  if ($return) {
-    return array_unique($dfp_targeting_terms);
-  }
 
   if ($view_mode == 'full') {
     // Find all taxonomy terms attached to the given entity and add them to the
@@ -146,6 +142,8 @@ function dfp_entity_view($entity, $type, $view_mode, $langcode, $return = FALSE)
         }
       }
     }
+
+    $dfp_targeting_terms = array_unique($dfp_targeting_terms);
   }
 }
 
@@ -254,7 +252,7 @@ function dfp_tokens($type, $tokens, array $data = array(), array $options = arra
           break;
 
         case 'ad_categories':
-          $term_names = dfp_entity_view(NULL, NULL, NULL, NULL, TRUE);
+          $term_names = drupal_static(DFP_ENTITY_TARGETING_TERMS);
           $replacements[$original] = implode(',', $term_names);
           break;
       }
