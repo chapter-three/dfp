@@ -160,7 +160,6 @@ function dfp_tag_form(&$form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#group' => 'settings',
-    //'#description' => t('If you are backfilling your ads with AdSense ads, override the settings defined in DFP below.'),
   );
   $form['backfill_settings']['adsense_ad_types'] = array(
     '#type' => 'select',
@@ -175,6 +174,19 @@ function dfp_tag_form(&$form, &$form_state) {
     ),
     '#parents' => array('settings', 'adsense_ad_types'),
     '#description' => t('Choose what type of ads this tag can display when AdSense ads are used for backfill.'),
+  );
+  $form['backfill_settings']['adsense_channel_ids'] = array(
+    '#type' => 'textfield',
+    '#title' => t('AdSense Channel ID(s)'),
+    '#default_value' => $tag->settings['adsense_channel_ids'],
+    '#required' => FALSE,
+    '#description' => t('Example: 271828183+314159265'),
+    '#parents' => array('settings', 'adsense_channel_ids'),
+    '#states' => array(
+      '!visible' => array(
+        array(':input[name="settings[adsense_ad_types]"]' => array('value' => '')),
+      ),
+    )
   );
   $form['backfill_settings']['adsense_color_settings'] = array(
     '#type' => 'container',

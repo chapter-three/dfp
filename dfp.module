@@ -658,6 +658,9 @@ function _dfp_js_slot_definition($tag) {
   if (!empty($tag->adsense_ad_types)) {
     $js .= '  .set("adsense_ad_types", "' . $tag->adsense_ad_types . '")' . "\n";
   }
+  if (!empty($tag->adsense_channel_ids)) {
+    $js .= '  .set("adsense_channel_ids", "' . $tag->adsense_channel_ids . '")' . "\n";
+  }
   foreach ($tag->adsense_colors as $key => $val) {
     if (!empty($val)){
       $key = 'adsense_' . $key . '_color';

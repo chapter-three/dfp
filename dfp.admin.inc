@@ -33,13 +33,6 @@ function dfp_admin_settings($form, $form_state) {
     '#required' => TRUE,
     '#description' => t('The Network ID to use on all tags.'),
   );
-  $form['global_tag_settings']['dfp_default_adsense_channel_ids'] = array(
-    '#type' => 'textfield',
-    '#title' => t('AdSense Channel ID(s)'),
-    '#default_value' => variable_get('dfp_default_adsense_channel_ids', ''),
-    '#required' => FALSE,
-    '#description' => t('Example: 271828183+314159265'),
-  );
   $form['global_tag_settings']['dfp_async_rendering'] = array(
     '#type' => 'checkbox',
     '#title' => t('Render ads asynchronously'),

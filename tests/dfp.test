@@ -32,6 +32,7 @@ class dfpBaseTest extends DrupalWebTestCase {
       'block' => 1,
       'settings[slug]' => $this->randomName(32),
       'settings[adsense_ad_types]' => '',
+      'settings[adsense_channel_ids]' => '',
       'settings[adsense_colors][background]' => '',
       'settings[adsense_colors][border]' => '',
       'settings[adsense_colors][link]' => '',
@@ -188,6 +189,28 @@ class dfpDisplayTagTest extends dfpBaseTest {
     // }
   }
 
+  function testBackfill() {
+    $edit = $this->dfpBasicTagEditValues();
+
+    // Create a tag with backfill settings.
+    $colors = array('background', 'border', 'link', 'text', 'url');
+    $types = array('text', 'image', 'text_image');
+    shuffle($types);
+
+    $edit['settings[adsense_ad_types]'] = array_pop($types);
+    $edit['settings[adsense_channel_ids]'] = $this->randomName(8);
+    foreach ($colors as $color) {
+      $edit['settings[adsense_colors][' . $color . ']'] = strtoupper($this->randomName(8));
+    }
+    $tag = $this->createTag($edit);
+    $this->assertRaw('.set("adsense_ad_types", "' . $edit['settings[adsense_ad_types]'] . '")', 'The adsense type property was set properly.');
+    $this->assertRaw('.set("adsense_channel_ids", "' . $edit['settings[adsense_channel_ids]'] . '")', 'The adsense channel id property was set properly.');
+    foreach ($colors as $color) {
+      $this->assertRaw('.set("adsense_' . $color . '_color", "#' . $edit['settings[adsense_colors][' . $color . ']'] . '")', 'The adsense color property (' . $color . ') was set properly.');
+    }
+
+  }
+
 }
 
 class dfpTokensTest extends dfpBaseTest {
@@ -197,7 +220,7 @@ class dfpTokensTest extends dfpBaseTest {
   public static function getInfo() {
     return array(
       'name' => t('DFP Tokens'),
-      'description' => t('Tests for custom toekns created by the DFP module.'),
+      'description' => t('Tests for custom tokens created by the DFP module.'),
       'group' => t('DFP'),
     );
   }
