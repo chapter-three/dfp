@@ -52,7 +52,7 @@ class dfpBaseTest extends DrupalWebTestCase {
     $sizes = array('300x250', '300x600', '728x90', '728x10', '160x600', '120x80', '300x100', '50x50', '160x300');
     shuffle($sizes);
 
-    return $count == 1 ? array_pop($sizes) : array_slice($sizes, min($count, count($sizes)));
+    return $count == 1 ? array_pop($sizes) : array_slice($sizes, 0, min($count, count($sizes)));
   }
 
   /**
@@ -141,6 +141,103 @@ class dfpDisplayTagTest extends dfpBaseTest {
     $this->assertRaw('<div class="slug">' . $slug . '</div>', 'The provided slug is correctly displayed with its tag.');
 
     $this->deleteTag($tag->machinename);
+  }
+
+  function testTargeting() {
+    $edit = $this->dfpBasicTagEditValues();
+
+    // Create a tag with a target with only one value.
+    $tag = $this->createTag($edit);
+    $this->assertRaw('.setTargeting("' . $edit['targeting[1][target]'] . '", "' . $edit['targeting[1][value]'] . '");', 'Targets with a single value are printed correctly in javascript.');
+
+    // Create a tag with a target with multiple values.
+    $values = array($this->randomName(8), $this->randomName(8), $this->randomName(8));
+    $edit['targeting[1][target]'] = $this->randomName(8);
+    $edit['targeting[1][value]'] = implode(', ', $values);
+    $this->editTag($tag->machinename, $edit);
+    $this->assertRaw('.setTargeting("' . $edit['targeting[1][target]'] . '", ["' . implode('","', $values) . '"]);', 'Targets with a single value are printed correctly in javascript.');
+
+    // Create a tag with a target but no value.
+    $edit['targeting[1][target]'] = $this->randomName(8);
+    $edit['targeting[1][value]'] = '';
+    $this->editTag($tag->machinename, $edit);
+    $this->assertText(t('The value cannot be empty if a target exists.'), 'An error was correctly thrown when a target has no value.');
+
+    // Create a tag with an empty target, but a value.
+    $edit['targeting[1][target]'] = '';
+    $edit['targeting[1][value]'] = $this->randomName(8);
+    $this->editTag($tag->machinename, $edit);
+    $this->assertText(t('The target cannot be empty if a value exists.'), 'An error was correctly thrown when a target is blank, but a value has been entered.');
+
+    // This test will not work until the "Add another target" button works
+    // without javascript.
+
+    // // Create a tag with multiple targets.
+    // $count = rand(2,5);
+    // for ($i = 1; $i < $count; $i++) {
+    //   $this->drupalPost('admin/structure/dfp_ads/list/' . $machinename . '/edit', $edit, t('Add another target'));
+    // }
+    // for ($i = 1; $i < $count; $i++) {
+    //   $edit['targeting[' . $i . '][target]'] = $this->randomName(8);
+    //   $edit['targeting[' . $i . '][value]'] = $this->randomName(8);
+    // }
+    // $this->editTag($tag->machinename, $edit);
+    // $this->assertText(t('The target cannot be empty if a value exists.'), 'An error was correctly thrown when a target is blank, but a value has been entered.');
+    // for ($i = 1; $i < $count; $i++) {
+    //   $this->assertRaw('.setTargeting("' . $edit['targeting[' . $i . '][target]'] . '", "' . $edit['targeting[' . $i . '][value]'] . '");', 'Targets ' . $i . ' of ' . $count . ' printed correctly in javascript.');
+    // }
+  }
+
+}
+
+class dfpTokensTest extends dfpBaseTest {
+  /**
+   * Implements getInfo().
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('DFP Tokens'),
+      'description' => t('Tests for custom toekns created by the DFP module.'),
+      'group' => t('DFP'),
+    );
+  }
+
+  function testSlotToken() {
+    $edit = $this->dfpBasicTagEditValues();
+
+    // Create a tag that uses the slot token in a target.
+    $test_slot = $this->randomName(8);
+    $edit['slot'] = $test_slot;
+    $edit['targeting[1][target]'] = 'slot';
+    $edit['targeting[1][value]'] = '[dfp_tag:slot]';
+    $tag = $this->createTag($edit);
+    $this->assertRaw('.setTargeting("slot", "' . $test_slot . '");', 'The "slot" token works correctly.');
+  }
+
+  function testNetworkIDToken() {
+    $edit = $this->dfpBasicTagEditValues();
+
+    // Create a tag that uses the networkid token in a target.
+    $test_network_id = $this->randomName(8);
+    variable_set('dfp_network_id', $test_network_id);
+    $edit['targeting[1][target]'] = 'network id';
+    $edit['targeting[1][value]'] = '[dfp_tag:network_id]';
+    $tag = $this->createTag($edit);
+    $this->assertRaw('.setTargeting("network id", "' . $test_network_id . '");', 'The "network id" token works correctly.');
+  }
+
+  function testUrlPartsToken() {
+    $edit = $this->dfpBasicTagEditValues();
+
+    // Create a tag that uses the url parts token in a target.
+    $test_num = rand(1,3);
+    $edit['targeting[1][target]'] = 'url parts';
+    $edit['targeting[1][value]'] = '[dfp_tag:url_parts:' . $test_num . ']';
+    $tag = $this->createTag($edit);
+
+    $url_parts = explode('/', 'admin/structure/dfp_ads');
+    $replacement = implode('/', array_slice($url_parts, 0, $test_num));
+    $this->assertRaw('.setTargeting("url parts", "' . $replacement . '");', 'The "url parts" token works correctly.');
   }
 
 }
