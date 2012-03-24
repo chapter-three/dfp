@@ -51,6 +51,11 @@ function dfp_admin_settings($form, $form_state) {
     '#default_value' => variable_get('dfp_enable_ad_categories', 0),
     '#description' => t('Example: if you have an "animals" vocabulary and you want to target the same ads to "dogs", "cats" and "hamsters" you can edit each of those terms and set the DFP Ad Category to "pets". Whenever the taxonomy terms are included as targeting values, anything tagged "cats" will target "pets" instead.'),
   );
+  if (!module_exists('taxonomy')) {
+    $form['global_tag_settings']['dfp_enable_ad_categories']['disabled'] = TRUE;
+    $form['global_tag_settings']['dfp_enable_ad_categories']['#default_value'] = 0;
+    $form['global_tag_settings']['dfp_enable_ad_categories']['#description'] .= t('This requires the taxonomy module which is currently disabled.');
+  }
   $bundles = field_info_bundles('taxonomy_term');
   $options = array();
   foreach ($bundles as $key => $value) {
@@ -137,8 +142,9 @@ function dfp_admin_form_submit($form, &$form_state) {
   // field for each vocabulary that should (or should not) have DFP Ad
   // Categories enabled.
   foreach ($form_state['values']['dfp_enable_ad_categories_bundles'] as $bundle => $enable) {
-    $field = field_read_field('field_dfp_ad_categories');
-    if ($enable && $field === FALSE) {
+    $existing_instance = field_read_instance('taxonomy_term', 'field_dfp_ad_categories', $bundle);
+    $enable = $enable && !$existing_instance && $form_state['values']['dfp_enable_ad_categories'];
+    if ($enable) {
       $instance = array(
         'field_name' => 'field_dfp_ad_categories',
         'entity_type' => 'taxonomy_term',
@@ -151,8 +157,9 @@ function dfp_admin_form_submit($form, &$form_state) {
       );
       field_create_instance($instance);
     }
-    elseif (!$enable && $field !== FALSE) {
-      field_delete_instance($field);
+    elseif (!$enable && $existing_instance) {
+      // Delete this field instance, but be certain not to delete the field.
+      field_delete_instance($existing_instance, FALSE);
     }
   }
 }

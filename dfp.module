@@ -124,7 +124,7 @@ function dfp_entity_view($entity, $type, $view_mode, $langcode) {
 
   // If this is the fist time this function is run, initialize the static
   // dfp_targeting_terms array.
-  $dfp_targeting_terms = !isset($dfp_targeting_terms) ? array() : $dfp_targeting_terms;
+  $dfp_targeting_terms = is_null($dfp_targeting_terms) ? array() : $dfp_targeting_terms;
 
   if ($view_mode == 'full') {
     // Find all taxonomy terms attached to the given entity and add them to the
@@ -252,7 +252,9 @@ function dfp_tokens($type, $tokens, array $data = array(), array $options = arra
           break;
 
         case 'ad_categories':
-          $term_names = drupal_static(DFP_ENTITY_TARGETING_TERMS);
+          $term_names = &drupal_static(DFP_ENTITY_TARGETING_TERMS);
+          $term_names = is_null($term_names) ? array() : $term_names;
+
           $replacements[$original] = implode(',', $term_names);
           break;
       }

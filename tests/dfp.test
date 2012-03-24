@@ -6,11 +6,11 @@ class dfpBaseTest extends DrupalWebTestCase {
    */
   function setUp() {
     // Enable a couple modules.
-    parent::setUp('ctools', 'dfp');
+    parent::setUp('ctools', 'dfp', 'taxonomy');
     menu_rebuild();
 
     // Create an admin user with all the permissions needed to run tests.
-    $this->admin_user = $this->drupalCreateUser(array('administer DFP', 'administer taxonomy', 'access administration pages', 'administer blocks', 'administer nodes', 'edit terms in 1', 'edit terms in 2'));
+    $this->admin_user = $this->drupalCreateUser(array('administer DFP', 'administer taxonomy', 'access administration pages', 'administer blocks', 'bypass node access', 'administer nodes', 'edit terms in 1', 'edit terms in 2'));
     $this->drupalLogin($this->admin_user);
 
     // Add the some global settings needed for dfp ads to work.
@@ -213,6 +213,104 @@ class dfpDisplayTagTest extends dfpBaseTest {
 
 }
 
+class dfpAdCategoriesTest extends dfpBaseTest {
+  /**
+   * Implements getInfo().
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('DFP Ad Categories'),
+      'description' => t('Tests the functionaility of DFP ad categories.'),
+      'group' => t('DFP'),
+    );
+  }
+
+  function testEnableDisableAdCategories() {
+    // Check that enabling DFP Ad Categories for the "tags" vocabulary works.
+    $edit = array(
+      'dfp_enable_ad_categories' => 1,
+      'dfp_enable_ad_categories_bundles[tags]' => 'tags',
+    );
+    $this->drupalPost('admin/structure/dfp_ads/settings', $edit, t('Save configuration'));
+    $this->drupalGet('admin/structure/taxonomy/tags/add');
+    $this->assertFieldByName('field_dfp_ad_categories[und]');
+
+    // Check that disabling DFP Ad Categories vocabulary works even when a
+    // bundle is selected.
+    $edit = array(
+      'dfp_enable_ad_categories' => 0,
+    );
+    $this->drupalPost('admin/structure/dfp_ads/settings', $edit, t('Save configuration'));
+    $this->drupalGet('admin/structure/taxonomy/tags/add');
+    $this->assertNoFieldByName('field_dfp_ad_categories[und]');
+
+    // Check that disabling DFP Ad Categories on a specific vocabulary works.
+    // For this test to be valid, we first need to reenable DFP Ad Categories.
+    $edit = array(
+      'dfp_enable_ad_categories' => 1,
+      'dfp_enable_ad_categories_bundles[tags]' => 'tags',
+    );
+    $this->drupalPost('admin/structure/dfp_ads/settings', $edit, t('Save configuration'));
+    $this->drupalGet('admin/structure/taxonomy/tags/add');
+    $edit = array(
+      'dfp_enable_ad_categories_bundles[tags]' => 0,
+    );
+    $this->drupalPost('admin/structure/dfp_ads/settings', $edit, t('Save configuration'));
+    $this->drupalGet('admin/structure/taxonomy/tags/add');
+    $this->assertNoFieldByName('field_dfp_ad_categories[und]');
+  }
+
+  // Test that DFP Catetories are displayed properly.
+  function testDisplayAdCategories() {
+    // Turn on DFP ad categories for the "tags" vocabulary.
+    $edit = array(
+      'dfp_enable_ad_categories' => 1,
+      'dfp_enable_ad_categories_bundles[tags]' => 'tags',
+    );
+    $this->drupalPost('admin/structure/dfp_ads/settings', $edit, t('Save configuration'));
+
+    // Create a new DFP Ad Category term.
+    $dfp_category = $this->randomName(8); // tid == 1
+    $edit = array(
+      'name' => $dfp_category,
+    );
+    $this->drupalPost('admin/structure/taxonomy/dfp_ad_categories/add', $edit, t('Save'));
+
+    // Create a new "Article" node with two tags.
+    $control_tag = $this->randomName(8); // tid == 2
+    $test_tag = $this->randomName(8); // tid == 3
+    $edit = array(
+      'title' => $this->randomName(8),
+      'field_tags[und]' => $control_tag . ', ' . $test_tag,
+    );
+    $this->drupalPost('node/add/article', $edit, t('Save'));
+
+    // Edit one the new tags and tag it with a DFP Ad Category.
+    $edit = array(
+      'field_dfp_ad_categories[und]' => 1,
+    );
+    $this->drupalPost('taxonomy/term/3/edit', $edit, t('Save'));
+
+    // Create a DFP ad slot that targets the [dfp_tag:ad_categories] token.
+    $edit = $this->dfpBasicTagEditValues();
+
+    // Create a tag that uses the slot token in a target.
+    $edit['slot'] = $this->randomName(8);
+    $edit['targeting[1][target]'] = 'categories';
+    $edit['targeting[1][value]'] = '[dfp_tag:ad_categories]';
+    $tag = $this->createTag($edit);
+
+    // Check that when we are on the node page, that the DFP Ad Category is used
+    // and that the other tag is also displayed.
+    debug('control: '. $control_tag);
+    debug('test: '. $test_tag);
+    debug('dfp_category: ' . $dfp_category);
+    $this->drupalGet('node/1');
+    $this->assertRaw('.setTargeting("categories", ["' . $control_tag . '","' . $dfp_category . '"])', 'DFP Ad Categories work correctly.');
+
+  }
+}
+
 class dfpTokensTest extends dfpBaseTest {
   /**
    * Implements getInfo().
@@ -329,7 +427,7 @@ class DFPUnitTest extends DrupalWebTestCase {
    */
   public static function getInfo() {
     return array(
-      'name' => t('DFP unit tests'),
+      'name' => t('DFP Unit Tests'),
       'description' => t('Checks the integrity of certain DFP functions.'),
       'group' => t('DFP'),
     );
