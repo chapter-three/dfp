@@ -85,6 +85,9 @@ function dfp_schema() {
  * Implements hook_install().
  */
 function dfp_install() {
+  // Migrate data from the DART module if possible.
+  dfp_update_7000();
+
   $vocabulary_machinename = 'dfp_ad_categories';
 
   // If it doesn't already exist, create a vocabulary so that terms can be
@@ -111,10 +114,89 @@ function dfp_install() {
     ),
   );
   field_create_field($field);
-
 }
 
+/**
+ * Migrate existing DART tags to DFP tags. Note: this migration will destroy
+ * the any DFP global settings that have already been set.
+ */
+function dfp_update_7000() {
+  if (module_exists('dart')) {
+    // Migrate global settings.
+    $network_id = variable_get('dart_global_network_id', '');
+    if (!empty($network_id)) {
+      variable_set('dfp_network_id', $network_id);
+    }
 
+    $slug = variable_get('dart_global_slug', '');
+    if (!empty($slug)) {
+      variable_set('dfp_default_slug', $slug);
+    }
+
+    $adunit = array();
+    $adunit[] = variable_get('dart_global_prefix', '');
+    $adunit[] = variable_get('dart_global_site', '');
+    $adunit[] = variable_get('dart_global_zone', '');
+    $adunit = array_filter($adunit);
+    if (!empty($adunit)) {
+      variable_set('dfp_default_adunit', implode('/', $adunit));
+    }
+
+    $js = variable_get('dart_js', '');
+    if (!empty($js)) {
+      variable_set('dfp_injected_js', $js);
+    }
+
+    $asyncronous = variable_get('dart_load_last', NULL);
+    if (!is_null($asyncronous)) {
+      variable_set('dfp_async_rendering', $asyncronous);
+    }
+
+    // Migrate DART tags to DFP tags.
+    if (db_table_exists('dart_tags')) {
+      $dart_tags_query = db_select('dart_tags', 'dt')
+        ->fields('dt')
+        ->execute();
+      while($tag = $dart_tags_query->fetchObject()) {
+        $fields = array(
+          'machinename' => (string) $tag->machinename,
+          'slot' => (string) $tag->pos,
+          'size' => (string) $tag->sz,
+          'block' => (int) $tag->block,
+        );
+
+        $adunit = array();
+        if (isset($tag->settings['overrides']['site'])) {
+          $adunit[] = $tag->settings['overrides']['site'];
+        }
+        if (isset($tag->settings['overrides']['zone'])) {
+          $adunit[] = $tag->settings['overrides']['zone'];
+        }
+        $fields['adunit'] = !empty($adunit) ? implode('/', $adunit) : '';
+
+        $settings = array();
+        if (isset($tag->settings['overrides']['slug'])) {
+          $settings['slug'] = $tag->settings['overrides']['slug'];
+        }
+        if (isset($tag->settings['options']['scriptless'])) {
+          $settings['short_tag'] = $tag->settings['options']['scriptless'];
+        }
+
+        $settings['targeting'] = array();
+        foreach ($tag->settings['key_vals'] as $kv) {
+          $settings['targeting'][] = array('target' => $kv['key'], 'value' => $kv['val']);
+        }
+
+        $fields['settings'] = serialize($settings);
+
+        $insert_tag_query = db_insert('dfp_tags')
+          ->fields($fields)
+          ->execute();
+      }
+    }
+    return t('All DART tags and settings have been migrated to coresponding DFP tags and settings. It is highly recomended that you uninstall the DART module.');
+  }
+}
 
 
 
