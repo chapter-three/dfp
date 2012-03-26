@@ -101,19 +101,21 @@ function dfp_install() {
   }
 
   // Create a new term_reference field for the new vocabulary.
-  $field = array(
-    'field_name' => 'field_dfp_ad_categories',
-    'type' => 'taxonomy_term_reference',
-    'settings' => array(
-      'allowed_values' => array(
-        array(
-          'vocabulary' => $vocabulary_machinename,
-          'parent' => 0
+  if (field_read_field('field_dfp_ad_categories') === FALSE) {
+    $field = array(
+      'field_name' => 'field_dfp_ad_categories',
+      'type' => 'taxonomy_term_reference',
+      'settings' => array(
+        'allowed_values' => array(
+          array(
+            'vocabulary' => $vocabulary_machinename,
+            'parent' => 0
+          ),
         ),
       ),
-    ),
-  );
-  field_create_field($field);
+    );
+    field_create_field($field);
+  }
 }
 
 /**
@@ -158,6 +160,8 @@ function dfp_update_7000() {
         ->fields('dt')
         ->execute();
       while($tag = $dart_tags_query->fetchObject()) {
+        $tag->settings = unserialize($tag->settings);
+
         $fields = array(
           'machinename' => (string) $tag->machinename,
           'slot' => (string) $tag->pos,
