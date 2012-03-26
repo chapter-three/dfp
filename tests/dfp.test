@@ -454,12 +454,10 @@ class DFPUnitTest extends DrupalWebTestCase {
   function testDFPformatSize() {
     $sizes = '300x250';
     $expected_result = '[300, 250]';
-    debug(dfp_format_size($sizes));
-    $this->assertTrue(dfp_format_size($sizes) == $expected_result, 'The dfp_format_sizes function correctly handles an single size.');
 
+    $this->assertTrue(dfp_format_size($sizes) == $expected_result, 'The dfp_format_sizes function correctly handles an single size.');
     $sizes = '300x250,728x90';
     $expected_result = '[[300, 250], [728, 90]]';
-    debug(dfp_format_size($sizes));
     $this->assertTrue(dfp_format_size($sizes) == $expected_result, 'The dfp_format_sizes function correctly handles multiple sizes.');
   }
 }
