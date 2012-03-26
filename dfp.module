@@ -287,7 +287,7 @@ function dfp_preprocess_page($variables) {
  */
 function dfp_tag($machinename) {
   $tag = dfp_tag_load($machinename);
-debug($tag);
+
   $tag->slug = dfp_format_slug($tag->slug);
   $render_array = array();
 
