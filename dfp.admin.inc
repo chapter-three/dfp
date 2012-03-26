@@ -109,6 +109,27 @@ function dfp_admin_settings($form, $form_state) {
   $existing_targeting = _dfp_targeting_get_existing($form_state, variable_get('dfp_targeting', array()));
   _dfp_targeting_form($form['targeting_settings'], $form, $existing_targeting);
 
+  // AdTest Settings
+  $form['adtest'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Ad Test Settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#group' => 'settings',
+  );
+  $form['adtest']['dfp_adtest_adunit'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Ad Unit Pattern for Ad Tests'),
+    '#description'=> t('Override the Ad Unit value for all the ad tags on a page by adding ?adtest=true to the URL. Use the tokens below to define how the ad unit should display. Example: [dfp_tag:network_id]/test/[dfp_tag:slot]'),
+    '#default_value' => variable_get('dfp_adtest_adunit', ''),
+  );
+  $form['adtest']['tokens'] = array(
+    '#theme' => 'token_tree',
+    '#token_types' => array('dfp_tag'), // The token types that have specific context. Can be multiple token types like 'term' and/or 'user'
+    '#global_types' => FALSE, // A boolean TRUE or FALSE whether to include 'global' context tokens like [current-user:*] or [site:*]. Defaults to TRUE.
+    '#click_insert' => TRUE, // A boolean whether to include the 'Click this token to insert in into the the focused textfield' JavaScript functionality. Defaults to TRUE.
+  );
+
   // Javascript.
   $form['javascript'] = array(
     '#type' => 'fieldset',

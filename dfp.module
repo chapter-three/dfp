@@ -78,8 +78,9 @@ function dfp_menu() {
     'title' => 'DFP Test Page',
     'type' => MENU_LOCAL_TASK,
     'description' => "View all your DFP tags on a single page",
-    'page callback' => 'dfp_test_page',
+    'page callback' => 'dfp_adtest_page',
     'access arguments' => array('administer DFP'),
+    'file' => 'dfp.adtest.inc',
     'weight' => 10,
   );
 
@@ -423,6 +424,10 @@ function dfp_dfp_tag_load_alter(&$tag) {
       $plugin->execute($tag);
     }
   }
+
+  // Handle ad testing.
+  module_load_include('inc', 'dfp', 'dfp.adtest');
+  dfp_adtest_alter_tag($tag);
 }
 
 /**
@@ -443,32 +448,6 @@ function dfp_form_ctools_export_ui_edit_item_form_alter(&$form, &$form_state) {
     form_load_include($form_state, 'inc', 'dfp', 'dfp.admin');
     //array_unshift($form['#submit'], 'dps_targeting_form_submit');
   }
-}
-
-/**
- * Page callback for the DFP test page. It displays all tags on the site.
- */
-function dfp_test_page() {
-  $output = array();
-  $tags = dfp_tag_load_all();
-
-  foreach ($tags as $tag) {
-    $tag_slot = array(
-      'tag slot name' => array(
-        '#markup' => '<h3>' . $tag->slot . '</h3>',
-      ),
-    );
-    $tag_tag = dfp_tag($tag->machinename);
-    $tag_devel = array();
-    if (module_exists('devel')) {
-      $tag_devel['object'] = array(
-        '#markup' => kpr($tag, TRUE),
-      );
-    }
-    $output[] = array($tag_slot, $tag_tag, $tag_devel);
-  }
-
-  return $output;
 }
 
 /**

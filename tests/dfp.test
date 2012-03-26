@@ -302,9 +302,6 @@ class dfpAdCategoriesTest extends dfpBaseTest {
 
     // Check that when we are on the node page, that the DFP Ad Category is used
     // and that the other tag is also displayed.
-    debug('control: '. $control_tag);
-    debug('test: '. $test_tag);
-    debug('dfp_category: ' . $dfp_category);
     $this->drupalGet('node/1');
     $this->assertRaw('.setTargeting("categories", ["' . $control_tag . '","' . $dfp_category . '"])', 'DFP Ad Categories work correctly.');
 
@@ -415,6 +412,39 @@ class dfpGlobalsTest extends dfpBaseTest {
     variable_set('dfp_targeting', array($target));
     $this->drupalGet('/');
     $this->assertRaw('googletag.pubads().setTargeting("' . $target['target'] . '", "' . $target['value'] . '");', 'Global targetting values appear correclty in javascript.');
+  }
+
+}
+
+class dfpAdTestTest extends dfpBaseTest {
+  /**
+   * Implements getInfo().
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Displaying AdTest DFP Tags'),
+      'description' => t('Tests for displaying overridden DFP tags for ad test purposes.'),
+      'group' => t('DFP'),
+    );
+  }
+
+  function testTestPage() {
+    $edit = $this->dfpBasicTagEditValues();
+    $tag = $this->createTag($edit);
+
+    $override = $this->randomName(8);
+    $this->drupalGet('admin/structure/dfp_ads/test_page', array('query' => array('adunit_override' => $override)));
+    $this->assertRaw('googletag.defineSlot("' . $override . '"', 'The Ad Unit Name was properly overridden on the Ad Test Page.');
+  }
+
+  function testQueryString() {
+    $edit = $this->dfpBasicTagEditValues();
+    $tag = $this->createTag($edit);
+
+    $override = $this->randomName(8);
+    variable_set('dfp_adtest_adunit', $override);
+    $this->drupalGet('admin/structure/dfp_ads/test_page', array('query' => array('adtest' => 'true')));
+    $this->assertRaw('googletag.defineSlot("' . $override . '"', 'The Ad Unit Name was properly overridden using the adtest query string.');
   }
 
 }
