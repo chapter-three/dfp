@@ -1,0 +1,12 @@
+#dfp-adtest-form {
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 20px;
+  width: 85%;
+  margin: 0 auto;
+}
+
+#dfp-adtest-form .token-tree {
+  width: auto;
+  margin-left: 0px;
+}
