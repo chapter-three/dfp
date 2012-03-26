@@ -90,13 +90,6 @@ class dfpBaseTest extends DrupalWebTestCase {
 
     return $tag;
   }
-
-  /**
-   * Delete a tag specified by $machinename.
-   */
-  function deleteTag($machinename) {
-    $this->drupalPost('admin/structure/dfp_ads/list/' . $machinename . '/delete', array(), t('Delete'));
-  }
 }
 
 class dfpDisplayTagTest extends dfpBaseTest {
@@ -116,9 +109,7 @@ class dfpDisplayTagTest extends dfpBaseTest {
     $tag = $this->createTag();
 
     // Varify the slot is defined in javascript.
-    $this->assertRaw('googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "dfp-ad-' . $tag->slot . '")', 'The ad slot has been correctly defined in javascript.');
-
-    $this->deleteTag($tag->machinename);
+    $this->assertRaw('googletag.defineSlot("' . $tag->adunit . '", ' . dfp_format_size($tag->size) . ', "dfp-ad-' . $tag->slot . '")', 'The ad slot has been correctly defined in javascript.');
   }
 
   function testSlug() {
@@ -126,9 +117,10 @@ class dfpDisplayTagTest extends dfpBaseTest {
 
     // Create a tag without a slug, display it and ensure the default slug is
     // displayed.
+    variable_set('dfp_default_slug', $this->randomName(8));
     $edit['settings[slug]'] = '';
     $tag = $this->createTag($edit);
-    $this->assertRaw('<div class="slug">' . variable_get('dfp_default_slug', '') . '</div>', 'The default slug is correctly used when no slug exists for an individual tag.');
+    $this->assertRaw('<div class="slug">' . dfp_format_slug(variable_get('dfp_default_slug', '')) . '</div>', 'The default slug is correctly used when no slug exists for an individual tag.');
 
     // Change the slug to <none> and ensure that no slug is displayed.
     $edit['settings[slug]'] = '<none>';
@@ -140,8 +132,6 @@ class dfpDisplayTagTest extends dfpBaseTest {
     $edit['settings[slug]'] = $slug;
     $this->editTag($tag->machinename, $edit);
     $this->assertRaw('<div class="slug">' . $slug . '</div>', 'The provided slug is correctly displayed with its tag.');
-
-    $this->deleteTag($tag->machinename);
   }
 
   function testTargeting() {
@@ -429,8 +419,7 @@ class dfpAdTestTest extends dfpBaseTest {
   }
 
   function testTestPage() {
-    $edit = $this->dfpBasicTagEditValues();
-    $tag = $this->createTag($edit);
+    $tag = $this->createTag();
 
     $override = $this->randomName(8);
     $this->drupalGet('admin/structure/dfp_ads/test_page', array('query' => array('adunit_override' => $override)));
@@ -438,8 +427,7 @@ class dfpAdTestTest extends dfpBaseTest {
   }
 
   function testQueryString() {
-    $edit = $this->dfpBasicTagEditValues();
-    $tag = $this->createTag($edit);
+    $tag = $this->createTag();
 
     $override = $this->randomName(8);
     variable_set('dfp_adtest_adunit', $override);

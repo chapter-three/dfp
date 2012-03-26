@@ -287,6 +287,8 @@ function dfp_preprocess_page($variables) {
  */
 function dfp_tag($machinename) {
   $tag = dfp_tag_load($machinename);
+debug($tag);
+  $tag->slug = dfp_format_slug($tag->slug);
   $render_array = array();
 
   if (!empty($tag)) {
@@ -360,9 +362,6 @@ function dfp_tag_load($machinename) {
     }
 
     // Configure this tag based on the defined settings.
-    $tag->adunit = token_replace($tag->adunit, array('tag' => $tag));
-    $tag->size = dfp_format_size($tag->size);
-    $tag->slug = dfp_format_slug($tag->slug);
     $tag->wrapper_id = 'dfp-ad-' . $tag->machinename . '-wrapper';
     $tag->placeholder_id = 'dfp-ad-' . $tag->machinename;
 
@@ -667,6 +666,11 @@ function _dfp_js_slot_definition($tag) {
  */
 function template_preprocess_dfp_tag(&$variables) {
   $tag = $variables['tag'];
+
+  // Format certain tag properties for display.
+  $tag->adunit = token_replace($tag->adunit, array('tag' => $tag));
+  $tag->size = dfp_format_size($tag->size);
+  $tag->slug = dfp_format_slug($tag->slug);
 
   // Create the attributes for the wrapper div and placeholder div.
   $variables['placeholder_attributes'] = array(
