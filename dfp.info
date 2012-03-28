@@ -7,8 +7,8 @@ project = "dfp"
 
 configure = admin/structure/dfp_ads/settings
 
-;dependencies[] = system (>=7.13)
-dependencies[] = ctools
+;dependencies[] = system (>= 7.13)
+dependencies[] = ctools (>= 7.x-1.0-rc2)
 
 files[] = dfp.install
 files[] = dfp.module
