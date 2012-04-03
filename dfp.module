@@ -602,10 +602,6 @@ function _dfp_js_header_script() {
   if (variable_get('dfp_collapse_empty_divs', 1)) {
     $js .= '  googletag.pubads().collapseEmptyDivs();' . "\n";
   }
-  $channel_ids = variable_get('dfp_default_adsense_channel_ids', '');
-  if (variable_get('dfp_default_adsense_channel_ids', '')) {
-    $js .= '  googletag.pubads().set("adsense_channel_ids", "' . $channel_ids . '");' . "\n";
-  }
 
   // Set global targeting values for this page.
   $targeting = variable_get('dfp_targeting', array());
