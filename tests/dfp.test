@@ -368,16 +368,22 @@ class dfpGlobalsTest extends dfpBaseTest {
 
   function testGlobalSettingsOn(){
     $injected_js = $this->randomName(32);
+    $target = array(
+      'target' => $this->randomName(8),
+      'value' => $this->randomName(8),
+    );
 
     variable_set('dfp_async_rendering', '1');
     variable_set('dfp_single_request', '1');
     variable_set('dfp_collapse_empty_divs', '1');
     variable_set('dfp_injected_js', $injected_js);
+    variable_set('dfp_targeting', array($target));
     $this->drupalGet('/');
     $this->assertRaw('googletag.pubads().enableAsyncRendering();', 'Asyncronous rendering is turned on.');
     $this->assertRaw('googletag.pubads().enableSingleRequest();', 'Single request is turned on.');
     $this->assertRaw('googletag.pubads().collapseEmptyDivs();', 'Collapse empty divs is turned on.');
     $this->assertRaw($injected_js, 'Injected javascript correctly appears on the page.');
+    $this->assertRaw('googletag.pubads().setTargeting("' . $target['target'] . '", "' . $target['value'] . '");', 'Global targetting values appear correclty in javascript.');
   }
 
   function testGlobalSettingsOff(){
@@ -388,16 +394,6 @@ class dfpGlobalsTest extends dfpBaseTest {
     $this->assertNoRaw('googletag.pubads().enableAsyncRendering();', 'Asyncronous rendering is turned off.');
     $this->assertNoRaw('googletag.pubads().enableSingleRequest();', 'Single request is turned off.');
     $this->assertNoRaw('googletag.pubads().collapseEmptyDivs();', 'Collapse empty divs is turned off.');
-  }
-
-  function testGlobalTargets() {
-    $target = array(
-      'target' => $this->randomName(8),
-      'value' => $this->randomName(8),
-    );
-    variable_set('dfp_targeting', array($target));
-    $this->drupalGet('/');
-    $this->assertRaw('googletag.pubads().setTargeting("' . $target['target'] . '", "' . $target['value'] . '");', 'Global targetting values appear correclty in javascript.');
   }
 
 }
