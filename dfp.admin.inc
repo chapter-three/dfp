@@ -107,7 +107,7 @@ function dfp_admin_settings($form, $form_state) {
     '#group' => 'settings',
   );
   $existing_targeting = _dfp_targeting_get_existing($form_state, variable_get('dfp_targeting', array()));
-  _dfp_targeting_form($form['targeting_settings'], $form, $existing_targeting);
+  _dfp_targeting_form($form['targeting_settings'], $existing_targeting);
 
   // AdTest Settings
   $form['adtest'] = array(
@@ -186,9 +186,9 @@ function dfp_admin_form_submit($form, &$form_state) {
 }
 
 /**
- * Validation function used by the targeting form.
+ * Validation function used by an individual target in the targeting form.
  */
-function dfp_target_form_validate($element, &$form_state, $form) {
+function dfp_target_form_validate($element, &$form_state) {
   if (empty($element['target']['#value']) && !empty($element['value']['#value'])) {
     form_error($element['target'], t('The target cannot be empty if a value exists.'));
   }
@@ -198,29 +198,34 @@ function dfp_target_form_validate($element, &$form_state, $form) {
 }
 
 /**
- * Submit handler ensures that empty targeting values are not saved.
+ * Validation function used by the targeting form.
  */
-function dps_targeting_form_submit($form, &$form_state) {
-  if (array_key_exists('targeting', $form_state['values'])) {
-    _dfp_targeting_remove_empty($form_state['values']['targeting']);
+function dfp_targeting_form_validate(&$element, &$form_state) {
+  if ($form_state['triggering_element']['#value'] != t('Add another target')) {
+    dfp_targeting_trim($form_state['values']);
   }
-  else {
-    // Use the #array_parents property to walk through form_state['values'].
-    // This should only be necessary if the #parents property was set for
-    // the targeting form.
-    $targeting = _dfp_get_form_item('targeting', $form);
-    $item = &$form_state['values'];
-    foreach ($targeting['#array_parents'] as $parent) {
-      if (array_key_exists($parent, $item)) {
-        $item = &$item[$parent];
-      }
-      else {
-        $item = array();
-        break;
-      }
-    }
+}
 
-    _dfp_targeting_remove_empty($item);
+/**
+ * Helper function that takes a form_state['values'] and removes empty targets.
+ */
+function dfp_targeting_trim(&$values, $parent = 'targeting') {
+  foreach ($values as $key => &$val) {
+    if ($key == $parent) {
+      // We found the targeting values.
+      foreach ($val as $k => $v) {
+        if (empty($val[$k]['target']) && empty($val[$k]['value'])) {
+          unset($val[$k]);
+        }
+      }
+      // Reset the array indexes to prevent wierd behavior caused by a target
+      // being removed in the middle of the array.
+      $val = array_values($val);
+      break;
+    }
+    elseif (is_array($val)) {
+      dfp_targeting_trim($val, $parent);
+    }
   }
 }
 
@@ -242,25 +247,23 @@ function dfp_more_targets_js($form, $form_state) {
 /**
  * Helper form builder for the targeting form.
  */
-function _dfp_targeting_form(&$targeting_form, &$form, $existing_targeting = array()) {
-  if (isset($form['#submit']) && is_array($form['#submit'])) {
-    array_unshift($form['#submit'], 'dps_targeting_form_submit');
-  }
-
+function _dfp_targeting_form(&$targeting_form, $existing_targeting = array()) {
   // Display settings.
   $targeting_form['targeting'] = array(
+    '#type' => 'markup',
     '#tree' => FALSE,
     '#prefix' => '<div id="dfp-targeting-wrapper">',
     '#suffix' => '</div>',
     '#theme' => 'dfp_target_settings',
+    '#element_validate' => array('dfp_targeting_form_validate'),
   );
 
-  // Add existing targets to the form.
+  // Add existing targets to the form unless they are empty.
   foreach ($existing_targeting as $key => $data) {
     _dfp_target_form($targeting_form, $key, $data);
   }
   // Add one blank set of target fields.
-  _dfp_target_form($targeting_form, count($existing_targeting) + 1);
+  _dfp_target_form($targeting_form, count($existing_targeting));
 
   $targeting_form['targeting']['dfp_more_targets'] = array(
     '#type' => 'submit',

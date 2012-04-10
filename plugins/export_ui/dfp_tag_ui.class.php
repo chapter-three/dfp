@@ -2,7 +2,7 @@
 
 /**
  * @file
- * A custom Ctools Export UI class for DART Tags.
+ * A custom Ctools Export UI class for DFP Tags.
  */
 
 /**
@@ -73,6 +73,24 @@ class dfp_tag_ui extends ctools_export_ui {
     $header[] = array('data' => t('Operations'), 'class' => array('ctools-export-ui-operations'));
 
     return $header;
+  }
+
+  /**
+   * Make certain that setting form_state['rebuild'] = TRUE in a submit function
+   * will correctly rebuild the exportables item edit form for the user. This
+   * function is needed until the patch at http://drupal.org/node/1524598 is
+   * committed.
+   */
+  function edit_execute_form_standard(&$form_state) {
+    $output = drupal_build_form('ctools_export_ui_edit_item_form', $form_state);
+
+    if (!empty($form_state['executed']) && !$form_state['rebuild']) {
+      $this->edit_save_form($form_state);
+    }
+    else {
+      unset($form_state['executed']);
+    }
+    return $output;
   }
 
 }

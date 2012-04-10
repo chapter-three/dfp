@@ -608,7 +608,9 @@ function _dfp_js_header_script() {
   drupal_alter('dfp_global_targeting', $targeting);
   $targeting = dfp_format_targeting($targeting);
   foreach ($targeting as $key => $target) {
-    $js .= '  googletag.pubads().setTargeting(' . $target['target'] . ', ' . $target['value'] . ');' . "\n";
+    if (!empty($target['target']) && !empty($target['value'])) {
+      $js .= '  googletag.pubads().setTargeting(' . $target['target'] . ', ' . $target['value'] . ');' . "\n";
+    }
   }
 
   $js .= '});' . "\n";

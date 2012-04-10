@@ -36,6 +36,8 @@ $plugin = array(
 
   'form' => array(
     'settings' => 'dfp_tag_form',
+    // 'submit' => 'dfp_tag_form_submit',
+    'validate' => 'dfp_tag_form_validate',
   ),
 );
 
@@ -47,9 +49,9 @@ function dfp_tag_form(&$form, &$form_state) {
   form_load_include($form_state, 'inc', 'dfp', 'plugins/export_ui/dfp_ctools_export_ui');
   form_load_include($form_state, 'inc', 'dfp', 'dfp.admin');
 
+  // Create a default tag object.
   $tag = ($form_state['op'] == 'add' ? $form_state['item'] : $form_state['item']->raw);
 
-  $form['#validate'][] = 'dfp_tag_form_validate';
   $form['settings'] = array(
     '#type' => 'vertical_tabs',
   );
@@ -151,7 +153,7 @@ function dfp_tag_form(&$form, &$form_state) {
     '#group' => 'settings',
   );
   $existing_targeting = _dfp_targeting_get_existing($form_state, isset($tag->settings['targeting']) ? $tag->settings['targeting'] : array());
-  _dfp_targeting_form($form['targeting_settings'], $form, $existing_targeting);
+  _dfp_targeting_form($form['targeting_settings'], $existing_targeting);
 
   // Backfill ad settings options.
   $form['backfill_settings'] = array(

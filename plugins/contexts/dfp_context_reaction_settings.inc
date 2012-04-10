@@ -15,13 +15,13 @@ class dfp_context_reaction_settings extends context_reaction {
 
     // Build the targeting form.
     $form = array();
-    _dfp_targeting_form($form, $form, isset($values['targeting']) ? $values['targeting'] : array());
+    _dfp_targeting_form($form, isset($values['targeting']) ? $values['targeting'] : array());
 
     // Modify the #parents property to make sure values are stored in the
     // location that contexts expects them.
     $parents = array('reactions', 'plugins', 'dfp_settings');
-    foreach (element_children($form['targeting']) as $key => $val) {
-      if ($key != 'dfp_more_targets') {
+    foreach (element_children($form['targeting']) as $key) {
+      if (is_numeric($key)) {
         $form['targeting'][$key]['target']['#parents'] = array_merge($parents, $form['targeting'][$key]['target']['#parents']);
         $form['targeting'][$key]['value']['#parents'] = array_merge($parents, $form['targeting'][$key]['value']['#parents']);
       }
@@ -34,7 +34,7 @@ class dfp_context_reaction_settings extends context_reaction {
   }
 
   /**
-   * Return a keyed array containing the overridden values of site and zone.
+   * Return a keyed array containing the settings.
    */
   function execute(&$tag) {
     foreach ($this->get_contexts() as $context_name => $context) {

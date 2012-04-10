@@ -38,8 +38,8 @@ class dfpBaseTest extends DrupalWebTestCase {
       'settings[adsense_colors][link]' => '',
       'settings[adsense_colors][text]' => '',
       'settings[adsense_colors][url]' => '',
-      'targeting[1][target]' => $this->randomName(8),
-      'targeting[1][value]' => $this->randomName(8),
+      'targeting[0][target]' => $this->randomName(8),
+      'targeting[0][value]' => $this->randomName(8),
     );
 
     return $basic_tag;
@@ -79,7 +79,7 @@ class dfpBaseTest extends DrupalWebTestCase {
   /**
    * Edit a given tag specified by $machinename with the given values.
    */
-  function editTag($machinename, $edit) {
+  function editTag($machinename, &$edit) {
     // Make sure there is no machinename set when we are editing.
     if (isset($edit['machinename'])) {
       unset($edit['machinename']);
@@ -139,44 +139,50 @@ class dfpDisplayTagTest extends dfpBaseTest {
 
     // Create a tag with a target with only one value.
     $tag = $this->createTag($edit);
-    $this->assertRaw('.setTargeting("' . $edit['targeting[1][target]'] . '", "' . $edit['targeting[1][value]'] . '");', 'Targets with a single value are printed correctly in javascript.');
+    $this->assertRaw('.setTargeting("' . $edit['targeting[0][target]'] . '", "' . $edit['targeting[0][value]'] . '");', 'Targets with a single value are printed correctly in javascript.');
 
     // Create a tag with a target with multiple values.
     $values = array($this->randomName(8), $this->randomName(8), $this->randomName(8));
-    $edit['targeting[1][target]'] = $this->randomName(8);
-    $edit['targeting[1][value]'] = implode(', ', $values);
+    $edit['targeting[0][target]'] = $this->randomName(8);
+    $edit['targeting[0][value]'] = implode(', ', $values);
     $this->editTag($tag->machinename, $edit);
-    $this->assertRaw('.setTargeting("' . $edit['targeting[1][target]'] . '", ["' . implode('","', $values) . '"]);', 'Targets with a single value are printed correctly in javascript.');
+    $this->assertRaw('.setTargeting("' . $edit['targeting[0][target]'] . '", ["' . implode('","', $values) . '"]);', 'Targets with multiple values are printed correctly in javascript.');
 
     // Create a tag with a target but no value.
-    $edit['targeting[1][target]'] = $this->randomName(8);
-    $edit['targeting[1][value]'] = '';
+    $edit['targeting[0][target]'] = $this->randomName(8);
+    $edit['targeting[0][value]'] = '';
     $this->editTag($tag->machinename, $edit);
     $this->assertText(t('The value cannot be empty if a target exists.'), 'An error was correctly thrown when a target has no value.');
 
     // Create a tag with an empty target, but a value.
-    $edit['targeting[1][target]'] = '';
-    $edit['targeting[1][value]'] = $this->randomName(8);
+    $edit['targeting[0][target]'] = '';
+    $edit['targeting[0][value]'] = $this->randomName(8);
     $this->editTag($tag->machinename, $edit);
     $this->assertText(t('The target cannot be empty if a value exists.'), 'An error was correctly thrown when a target is blank, but a value has been entered.');
 
-    // This test will not work until the "Add another target" button works
-    // without javascript.
+    // Create a tag with multiple targets.
+    $count = 3;
+    for ($i = 0; $i < $count; $i++) {
+      $edit['targeting[' . $i . '][target]'] = $this->randomName(8);
+      $edit['targeting[' . $i . '][value]'] = $this->randomName(8);
+      $this->drupalPost('admin/structure/dfp_ads/list/' . $tag->machinename . '/edit', $edit, t('Add another target'));
+      $this->editTag($tag->machinename, $edit);
+    }
 
-    // // Create a tag with multiple targets.
-    // $count = rand(2,5);
-    // for ($i = 1; $i < $count; $i++) {
-    //   $this->drupalPost('admin/structure/dfp_ads/list/' . $machinename . '/edit', $edit, t('Add another target'));
-    // }
-    // for ($i = 1; $i < $count; $i++) {
-    //   $edit['targeting[' . $i . '][target]'] = $this->randomName(8);
-    //   $edit['targeting[' . $i . '][value]'] = $this->randomName(8);
-    // }
-    // $this->editTag($tag->machinename, $edit);
-    // $this->assertText(t('The target cannot be empty if a value exists.'), 'An error was correctly thrown when a target is blank, but a value has been entered.');
-    // for ($i = 1; $i < $count; $i++) {
-    //   $this->assertRaw('.setTargeting("' . $edit['targeting[' . $i . '][target]'] . '", "' . $edit['targeting[' . $i . '][value]'] . '");', 'Targets ' . $i . ' of ' . $count . ' printed correctly in javascript.');
-    // }
+    for ($i = 0; $i < $count; $i++) {
+      $this->assertRaw('.setTargeting("' . $edit['targeting[' . $i . '][target]'] . '", "' . $edit['targeting[' . $i . '][value]'] . '")', 'Targets ' . $i . ' of ' . $count . ' printed correctly in javascript.');
+    }
+    // Make sure that empty values are ignored.
+    $this->drupalPost('admin/structure/dfp_ads/list/' . $tag->machinename . '/edit', $edit, t('Add another target'));
+    $this->editTag($tag->machinename, $edit);
+    $this->assertNoRaw('.setTargeting(, )', 'Empty targets were correctly ignored when adding.');
+
+    // Test that target can be removed.
+    $edit['targeting[0][target]'] = '';
+    $edit['targeting[0][value]'] = '';
+    $this->editTag($tag->machinename, $edit);
+    $this->assertNoRaw('.setTargeting(, )', 'Empty targets were correctly removed when editing.');
+
   }
 
   function testBackfill() {
@@ -198,7 +204,6 @@ class dfpDisplayTagTest extends dfpBaseTest {
     foreach ($colors as $color) {
       $this->assertRaw('.set("adsense_' . $color . '_color", "#' . $edit['settings[adsense_colors][' . $color . ']'] . '")', 'The adsense color property (' . $color . ') was set properly.');
     }
-
   }
 
 }
@@ -286,8 +291,8 @@ class dfpAdCategoriesTest extends dfpBaseTest {
 
     // Create a tag that uses the slot token in a target.
     $edit['slot'] = $this->randomName(8);
-    $edit['targeting[1][target]'] = 'categories';
-    $edit['targeting[1][value]'] = '[dfp_tag:ad_categories]';
+    $edit['targeting[0][target]'] = 'categories';
+    $edit['targeting[0][value]'] = '[dfp_tag:ad_categories]';
     $tag = $this->createTag($edit);
 
     // Check that when we are on the node page, that the DFP Ad Category is used
@@ -316,8 +321,8 @@ class dfpTokensTest extends dfpBaseTest {
     // Create a tag that uses the slot token in a target.
     $test_slot = $this->randomName(8);
     $edit['slot'] = $test_slot;
-    $edit['targeting[1][target]'] = 'slot';
-    $edit['targeting[1][value]'] = '[dfp_tag:slot]';
+    $edit['targeting[0][target]'] = 'slot';
+    $edit['targeting[0][value]'] = '[dfp_tag:slot]';
     $tag = $this->createTag($edit);
     $this->assertRaw('.setTargeting("slot", "' . $test_slot . '");', 'The "slot" token works correctly.');
   }
@@ -328,8 +333,8 @@ class dfpTokensTest extends dfpBaseTest {
     // Create a tag that uses the networkid token in a target.
     $test_network_id = $this->randomName(8);
     variable_set('dfp_network_id', $test_network_id);
-    $edit['targeting[1][target]'] = 'network id';
-    $edit['targeting[1][value]'] = '[dfp_tag:network_id]';
+    $edit['targeting[0][target]'] = 'network id';
+    $edit['targeting[0][value]'] = '[dfp_tag:network_id]';
     $tag = $this->createTag($edit);
     $this->assertRaw('.setTargeting("network id", "' . $test_network_id . '");', 'The "network id" token works correctly.');
   }
@@ -342,8 +347,8 @@ class dfpTokensTest extends dfpBaseTest {
 
     $max_parts_to_test = 3;
     for ($i = 1; $i <= $max_parts_to_test; $i++) {
-      $edit['targeting[1][target]'] = 'url parts';
-      $edit['targeting[1][value]'] = '[dfp_tag:url_parts:' . $i . ']';
+      $edit['targeting[0][target]'] = 'url parts';
+      $edit['targeting[0][value]'] = '[dfp_tag:url_parts:' . $i . ']';
       $this->editTag($tag->machinename, $edit);
 
       $this->drupalGet($url);
