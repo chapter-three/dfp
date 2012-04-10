@@ -438,6 +438,15 @@ class DFPUnitTest extends DrupalUnitTestCase {
   protected $profile = 'testing';
 
   /**
+   * Implementation of setUp().
+   */
+  function setUp() {
+    // Enable a couple modules.
+    drupal_load('module', 'dfp');
+    parent::setUp();
+  }
+
+  /**
    * Implements getInfo().
    */
   public static function getInfo() {
