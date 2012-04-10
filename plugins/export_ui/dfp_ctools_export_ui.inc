@@ -36,7 +36,6 @@ $plugin = array(
 
   'form' => array(
     'settings' => 'dfp_tag_form',
-    // 'submit' => 'dfp_tag_form_submit',
     'validate' => 'dfp_tag_form_validate',
   ),
 );
