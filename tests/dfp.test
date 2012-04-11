@@ -10,7 +10,7 @@ class dfpBaseTest extends DrupalWebTestCase {
     menu_rebuild();
 
     // Create an admin user with all the permissions needed to run tests.
-    $this->admin_user = $this->drupalCreateUser(array('administer DFP', 'administer taxonomy', 'access administration pages', 'administer blocks', 'bypass node access', 'administer nodes', 'edit terms in 1', 'edit terms in 2'));
+    $this->admin_user = $this->drupalCreateUser(array('administer DFP', 'administer taxonomy', 'access administration pages', 'administer blocks', 'bypass node access', 'administer nodes', 'edit terms in 1'));
     $this->drupalLogin($this->admin_user);
 
     // Add the some global settings needed for dfp ads to work.

@@ -287,39 +287,41 @@ function dfp_preprocess_page($variables) {
  */
 function dfp_tag($machinename) {
   $tag = dfp_tag_load($machinename);
-
-  $tag->slug = dfp_format_slug($tag->slug);
   $render_array = array();
 
-  if (!empty($tag)) {
-    $render_array = array(
-      'dfp_wrapper' => array(
-        '#type' => 'container',
-        '#attributes' => array(
-          'id' => $tag->wrapper_id,
-          'class' => array(
-            'dfp-tag-wrapper',
+  if ($tag) {
+    $tag->slug = dfp_format_slug($tag->slug);
+
+    if (!empty($tag)) {
+      $render_array = array(
+        'dfp_wrapper' => array(
+          '#type' => 'container',
+          '#attributes' => array(
+            'id' => $tag->wrapper_id,
+            'class' => array(
+              'dfp-tag-wrapper',
+            ),
+          ),
+          'tag' => array(
+            '#theme' => $tag->short_tag ? 'dfp_short_tag' : 'dfp_tag',
+            '#tag' => $tag,
           ),
         ),
-        'tag' => array(
-          '#theme' => $tag->short_tag ? 'dfp_short_tag' : 'dfp_tag',
-          '#tag' => $tag,
-        ),
-      ),
-    );
-    if (!empty($tag->slug)) {
-      $render_array['dfp_wrapper']['slug_wrapper'] = array(
-        '#type' => 'container',
-        '#attributes' => array(
-          'class' => array(
-            'slug',
-          ),
-        ),
-        'slug' => array(
-          '#markup' => $tag->slug,
-        ),
-        '#weight' => -1,
       );
+      if (!empty($tag->slug)) {
+        $render_array['dfp_wrapper']['slug_wrapper'] = array(
+          '#type' => 'container',
+          '#attributes' => array(
+            'class' => array(
+              'slug',
+            ),
+          ),
+          'slug' => array(
+            '#markup' => $tag->slug,
+          ),
+          '#weight' => -1,
+        );
+      }
     }
   }
 
