@@ -62,7 +62,7 @@ function dfp_schema() {
       ),
       'block' => array(
         'type' => 'int',
-        'default' => 0,
+        'default' => 1,
         'description' => 'If true, a block will be created in which to display this ad tag.',
       ),
       'settings' => array(
