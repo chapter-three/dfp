@@ -88,13 +88,6 @@ function dfp_menu() {
 }
 
 /**
- * Implements hook_init()
- */
-function dfp_init() {
-  _dfp_js_google_tag_service();
-}
-
-/**
  * Implements hook_block_info().
  */
 function dfp_block_info() {
@@ -276,9 +269,9 @@ function dfp_tokens($type, $tokens, array $data = array(), array $options = arra
  * Implements preprocess_page().
  */
 function dfp_preprocess_page($variables) {
-  // Add the header js here so that enough information has been
-  // loaded for tokens to work properly.
-  _dfp_js_header_script();
+  // Add the header js here so that enough information has been loaded for
+  // tokens to work properly.
+  _dfp_js_global_settings();
 }
 
 
@@ -567,33 +560,32 @@ function _dfp_block_tags() {
 }
 
 /**
- * Helper function to include external tag service javascript file.
- */
-function _dfp_js_google_tag_service() {
-  // Inlclude a script tag for the Google Tag Services.
-  // @todo: One day this should include an async=true attribute. See #1140356.
-  $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-  $options = array(
-    'type' => 'external',
-    'group' => JS_LIBRARY,
-    'every_page' => TRUE,
-  );
-  drupal_add_js($protocol . DFP_GOOGLE_TAG_SERVICES_URL, $options);
-}
-
-/**
  * Helper function to include javascript variables, etc in the header above all
  * slot definitions.
  */
-function _dfp_js_header_script() {
-  // Initialize the google varibales.
+function _dfp_js_global_settings() {
+  // Initialize the google varibales and inject user-defined javascript.
   $js = 'var googletag = googletag || {};' . "\n";
-  $js .= 'googletag.cmd = googletag.cmd || [];' . "\n";
-
-  // Inject user-defined javascript.
+  $js .= 'googletag.cmd = googletag.cmd || [];';
   $js .= variable_get('dfp_injected_js', '') . "\n";
 
-  // Add global settings.
+  $options = array(
+    'type' => 'inline',
+    'group' => JS_LIBRARY,
+    'every_page' => TRUE,
+    'weight' => -10,
+  );
+  drupal_add_js($js, $options);
+
+  // Inlclude a script tag for the Google Tag Services.
+  // @todo: One day this should include an async=true attribute. See #1140356.
+  //        However, there is a good chance this might break <= IE8.
+  $options['type'] = 'external';
+  $options['weight']++;
+  drupal_add_js(($GLOBALS['is_https'] ? "https://" : "http://") . DFP_GOOGLE_TAG_SERVICES_URL, $options);
+
+  // Add global settings with a heavy weight so that they appear after all the
+  // defineSlot() calls otherwise IE8 and Opera fail to display ads properly.
   $js .= 'googletag.cmd.push(function() {' . "\n";
   if (variable_get('dfp_async_rendering', 1)) {
     $js .= '  googletag.pubads().enableAsyncRendering();' . "\n";
@@ -620,8 +612,9 @@ function _dfp_js_header_script() {
 
   $options = array(
     'type' => 'inline',
-    'group' => JS_LIBRARY,
+    'group' => JS_DEFAULT,
     'every_page' => TRUE,
+    'weight' => 10,
   );
   drupal_add_js($js, $options);
 }
@@ -657,6 +650,7 @@ function _dfp_js_slot_definition($tag) {
   $options = array(
     'type' => 'inline',
     'group' => JS_LIBRARY,
+    'weight' => 0,
   );
   drupal_add_js($js, $options);
 }
