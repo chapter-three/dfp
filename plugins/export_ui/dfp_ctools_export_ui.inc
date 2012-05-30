@@ -101,7 +101,7 @@ function dfp_tag_form(&$form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Ad Unit Pattern'),
     '#required' => FALSE,
-    '#maxlength' => 64,
+    '#maxlength' => 255,
     '#default_value' => $tag->adunit,
     '#description' => t('Use the tokens below to define how the ad unit should display. You can programatically alter this value during any page request. Example: [dfp_tag:network_id]/[dfp_tag:url_parts:4]/[dfp_tag:slot]'),
   );
