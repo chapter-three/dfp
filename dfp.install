@@ -6,6 +6,17 @@
  */
 
 /**
+ * Implements hook_enable().
+ */
+function dfp_enable() {
+  $t = get_t();
+
+  if (!module_exists('token')) {
+    drupal_set_message($t('While it is not required, the Doubleclick for Publishers administration forms are vastly improved by using the <a href="!url">token module</a>.', array('!url' => 'http://drupal.org/project/token')));
+  }
+}
+
+/**
  * Implements hook_schema().
  */
 function dfp_schema() {
@@ -123,6 +134,8 @@ function dfp_install() {
  * the any DFP global settings that have already been set.
  */
 function dfp_update_7000() {
+  $t = get_t();
+
   if (module_exists('dart')) {
     // Migrate global settings.
     $network_id = variable_get('dart_global_network_id', '');
@@ -198,9 +211,26 @@ function dfp_update_7000() {
           ->execute();
       }
     }
-    return t('All DART tags and settings have been migrated to coresponding DFP tags and settings. It is highly recomended that you uninstall the DART module.');
+    return $t('All DART tags and settings have been migrated to coresponding DFP tags and settings. It is highly recomended that you uninstall the DART module.');
   }
 }
 
+/**
+ * The network id is now included automatically in the ad unit pattern therefore
+ * existing tags need the ad unit id token removed so it doesnt appear twice.
+ */
+function dfp_update_7001() {
+  $t = get_t();
 
+  $tags = db_select('dfp_tags', 'd')->fields('d')->execute();
 
+  foreach ($tags as $tag) {
+    if (strpos($tag->adunit, '[dfp_tag:network_id]/') === 0) {
+      $tag->adunit = str_replace('[dfp_tag:network_id]/', '', $tag->adunit);
+      $record = array('adid' => $tag->adid, 'adunit' => $tag->adunit);
+      drupal_write_record('dfp_tags', $record, 'adid');
+    }
+  }
+
+  return $t('The [dfp_tag:network_id] token has been removed from the beginning of the Ad Unit Pattern for all tags because it is now automatically included.');
+}

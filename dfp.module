@@ -348,6 +348,9 @@ function dfp_tag_load($machinename) {
     // Allow modules to alter the raw tag object.
     drupal_alter('dfp_tag_load', $tag);
 
+    // Prepend the network id to the ad unit pattern.
+    $tag->adunit = '[dfp_tag:network_id]/' . $tag->adunit;
+
     // Move the settings out of the settings array.
     foreach ($tag->settings as $key => $val) {
       $tag->{$key} = $val;
