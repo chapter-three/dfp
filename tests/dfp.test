@@ -296,9 +296,19 @@ class dfpAdCategoriesTest extends dfpBaseTest {
     $tag = $this->createTag($edit);
 
     // Check that when we are on the node page, that the DFP Ad Category is used
-    // and that the other tag is also displayed.
+    // and that the control tag is also displayed.
     $this->drupalGet('node/1');
     $this->assertRaw('.setTargeting("categories", ["' . $control_tag . '","' . $dfp_category . '"])', 'DFP Ad Categories work correctly.');
+
+    // Check that when we are on the term page for one of DFP Ad Categories that
+    // it is correctly included.
+    $this->drupalGet('taxonomy/term/1');
+    $this->assertRaw('.setTargeting("categories", "' . $dfp_category . '")', 'DFP Ad Categories appear on its own term page correctly.');
+
+    // Check that when we are on a term page for a term with a coresponding
+    // DFP Ad Categories the DFP Ad Category is included.
+    $this->drupalGet('taxonomy/term/3');
+    $this->assertRaw('.setTargeting("categories", "' . $dfp_category . '")', 'DFP Ad Categories appear on term pages for terms that have a DFP Ad Category correctly.');
 
   }
 }
@@ -467,35 +477,3 @@ class DFPUnitTest extends DrupalUnitTestCase {
     $this->assertTrue(dfp_format_size($sizes) == $expected_result, 'The dfp_format_sizes function correctly handles multiple sizes.');
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -128,11 +128,7 @@ function dfp_entity_view($entity, $type, $view_mode, $langcode) {
       if (array_key_exists('#field_type', $entity->content[$key]) && $entity->content[$key]['#field_type'] == 'taxonomy_term_reference') {
         $terms = field_view_field($type, $entity, $key);
         foreach ($terms['#items'] as $item) {
-          $term = $item['taxonomy_term'];
-          if (!empty($term->field_dfp_ad_categories)) {
-            $term = taxonomy_term_load($term->field_dfp_ad_categories[LANGUAGE_NONE][0]['tid']);
-          }
-          $dfp_targeting_terms[] = $term->name;
+          $dfp_targeting_terms[] = _dfp_get_ad_category($item['taxonomy_term']);
         }
       }
     }
@@ -248,6 +244,14 @@ function dfp_tokens($type, $tokens, array $data = array(), array $options = arra
         case 'ad_categories':
           $term_names = &drupal_static(DFP_ENTITY_TARGETING_TERMS);
           $term_names = is_null($term_names) ? array() : $term_names;
+
+          // If a term has been explicitly defined because we are on a term page
+          // then add the term to the list.
+          // @todo: If http://drupal.org/node/1067120 ever lands, this logic can
+          // be moved to dfp_entity_view() where it belongs.
+          if (isset($data['term'])) {
+            $term_names[] = _dfp_get_ad_category($data['term']);
+          }
 
           $replacements[$original] = implode(',', $term_names);
           break;
@@ -541,6 +545,23 @@ function dfp_format_slug($slug) {
   }
 
   return $formatted_slug;
+}
+
+/**
+ * Return the term object to use as the DFP Ad Category given a specific term.
+ *
+ * @param object $term
+ *   The term object to analyze. If it is tagged with a DFP Ad Cateegory, then
+ *   that term is returned, otherwise the original term is returned unchanged.
+ *
+ * @return string
+ *   The term name to be included in an ad tag.
+ */
+function _dfp_get_ad_category($term) {
+  if (!empty($term->field_dfp_ad_categories)) {
+    $term = taxonomy_term_load($term->field_dfp_ad_categories[LANGUAGE_NONE][0]['tid']);
+  }
+  return $term->name;
 }
 
 /**
