@@ -603,7 +603,7 @@ function _dfp_js_global_settings() {
 
   // Add global settings with a heavy weight so that they appear after all the
   // defineSlot() calls otherwise IE8 and Opera fail to display ads properly.
-  $js .= 'googletag.cmd.push(function() {' . "\n";
+  $js = 'googletag.cmd.push(function() {' . "\n";
   if (variable_get('dfp_async_rendering', 1)) {
     $js .= '  googletag.pubads().enableAsyncRendering();' . "\n";
   }
