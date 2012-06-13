@@ -106,7 +106,7 @@ function dfp_install() {
   $existing_vocabulary = taxonomy_vocabulary_machine_name_load($vocabulary_machinename);
   if (!$existing_vocabulary) {
     taxonomy_vocabulary_save((object) array(
-      'name' => 'DFP Ad Catergories',
+      'name' => 'DFP Ad Categories',
       'machine_name' => $vocabulary_machinename,
     ));
   }
@@ -233,4 +233,17 @@ function dfp_update_7001() {
   }
 
   return $t('The [dfp_tag:network_id] token has been removed from the beginning of the Ad Unit Pattern for all tags because it is now automatically included.');
+}
+
+/**
+ * Fix a typo in the name of the DFP Ad Categories vocabulary.
+ */
+function dfp_update_7002() {
+  $vocabulary_machinename = 'dfp_ad_categories';
+  $existing_vocabulary = taxonomy_vocabulary_machine_name_load($vocabulary_machinename);
+
+  if ($existing_vocabulary && $existing_vocabulary->name == 'DFP Ad Catergories') {
+    $existing_vocabulary->name = 'DFP Ad Categories';
+    taxonomy_vocabulary_save($existing_vocabulary);
+  }
 }
