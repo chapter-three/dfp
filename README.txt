@@ -8,7 +8,7 @@ Some of the information required by this module must be obtained from Doubleclic
 * Drupal version >= 7.13. The "backfill ad" form did not appear properly until this commit: http://drupalcode.org/project/drupal.git/commit/bb3f7e9
 
 -- Usage --
-You can create DFP tags and display them either as a block or by using the dart_tag($machinename); function in your code.
+You can create DFP tags and display them either as a block or by using the dfp_tag($machinename); function in your code.
 
 The new Google Publisher Tags morphed the concept of a site/zone into a 5-teired hierarchical string known as the AdUnitName. A typical ad unit name might be sports/yankees.
 
