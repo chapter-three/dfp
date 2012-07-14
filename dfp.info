@@ -9,6 +9,7 @@ configure = admin/structure/dfp_ads/settings
 
 dependencies[] = system (>= 7.14)
 dependencies[] = ctools (>= 7.x-1.0-rc2)
+dependencies[] = taxonomy
 
 files[] = dfp.install
 files[] = dfp.module
