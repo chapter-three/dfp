@@ -280,7 +280,10 @@ function dfp_tag($machinename) {
   $tag = dfp_tag_load($machinename);
   $render_array = array();
 
-  if ($tag) {
+  if (!$tag) {
+    watchdog('dfp', 'Unknown ad tag %machinename passed to dfp_tag().', array('%machinename'=>$machinename), WATCHDOG_WARNING);
+  }
+  else {
     $tag->slug = dfp_format_slug($tag->slug);
 
     if (!empty($tag)) {
