@@ -104,7 +104,12 @@ function dfp_block_info() {
  * Implements hook_block_view().
  */
 function dfp_block_view($delta) {
-  $block['content'] = dfp_tag($delta);
+  $block = array();
+  $tag = dfp_tag_load($delta);
+
+  if(!$tag->disabled){
+    $block['content'] = dfp_tag($delta);
+  }
 
   return $block;
 }
