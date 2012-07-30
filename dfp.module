@@ -107,7 +107,7 @@ function dfp_block_view($delta) {
   $block = array();
   $tag = dfp_tag_load($delta);
 
-  if(!$tag->disabled){
+  if (!isset($tag->disabled) || !$tag->disabled) {
     $block['content'] = dfp_tag($delta);
   }
 
