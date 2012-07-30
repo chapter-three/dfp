@@ -122,13 +122,15 @@ function dfp_entity_view($entity, $type, $view_mode, $langcode) {
 
   if ($view_mode == 'full') {
     // Find all taxonomy terms attached to the given entity and add them to the
-    // dfp_targeting_terms array. Check each term to see if a DFP Ad Category has
-    // been assigned to it. If so, add that term to the array instead.
+    // dfp_targeting_terms array. Check each term to see if a DFP Ad Category
+    // has been assigned to it. If so, add that term to the array instead.
     foreach (element_children($entity->content) as $key) {
       if (array_key_exists('#field_type', $entity->content[$key]) && $entity->content[$key]['#field_type'] == 'taxonomy_term_reference') {
         $terms = field_view_field($type, $entity, $key);
         foreach ($terms['#items'] as $item) {
-          $dfp_targeting_terms[] = _dfp_get_ad_category($item['taxonomy_term']);
+          if (array_key_exists('taxonomy_term', $item)) {
+            $dfp_targeting_terms[] = _dfp_get_ad_category($item['taxonomy_term']);
+          }
         }
       }
     }
