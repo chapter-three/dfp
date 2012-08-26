@@ -91,12 +91,30 @@ function dfp_menu() {
  */
 function dfp_block_info() {
   $tags = _dfp_block_tags();
-
   $blocks = array();
+  $hashes = array();
+
   foreach ($tags as $tag) {
+    // The block table chokes when the delta is more than 32 characters. To
+    // solve this we create a hash of the machine name when needed.
+    if (strlen($tag->machinename >= 32)) {
+      $delta = md5($tag->machinename);
+      $hashes[$delta] = $tag->machinename;
+    }
+    else {
+      $delta = $tag->machinename;
+    }
+
     $blocks[$tag->machinename]['info'] = t('DFP tag: !slotname', array('!slotname' => $tag->slot));
     $blocks[$tag->machinename]['cache'] = DRUPAL_CACHE_PER_PAGE;
   }
+
+  // Only save hashes if they have changed.
+  $old_hashes = variable_get('dfp_block_hashes', array());
+  if ($hashes != $old_hashes) {
+    variable_set('dfp_block_hashes', $hashes);
+  }
+
   return $blocks;
 }
 
@@ -105,9 +123,18 @@ function dfp_block_info() {
  */
 function dfp_block_view($delta) {
   $block = array();
+
+  // If this is 32, this should be an md5 hash.
+  if (strlen($delta) == 32) {
+    $hashes = variable_get('dfp_block_hashes', array());
+    if (!empty($hashes[$delta])) {
+      $delta = $hashes[$delta];
+    }
+  }
+
   $tag = dfp_tag_load($delta);
 
-  if (!isset($tag->disabled) || !$tag->disabled) {
+  if (!empty($tag->disabled)) {
     $block['content'] = dfp_tag($delta);
   }
 
