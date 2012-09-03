@@ -5,8 +5,13 @@ package = Advertising
 
 configure = admin/structure/dfp_ads/settings
 
-dependencies[] = system (>= 7.14)
-dependencies[] = ctools (>= 7.x-1.0-rc2)
+;These version dependencies are still accurate but they have been commented out
+;to allow testbot to work properly.
+;dependencies[] = system (>= 7.14)
+;dependencies[] = ctools (>= 7.x-1.0-rc2)
+
+dependencies[] = system
+dependencies[] = ctools
 dependencies[] = taxonomy
 
 files[] = plugins/export_ui/dfp_tag_ui.class.inc
