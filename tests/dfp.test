@@ -28,7 +28,7 @@ class dfpBaseTest extends DrupalWebTestCase {
       'machinename' => $machinename,
       'slot' => $machinename,
       'size' => implode(',', $this->dfpGenerateSize(2)),
-      'adunit' => '12345/' . $this->randomName(8),
+      'adunit' => $this->randomName(8),
       'block' => 1,
       'settings[slug]' => $this->randomName(32),
       'settings[adsense_ad_types]' => '',
@@ -61,7 +61,7 @@ class dfpBaseTest extends DrupalWebTestCase {
    */
   function createTag($edit = array()) {
     // Create a new tag.
-    $edit = empty($edit) ? $this->dfpBasicTagEditValues() : $edit;
+    $edit += $this->dfpBasicTagEditValues();
     $this->drupalPost('admin/structure/dfp_ads/add', $edit, t('Save'));
 
     // Load the tag object.
@@ -70,7 +70,8 @@ class dfpBaseTest extends DrupalWebTestCase {
 
     // Display the new tag.
     $edit = array();
-    $edit['blocks[dfp_' . $tag->machinename . '][region]'] = 'sidebar_first';
+    $delta = 'dfp_' . (strlen($tag->machinename) >= 32 ? md5($tag->machinename) : $tag->machinename);
+    $edit['blocks[' . $delta . '][region]'] = 'sidebar_first';
     $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
 
     return $tag;
@@ -107,9 +108,13 @@ class dfpDisplayTagTest extends dfpBaseTest {
   function testDisplayTag() {
     // Create a simple tag as a block.
     $tag = $this->createTag();
+    $this->assertRaw('googletag.defineSlot("' . variable_get('dfp_network_id', '') . '/' . $tag->adunit . '", ' . dfp_format_size($tag->size) . ', "' . $tag->placeholder_id . '")', 'The ad slot has been correctly defined in javascript.');
 
-    // Varify the slot is defined in javascript.
-    $this->assertRaw('googletag.defineSlot("' . $tag->adunit . '", ' . dfp_format_size($tag->size) . ', "dfp-ad-' . $tag->slot . '")', 'The ad slot has been correctly defined in javascript.');
+    // Create a tag with a machine name longer than 32 characters.
+    $edit = array('machinename' => strtolower($this->randomName(64)));
+    $tag = $this->createTag($edit);
+    $this->assertRaw('googletag.defineSlot("' . variable_get('dfp_network_id', '') . '/' . $tag->adunit . '", ' . dfp_format_size($tag->size) . ', "' . $tag->placeholder_id . '")', 'The ad slot with a very long machine name has been correctly defined in javascript.');
+
   }
 
   function testSlug() {
@@ -430,7 +435,7 @@ class dfpAdTestTest extends dfpBaseTest {
 
     $override = $this->randomName(8);
     $this->drupalGet('admin/structure/dfp_ads/test_page', array('query' => array('adunit_override' => $override)));
-    $this->assertRaw('googletag.defineSlot("' . $override . '"', 'The Ad Unit Name was properly overridden on the Ad Test Page.');
+    $this->assertRaw('googletag.defineSlot("' . variable_get('dfp_network_id', '') . '/' . $override . '"', 'The Ad Unit Name was properly overridden on the Ad Test Page.');
   }
 
   function testQueryString() {
@@ -439,7 +444,7 @@ class dfpAdTestTest extends dfpBaseTest {
     $override = $this->randomName(8);
     variable_set('dfp_adtest_adunit', $override);
     $this->drupalGet('admin/structure/dfp_ads/test_page', array('query' => array('adtest' => 'true')));
-    $this->assertRaw('googletag.defineSlot("' . $override . '"', 'The Ad Unit Name was properly overridden using the adtest query string.');
+    $this->assertRaw('googletag.defineSlot("' . variable_get('dfp_network_id', '') . '/' . $override . '"', 'The Ad Unit Name was properly overridden using the adtest query string.');
   }
 
 }

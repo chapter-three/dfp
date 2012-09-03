@@ -5,9 +5,10 @@
  */
 function dfp_adtest_page() {
   $output = array();
+  $form = drupal_get_form('dfp_adtest_form');
 
   $output[] = array(
-    '#markup' => render(drupal_get_form('dfp_adtest_form')),
+    '#markup' => render($form),
     '#attached' => array(
       'css' => array(
         'dfp-admin' => drupal_get_path('module', 'dfp') . '/dfp.admin.css',
