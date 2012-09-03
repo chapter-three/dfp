@@ -12,7 +12,7 @@ function dfp_enable() {
   $t = get_t();
 
   if (!module_exists('token')) {
-    drupal_set_message($t('While it is not required, the Doubleclick for Publishers administration forms are vastly improved by using the <a href="!url">token module</a>.', array('!url' => 'http://drupal.org/project/token')));
+    drupal_set_message($t('While it is not required, the Doubleclick for Publishers administration forms are vastly improved by using the <a href="http://drupal.org/project/token">token module</a>.'));
   }
 }
 
@@ -172,7 +172,7 @@ function dfp_update_7000() {
       $dart_tags_query = db_select('dart_tags', 'dt')
         ->fields('dt')
         ->execute();
-      while($tag = $dart_tags_query->fetchObject()) {
+      while ($tag = $dart_tags_query->fetchObject()) {
         $tag->settings = unserialize($tag->settings);
 
         $fields = array(

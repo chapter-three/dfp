@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Creates a test page for DFP ads.
+ */
+
+/**
  * Page callback for the DFP test page. It displays all tags on the site.
  */
 function dfp_adtest_page() {
@@ -48,7 +53,7 @@ function dfp_adtest_form($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Ad Unit Override'),
     '#default_value' => isset($_GET['adunit_override']) ? $_GET['adunit_override'] : '',
-    '#description'=> t('Override the Ad Unit value for all the ad tags below. Use the tokens below to define how the ad unit should display. Example: [dfp_tag:network_id]/test/[dfp_tag:slot]'),
+    '#description' => t('Override the Ad Unit value for all the ad tags below. Use the tokens below to define how the ad unit should display. Example: [dfp_tag:network_id]/test/[dfp_tag:slot]'),
   );
   $form['tokens'] = array(
     '#theme' => 'token_tree',

@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Context reaction plugin for DFP ads.
+ */
+
+/**
  * Expose DFP tags as context reactions.
  */
 class dfp_context_reaction_tags extends context_reaction {

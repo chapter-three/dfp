@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Admin forms and functinality for DFP ads.
+ */
+
+/**
  * Form builder for the global DFP settings form.
  */
 function dfp_admin_settings($form, $form_state) {
@@ -120,7 +125,7 @@ function dfp_admin_settings($form, $form_state) {
   $form['adtest']['dfp_adtest_adunit'] = array(
     '#type' => 'textfield',
     '#title' => t('Ad Unit Pattern for Ad Tests'),
-    '#description'=> t('Override the Ad Unit value for all the ad tags on a page by adding ?adtest=true to the URL. Use the tokens below to define how the ad unit should display. Example: [dfp_tag:network_id]/test/[dfp_tag:slot]'),
+    '#description' => t('Override the Ad Unit value for all the ad tags on a page by adding ?adtest=true to the URL. Use the tokens below to define how the ad unit should display. Example: [dfp_tag:network_id]/test/[dfp_tag:slot]'),
     '#default_value' => variable_get('dfp_adtest_adunit', ''),
   );
   $form['adtest']['tokens'] = array(
@@ -358,12 +363,12 @@ function _dfp_get_form_item($needle_key, $array) {
   $children = element_children($array);
 
   foreach ($children as $child) {
-    if($child == $needle_key) {
+    if ($child == $needle_key) {
       return $array[$child];
     }
-    elseif(is_array($array[$child])) {
+    elseif (is_array($array[$child])) {
       $result = _dfp_get_form_item($needle_key, $array[$child]);
-      if($result) {
+      if ($result) {
         return $result;
       }
     }

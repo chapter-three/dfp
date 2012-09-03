@@ -97,7 +97,7 @@ function dfp_block_info() {
   foreach ($tags as $tag) {
     // The block table chokes when the delta is more than 32 characters. To
     // solve this we create a hash of the machine name when needed.
-    if (strlen($tag->machinename) >= 32) {
+    if (drupal_strlen($tag->machinename) >= 32) {
       $delta = md5($tag->machinename);
       $hashes[$delta] = $tag->machinename;
     }
@@ -125,7 +125,7 @@ function dfp_block_view($delta) {
   $block = array();
 
   // If this is 32, this should be an md5 hash.
-  if (strlen($delta) == 32) {
+  if (drupal_strlen($delta) == 32) {
     $hashes = variable_get('dfp_block_hashes', array());
     if (!empty($hashes[$delta])) {
       $delta = $hashes[$delta];
@@ -315,7 +315,7 @@ function dfp_tag($machinename) {
   $render_array = array();
 
   if (!$tag) {
-    watchdog('dfp', 'Unknown ad tag %machinename passed to dfp_tag().', array('%machinename'=>$machinename), WATCHDOG_WARNING);
+    watchdog('dfp', 'Unknown ad tag %machinename passed to dfp_tag().', array('%machinename' => $machinename), WATCHDOG_WARNING);
   }
   else {
     $tag->slug = dfp_format_slug($tag->slug);
@@ -546,7 +546,7 @@ function dfp_format_size($size) {
   $sizes = explode(',', check_plain($size));
   foreach ($sizes as $size) {
     $formatted_size = explode('x', trim($size));
-    $formatted_sizes[] = '[' . implode(', ', $formatted_size) .']';
+    $formatted_sizes[] = '[' . implode(', ', $formatted_size) . ']';
   }
 
   return count($formatted_sizes) == 1 ? $formatted_sizes[0] : '[' . implode(', ', $formatted_sizes) . ']';
@@ -686,9 +686,9 @@ function _dfp_js_slot_definition($tag) {
     $js .= '  .set("adsense_channel_ids", "' . $tag->adsense_channel_ids . '")' . "\n";
   }
   foreach ($tag->adsense_colors as $key => $val) {
-    if (!empty($val)){
+    if (!empty($val)) {
       $key = 'adsense_' . $key . '_color';
-      $val = '#' . strtoupper($val);
+      $val = '#' . drupal_strtoupper($val);
       $js .= '  .set("' . $key . '", "' . $val . '")' . "\n";
     }
   }

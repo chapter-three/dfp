@@ -32,7 +32,7 @@ class dfp_tag_ui extends ctools_export_ui {
     // Warn users if network id has no value. This can happen immediatly after
     // the module is installed.
     if (variable_get('dfp_network_id', '') == '') {
-      drupal_set_message(t('DFP ad tags will not work until you have <a href="!url">set your network id</a> as provided by Google.', array('!url' => '/admin/structure/dfp_ads/settings')), 'warning', FALSE);
+      drupal_set_message(t('DFP ad tags will not work until you have <a href="/admin/structure/dfp_ads/settings">set your network id</a> as provided by Google.'), 'warning', FALSE);
     }
 
     // Set up sorting

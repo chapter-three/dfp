@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Test file for DFP module.
+ */
+
 class dfpBaseTest extends DrupalWebTestCase {
   /**
    * Implementation of setUp().
@@ -23,7 +28,7 @@ class dfpBaseTest extends DrupalWebTestCase {
    * DFP tag object.
    */
   function dfpBasicTagEditValues() {
-    $machinename = strtolower($this->randomName(8));
+    $machinename = drupal_strtolower($this->randomName(8));
     $basic_tag = array(
       'machinename' => $machinename,
       'slot' => $machinename,
@@ -70,7 +75,7 @@ class dfpBaseTest extends DrupalWebTestCase {
 
     // Display the new tag.
     $edit = array();
-    $delta = 'dfp_' . (strlen($tag->machinename) >= 32 ? md5($tag->machinename) : $tag->machinename);
+    $delta = 'dfp_' . (drupal_strlen($tag->machinename) >= 32 ? md5($tag->machinename) : $tag->machinename);
     $edit['blocks[' . $delta . '][region]'] = 'sidebar_first';
     $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
 
@@ -111,7 +116,7 @@ class dfpDisplayTagTest extends dfpBaseTest {
     $this->assertRaw('googletag.defineSlot("' . variable_get('dfp_network_id', '') . '/' . $tag->adunit . '", ' . dfp_format_size($tag->size) . ', "' . $tag->placeholder_id . '")', 'The ad slot has been correctly defined in javascript.');
 
     // Create a tag with a machine name longer than 32 characters.
-    $edit = array('machinename' => strtolower($this->randomName(64)));
+    $edit = array('machinename' => drupal_strtolower($this->randomName(64)));
     $tag = $this->createTag($edit);
     $this->assertRaw('googletag.defineSlot("' . variable_get('dfp_network_id', '') . '/' . $tag->adunit . '", ' . dfp_format_size($tag->size) . ', "' . $tag->placeholder_id . '")', 'The ad slot with a very long machine name has been correctly defined in javascript.');
 
@@ -201,7 +206,7 @@ class dfpDisplayTagTest extends dfpBaseTest {
     $edit['settings[adsense_ad_types]'] = array_pop($types);
     $edit['settings[adsense_channel_ids]'] = $this->randomName(8);
     foreach ($colors as $color) {
-      $edit['settings[adsense_colors][' . $color . ']'] = strtoupper($this->randomName(8));
+      $edit['settings[adsense_colors][' . $color . ']'] = drupal_strtoupper($this->randomName(8));
     }
     $tag = $this->createTag($edit);
     $this->assertRaw('.set("adsense_ad_types", "' . $edit['settings[adsense_ad_types]'] . '")', 'The adsense type property was set properly.');
@@ -386,7 +391,7 @@ class dfpGlobalsTest extends dfpBaseTest {
     );
   }
 
-  function testGlobalSettingsOn(){
+  function testGlobalSettingsOn() {
     $injected_js = $this->randomName(32);
     $target = array(
       'target' => $this->randomName(8),
@@ -406,7 +411,7 @@ class dfpGlobalsTest extends dfpBaseTest {
     $this->assertRaw('googletag.pubads().setTargeting("' . $target['target'] . '", "' . $target['value'] . '");', 'Global targetting values appear correclty in javascript.');
   }
 
-  function testGlobalSettingsOff(){
+  function testGlobalSettingsOff() {
     variable_set('dfp_async_rendering', '0');
     variable_set('dfp_single_request', '0');
     variable_set('dfp_collapse_empty_divs', '0');
