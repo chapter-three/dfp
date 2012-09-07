@@ -298,9 +298,9 @@ function dfp_tokens($type, $tokens, array $data = array(), array $options = arra
 }
 
 /**
- * Implements preprocess_page().
+ * Implements preprocess_html().
  */
-function dfp_preprocess_page($variables) {
+function dfp_preprocess_html($variables) {
   // Add the header js here so that enough information has been loaded for
   // tokens to work properly.
   _dfp_js_global_settings();
