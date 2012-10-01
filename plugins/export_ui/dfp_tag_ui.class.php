@@ -99,4 +99,17 @@ class dfp_tag_ui extends ctools_export_ui {
     return $output;
   }
 
+  /**
+   * Deletes any blocks associated with the exportable item being deleted.
+   */
+  function delete_page($js, $input, $item) {
+    $delta = drupal_strlen($item->machinename) >= 32 ? md5($item->machinename) : $item->machinename;
+    db_delete('block')
+      ->condition('module', 'dfp')
+      ->condition('delta', $delta)
+      ->execute();
+
+    return parent::delete_page($js, $input, $item);
+  }
+
 }
