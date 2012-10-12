@@ -313,7 +313,7 @@ class dfpAdCategoriesTest extends dfpBaseTest {
 
     // Edit one the new tags and tag it with a DFP Ad Category.
     $edit = array(
-      'field_dfp_ad_categories[und]' => 1,
+      'field_dfp_ad_categories[und]' => $dfp_category->tid,
     );
     $this->drupalPost('taxonomy/term/' . $test_tag->tid . '/edit', $edit, t('Save'));
 
