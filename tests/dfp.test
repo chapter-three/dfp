@@ -96,6 +96,20 @@ class dfpBaseTest extends DrupalWebTestCase {
 
     return $tag;
   }
+
+  /**
+   * Create a taxonomy term.
+   */
+  function createTerm($vocabulary) {
+    $term = new stdClass();
+    $term->name = $this->randomName();
+    $term->description = $this->randomName();
+    // Use the first available text format.
+    $term->format = db_query_range('SELECT format FROM {filter_format}', 0, 1)->fetchField();
+    $term->vid = $vocabulary->vid;
+    taxonomy_term_save($term);
+    return $term;
+  }
 }
 
 class dfpDisplayTagTest extends dfpBaseTest {
@@ -267,6 +281,9 @@ class dfpAdCategoriesTest extends dfpBaseTest {
 
   // Test that DFP Catetories are displayed properly.
   function testDisplayAdCategories() {
+    $dfp_add_categories_vocabulary = taxonomy_vocabulary_machine_name_load('dfp_ad_categories');
+    $tags_vocabulary = taxonomy_vocabulary_machine_name_load('tags');
+
     // Turn on DFP ad categories for the "tags" vocabulary.
     $edit = array(
       'dfp_enable_ad_categories' => 1,
@@ -275,26 +292,30 @@ class dfpAdCategoriesTest extends dfpBaseTest {
     $this->drupalPost('admin/structure/dfp_ads/settings', $edit, t('Save configuration'));
 
     // Create a new DFP Ad Category term.
-    $dfp_category = $this->randomName(8); // tid == 1
-    $edit = array(
-      'name' => $dfp_category,
-    );
-    $this->drupalPost('admin/structure/taxonomy/dfp_ad_categories/add', $edit, t('Save'));
+    $dfp_category = $this->createTerm($dfp_add_categories_vocabulary);
 
-    // Create a new "Article" node with two tags.
-    $control_tag = $this->randomName(8); // tid == 2
-    $test_tag = $this->randomName(8); // tid == 3
+    $control_tag_name = $this->randomName(8);
+    $test_tag_name = $this->randomName(8);
+
+    // Create a new "Article" node with these two tags.
     $edit = array(
       'title' => $this->randomName(8),
-      'field_tags[und]' => $control_tag . ', ' . $test_tag,
+      'field_tags[und]' => $control_tag_name . ', ' . $test_tag_name,
     );
     $this->drupalPost('node/add/article', $edit, t('Save'));
+
+    // Get the two terms created in the "tags" vocabulary.
+    $control_tag = taxonomy_get_term_by_name($control_tag_name);
+    $control_tag = array_pop($control_tag);
+
+    $test_tag = taxonomy_get_term_by_name($test_tag_name);
+    $test_tag = array_pop($test_tag);
 
     // Edit one the new tags and tag it with a DFP Ad Category.
     $edit = array(
       'field_dfp_ad_categories[und]' => 1,
     );
-    $this->drupalPost('taxonomy/term/3/edit', $edit, t('Save'));
+    $this->drupalPost('taxonomy/term/' . $test_tag->tid . '/edit', $edit, t('Save'));
 
     // Create a DFP ad slot that targets the [dfp_tag:ad_categories] token.
     $edit = $this->dfpBasicTagEditValues();
@@ -308,17 +329,17 @@ class dfpAdCategoriesTest extends dfpBaseTest {
     // Check that when we are on the node page, that the DFP Ad Category is used
     // and that the control tag is also displayed.
     $this->drupalGet('node/1');
-    $this->assertRaw('.setTargeting("categories", ["' . $control_tag . '","' . $dfp_category . '"])', 'DFP Ad Categories work correctly.');
+    $this->assertRaw('.setTargeting("categories", ["' . $control_tag->name . '","' . $dfp_category->name . '"])', 'DFP Ad Categories work correctly.');
 
     // Check that when we are on the term page for one of DFP Ad Categories that
     // it is correctly included.
-    $this->drupalGet('taxonomy/term/1');
-    $this->assertRaw('.setTargeting("categories", "' . $dfp_category . '")', 'DFP Ad Categories appear on its own term page correctly.');
+    $this->drupalGet('taxonomy/term/' . $dfp_category->tid);
+    $this->assertRaw('.setTargeting("categories", "' . $dfp_category->name . '")', 'DFP Ad Categories appear on its own term page correctly.');
 
     // Check that when we are on a term page for a term with a coresponding
     // DFP Ad Categories the DFP Ad Category is included.
-    $this->drupalGet('taxonomy/term/3');
-    $this->assertRaw('.setTargeting("categories", "' . $dfp_category . '")', 'DFP Ad Categories appear on term pages for terms that have a DFP Ad Category correctly.');
+    $this->drupalGet('taxonomy/term/' . $test_tag->tid);
+    $this->assertRaw('.setTargeting("categories", "' . $dfp_category->name . '")', 'DFP Ad Categories appear on term pages for terms that have a DFP Ad Category correctly.');
 
   }
 }
