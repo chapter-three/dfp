@@ -244,7 +244,7 @@ function dfp_token_info() {
   );
   $tag['url_parts'] = array(
     'name' => t("URL Parts (n)"),
-    'description' => t("Given the current URL of http://site.com/path/to/page, [dfp_tag:url_parts:2] will be replaced with 'path/to'."),
+    'description' => t("Deprecated. Use [current-page:url:args:count] instead."),
   );
 
   return array(
