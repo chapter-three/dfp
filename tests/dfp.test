@@ -293,23 +293,15 @@ class dfpAdCategoriesTest extends dfpBaseTest {
 
     // Create a new DFP Ad Category term.
     $dfp_category = $this->createTerm($dfp_add_categories_vocabulary);
-
-    $control_tag_name = $this->randomName(8);
-    $test_tag_name = $this->randomName(8);
+    $control_tag = $this->createTerm($tags_vocabulary);
+    $test_tag = $this->createTerm($tags_vocabulary);
 
     // Create a new "Article" node with these two tags.
     $edit = array(
       'title' => $this->randomName(8),
-      'field_tags[und]' => $control_tag_name . ', ' . $test_tag_name,
+      'field_tags[und]' => $control_tag->name . ', ' . $test_tag->name,
     );
     $this->drupalPost('node/add/article', $edit, t('Save'));
-
-    // Get the two terms created in the "tags" vocabulary.
-    $control_tag = taxonomy_get_term_by_name($control_tag_name);
-    $control_tag = array_pop($control_tag);
-
-    $test_tag = taxonomy_get_term_by_name($test_tag_name);
-    $test_tag = array_pop($test_tag);
 
     // Edit one the new tags and tag it with a DFP Ad Category.
     $edit = array(

@@ -281,6 +281,7 @@ function dfp_tokens($type, $tokens, array $data = array(), array $options = arra
           // be moved to dfp_entity_view() where it belongs.
           if (isset($data['term'])) {
             $term_names[] = _dfp_get_ad_category($data['term']);
+            $term_names = array_unique($term_names);
           }
 
           $replacements[$original] = implode(',', $term_names);
