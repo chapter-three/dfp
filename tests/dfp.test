@@ -110,6 +110,23 @@ class dfpBaseTest extends DrupalWebTestCase {
     taxonomy_term_save($term);
     return $term;
   }
+
+  /**
+   * Assert that a property is properly being set.
+   */
+  function assertPropertySet($property, $key, $val) {
+    $pattern = '|' . '.set' . $property . '\("' . $key . '",{1}\s(.)*' . addslashes($val) . '|';
+    $this->assertPattern($pattern, 'A ' . $property . ' property was set for ' . $key . ' = ' . $val);
+  }
+
+  /**
+   * Assert that a property is not being set.
+   */
+  function assertPropertyNotSet($property, $key, $val) {
+    $pattern = '|' . '.set' . $property . '\("' . $key . '",{1}\s(.)*' . addslashes($val) . '|';
+    $this->assertNoPattern($pattern, 'A ' . $property . ' property was not set for ' . $key . ' = ' . $val);
+  }
+
 }
 
 class dfpDisplayTagTest extends dfpBaseTest {
@@ -163,14 +180,14 @@ class dfpDisplayTagTest extends dfpBaseTest {
 
     // Create a tag with a target with only one value.
     $tag = $this->createTag($edit);
-    $this->assertRaw('.setTargeting("' . $edit['targeting[0][target]'] . '", "' . $edit['targeting[0][value]'] . '");', 'Targets with a single value are printed correctly in javascript.');
+    $this->assertPropertySet('Targeting', $edit['targeting[0][target]'], $edit['targeting[0][value]']);
 
     // Create a tag with a target with multiple values.
     $values = array($this->randomName(8), $this->randomName(8), $this->randomName(8));
     $edit['targeting[0][target]'] = $this->randomName(8);
     $edit['targeting[0][value]'] = implode(', ', $values);
     $this->editTag($tag->machinename, $edit);
-    $this->assertRaw('.setTargeting("' . $edit['targeting[0][target]'] . '", ["' . implode('","', $values) . '"]);', 'Targets with multiple values are printed correctly in javascript.');
+    $this->assertPropertySet('Targeting', $edit['targeting[0][target]'], implode('","', $values));
 
     // Create a tag with a target but no value.
     $edit['targeting[0][target]'] = $this->randomName(8);
@@ -194,19 +211,18 @@ class dfpDisplayTagTest extends dfpBaseTest {
     }
 
     for ($i = 0; $i < $count; $i++) {
-      $this->assertRaw('.setTargeting("' . $edit['targeting[' . $i . '][target]'] . '", "' . $edit['targeting[' . $i . '][value]'] . '")', 'Targets ' . $i . ' of ' . $count . ' printed correctly in javascript.');
+      $this->assertPropertySet('Targeting', $edit['targeting[' . $i . '][target]'], $edit['targeting[' . $i . '][value]']);
     }
     // Make sure that empty values are ignored.
     $this->drupalPost('admin/structure/dfp_ads/list/' . $tag->machinename . '/edit', $edit, t('Add another target'));
     $this->editTag($tag->machinename, $edit);
-    $this->assertNoRaw('.setTargeting(, )', 'Empty targets were correctly ignored when adding.');
+    $this->assertPropertyNotSet('Targeting', '', '');
 
     // Test that target can be removed.
     $edit['targeting[0][target]'] = '';
     $edit['targeting[0][value]'] = '';
     $this->editTag($tag->machinename, $edit);
-    $this->assertNoRaw('.setTargeting(, )', 'Empty targets were correctly removed when editing.');
-
+    $this->assertPropertyNotSet('Targeting', '', '');
   }
 
   function testBackfill() {
@@ -223,10 +239,10 @@ class dfpDisplayTagTest extends dfpBaseTest {
       $edit['settings[adsense_colors][' . $color . ']'] = drupal_strtoupper($this->randomName(8));
     }
     $tag = $this->createTag($edit);
-    $this->assertRaw('.set("adsense_ad_types", "' . $edit['settings[adsense_ad_types]'] . '")', 'The adsense type property was set properly.');
-    $this->assertRaw('.set("adsense_channel_ids", "' . $edit['settings[adsense_channel_ids]'] . '")', 'The adsense channel id property was set properly.');
+    $this->assertPropertySet('', 'adsense_ad_types', $edit['settings[adsense_ad_types]']);
+    $this->assertPropertySet('', 'adsense_channel_ids', $edit['settings[adsense_channel_ids]']);
     foreach ($colors as $color) {
-      $this->assertRaw('.set("adsense_' . $color . '_color", "#' . $edit['settings[adsense_colors][' . $color . ']'] . '")', 'The adsense color property (' . $color . ') was set properly.');
+      $this->assertPropertySet('', 'adsense_' . $color . '_color', $edit['settings[adsense_colors][' . $color . ']']);
     }
   }
 
@@ -321,18 +337,18 @@ class dfpAdCategoriesTest extends dfpBaseTest {
     // Check that when we are on the node page, that the DFP Ad Category is used
     // and that the control tag is also displayed.
     $this->drupalGet('node/1');
-    $this->assertRaw('.setTargeting("categories", ["' . $control_tag->name . '","' . $dfp_category->name . '"])', 'DFP Ad Categories work correctly.');
+    $this->assertPropertySet('Targeting', 'categories', $control_tag->name);
+    $this->assertPropertySet('Targeting', 'categories', $dfp_category->name);
 
     // Check that when we are on the term page for one of DFP Ad Categories that
     // it is correctly included.
     $this->drupalGet('taxonomy/term/' . $dfp_category->tid);
-    $this->assertRaw('.setTargeting("categories", "' . $dfp_category->name . '")', 'DFP Ad Categories appear on its own term page correctly.');
+    $this->assertPropertySet('Targeting', 'categories', $dfp_category->name);
 
     // Check that when we are on a term page for a term with a coresponding
     // DFP Ad Categories the DFP Ad Category is included.
     $this->drupalGet('taxonomy/term/' . $test_tag->tid);
-    $this->assertRaw('.setTargeting("categories", "' . $dfp_category->name . '")', 'DFP Ad Categories appear on term pages for terms that have a DFP Ad Category correctly.');
-
+    $this->assertPropertySet('Targeting', 'categories', $dfp_category->name);
   }
 }
 
@@ -357,7 +373,7 @@ class dfpTokensTest extends dfpBaseTest {
     $edit['targeting[0][target]'] = 'slot';
     $edit['targeting[0][value]'] = '[dfp_tag:slot]';
     $tag = $this->createTag($edit);
-    $this->assertRaw('.setTargeting("slot", "' . $test_slot . '");', 'The "slot" token works correctly.');
+    $this->assertPropertySet('Targeting', 'slot', $test_slot);
   }
 
   function testNetworkIDToken() {
@@ -369,7 +385,7 @@ class dfpTokensTest extends dfpBaseTest {
     $edit['targeting[0][target]'] = 'network id';
     $edit['targeting[0][value]'] = '[dfp_tag:network_id]';
     $tag = $this->createTag($edit);
-    $this->assertRaw('.setTargeting("network id", "' . $test_network_id . '");', 'The "network id" token works correctly.');
+    $this->assertPropertySet('Targeting', 'network id', $test_network_id);
   }
 
   function testUrlPartsToken() {
@@ -386,7 +402,8 @@ class dfpTokensTest extends dfpBaseTest {
 
       $this->drupalGet($url);
       $replacement = implode('/', array_slice($url_parts, 0, $i));
-      $this->assertRaw('.setTargeting("url parts", "' . $replacement . '")', 'The "url parts" token works correctly with ' . $i . ' parts.');
+debug($replacement);
+      $this->assertPropertySet('Targeting', 'url parts', $replacement);
     }
   }
 
