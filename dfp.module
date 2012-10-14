@@ -158,7 +158,7 @@ function dfp_entity_view($entity, $type, $view_mode, $langcode) {
         $terms = field_view_field($type, $entity, $key);
         foreach ($terms['#items'] as $item) {
           if (array_key_exists('taxonomy_term', $item)) {
-            $dfp_targeting_terms[] = _dfp_get_ad_category($item['taxonomy_term']);
+            $dfp_targeting_terms[] = _dfp_get_ad_category($item['taxonomy_term'], TRUE);
           }
         }
       }
@@ -244,7 +244,7 @@ function dfp_token_info() {
   );
   $tag['url_parts'] = array(
     'name' => t("URL Parts (n)"),
-    'description' => t("Deprecated. Use [current-page:url:args:count] instead."),
+    'description' => t('**Deprecated. See <a href="http://drupal.org/node/1812372" target="_blank">this issue<a> for alternitives.'),
   );
 
   return array(
@@ -280,7 +280,7 @@ function dfp_tokens($type, $tokens, array $data = array(), array $options = arra
           // @todo: If http://drupal.org/node/1067120 ever lands, this logic can
           // be moved to dfp_entity_view() where it belongs.
           if (isset($data['term'])) {
-            $term_names[] = _dfp_get_ad_category($data['term']);
+            $term_names[] = _dfp_get_ad_category($data['term'], TRUE);
             $term_names = array_unique($term_names);
           }
 
@@ -587,13 +587,26 @@ function dfp_format_slug($slug) {
  *   The term object to analyze. If it is tagged with a DFP Ad Cateegory, then
  *   that term is returned, otherwise the original term is returned unchanged.
  *
+ * @param boolean $clean_string
+ *   If true, use ctools_cleanstring. In future versions, this should default to
+ *   TRUE, but for now it defaults to FALSE.
+ *
  * @return string
  *   The term name to be included in an ad tag.
  */
-function _dfp_get_ad_category($term) {
+function _dfp_get_ad_category($term, $clean_string = FALSE) {
   if (!empty($term->field_dfp_ad_categories)) {
     $term = taxonomy_term_load($term->field_dfp_ad_categories[LANGUAGE_NONE][0]['tid']);
   }
+
+  $term_name = $term->name;
+  if ($clean_string) {
+    ctools_include('cleanstring');
+    $term_name = ctools_cleanstring($term_name, array(
+      'lower_case' => TRUE,
+    ));
+  }
+
   return $term->name;
 }
 
