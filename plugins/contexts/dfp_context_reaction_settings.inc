@@ -59,9 +59,9 @@ function dfp_contexts_more_targets_submit($form, &$form_state) {
 }
 
 /**
- * Ajax callback for adding new messages to the broadcast messages form.
+ * Ajax callback for add more targets to an ad tag.
  */
 function dfp_contexts_more_targets_js($form, $form_state) {
-  return $form['reactions']['plugins']['dfp_settings']['targeting'];;
+  return $form['reactions']['plugins']['dfp_settings']['targeting'];
 }
 
