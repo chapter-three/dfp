@@ -217,7 +217,7 @@ function dfp_targeting_form_validate(&$element, &$form_state) {
  */
 function dfp_targeting_trim(&$values, $parent = 'targeting') {
   foreach ($values as $key => &$val) {
-    if ($key == $parent) {
+    if ($key === $parent) {
       // We found the targeting values.
       foreach ($val as $k => $v) {
         if (empty($val[$k]['target']) && empty($val[$k]['value'])) {
