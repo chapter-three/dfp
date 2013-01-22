@@ -402,7 +402,6 @@ class dfpTokensTest extends dfpBaseTest {
 
       $this->drupalGet($url);
       $replacement = implode('/', array_slice($url_parts, 0, $i));
-debug($replacement);
       $this->assertPropertySet('Targeting', 'url parts', $replacement);
     }
   }

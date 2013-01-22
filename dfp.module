@@ -509,18 +509,7 @@ function dfp_form_ctools_export_ui_edit_item_form_alter(&$form, &$form_state) {
  */
 function dfp_format_targeting($targeting, $tag = '') {
   if (!empty($targeting)) {
-    // Prepare information needed for token replacements.
-    global $user;
-    $data = array('user' => $user);
-    if (!empty($tag)) {
-      $data['tag'] = $tag;
-    }
-    if (arg(0) == 'node' && is_numeric(arg(1))) {
-      $data['node'] = node_load(arg(1));
-    }
-    if (arg(0) == 'taxonomy' && is_numeric(arg(2))) {
-      $data['term'] = taxonomy_term_load(arg(2));
-    }
+    $data = _dfp_prepare_tokens($tag);
   }
 
   foreach ($targeting as $key => &$target) {
@@ -722,13 +711,33 @@ function _dfp_js_slot_definition($tag) {
 }
 
 /**
+ * Prepare token replacement values.
+ *
+ * @param  (optional) object $tag
+ * @return array
+ */
+function _dfp_prepare_tokens($tag = NULL) {
+  global $user;
+
+  $data = array();
+  $data['user'] = $user;
+  $data['node'] = menu_get_object();
+  $data['term'] = menu_get_object('taxonomy_term', 2);
+  if (!empty($tag)) {
+    $data['tag'] = $tag;
+  }
+
+  return $data;
+}
+
+/**
  * Preprocess function for DFP tags.
  */
 function template_preprocess_dfp_tag(&$variables) {
   $tag = $variables['tag'];
 
   // Format certain tag properties for display.
-  $tag->adunit = token_replace('[dfp_tag:network_id]/' . $tag->adunit, array('tag' => $tag));
+  $tag->adunit = token_replace('[dfp_tag:network_id]/' . $tag->adunit, _dfp_prepare_tokens($tag));
   $tag->size = dfp_format_size($tag->size);
   $tag->slug = dfp_format_slug($tag->slug);
 
