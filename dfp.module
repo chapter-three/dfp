@@ -530,7 +530,7 @@ function dfp_format_targeting($targeting, $tag = '') {
     // The target value could be blank if tokens are used. If so, removed it.
     if (empty($target['value'])) {
       unset($targeting[$key]);
-      break;
+      continue;
     }
 
     // Convert the values into an array and trim the whitespace from each value.
