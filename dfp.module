@@ -185,12 +185,16 @@ function dfp_context_registry() {
   return array(
     'reactions' => array(
       'dfp_tags' => array(
-        'title' => t('DFP tags'),
+        'title' => t('DFP Tags'),
         'plugin' => 'dfp_context_reaction_tags',
       ),
       'dfp_settings' => array(
-        'title' => t('DFP settings'),
+        'title' => t('DFP Settings'),
         'plugin' => 'dfp_context_reaction_settings',
+      ),
+      'dfp_adunit' => array(
+        'title' => t('DFP AdUnit'),
+        'plugin' => 'dfp_context_reaction_adunit',
       ),
     ),
   );
@@ -214,6 +218,14 @@ function dfp_context_plugins() {
       'path' => drupal_get_path('module', 'dfp') . '/plugins/contexts',
       'file' => 'dfp_context_reaction_settings.inc',
       'class' => 'dfp_context_reaction_settings',
+      'parent' => 'context_reaction',
+    ),
+  );
+  $plugins['dfp_context_reaction_adunit'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'dfp') . '/plugins/contexts',
+      'file' => 'dfp_context_reaction_adunit.inc',
+      'class' => 'dfp_context_reaction_adunit',
       'parent' => 'context_reaction',
     ),
   );
@@ -443,7 +455,6 @@ function dfp_tag_save(&$tag) {
  * Alter a dfp tag object to integrate with the contexts module.
  */
 function dfp_dfp_tag_load_alter(&$tag) {
-  // Remove any disabled tags.
   if (module_exists('context')) {
     // Hide the tag based on the current context.
     if ($plugin = context_get_plugin('reaction', 'dfp_tags')) {
@@ -452,6 +463,10 @@ function dfp_dfp_tag_load_alter(&$tag) {
     // Override the tag's settings based on the current context. This must
     // come after settings is unserialized.
     if ($plugin = context_get_plugin('reaction', 'dfp_settings')) {
+      $plugin->execute($tag);
+    }
+    // Override the adunit tag based on the current context.
+    if ($plugin = context_get_plugin('reaction', 'dfp_adunit')) {
       $plugin->execute($tag);
     }
   }
