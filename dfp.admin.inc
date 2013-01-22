@@ -36,7 +36,7 @@ function dfp_admin_settings($form, $form_state) {
     '#title' => t('Network ID'),
     '#default_value' => variable_get('dfp_network_id', ''),
     '#required' => TRUE,
-    '#description' => t('The Network ID to use on all tags.'),
+    '#description' => t('The Network ID to use on all tags. According to Google this value should begin with a /.'),
   );
   $form['global_tag_settings']['dfp_async_rendering'] = array(
     '#type' => 'checkbox',

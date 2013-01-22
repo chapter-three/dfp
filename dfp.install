@@ -247,3 +247,14 @@ function dfp_update_7002() {
     taxonomy_vocabulary_save($existing_vocabulary);
   }
 }
+
+/**
+ * Prepend ths NetworkID with a "/" as per Google's recommendations.
+ */
+function dfp_update_7003() {
+  $current_network_id = variable_get('dfp_network_id', '');
+  if (!empty($current_network_id) && strpos($current_network_id, "/") !== 0) {
+    variable_set('dfp_network_id', "/" . $current_network_id);
+    drupal_set_message(t('Your network ID has been prepended with a "/" to match Google\'s recommendations. It\'s possible this could effect your reporting on DFP so if you are not certain this change is right for your site, you should remove the "/" by editing the network id on the <a href="admin/structure/dfp_ads/settings">global DFP settings form</a>.'), 'warning');
+  }
+}
