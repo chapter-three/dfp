@@ -45,7 +45,7 @@ class dfp_context_reaction_adunit extends context_reaction {
     $form['tokens'] = array(
       '#theme' => 'token_tree',
       '#token_types' => array('dfp_tag', 'node', 'term', 'user'),
-      '#global_types' => FALSE,
+      '#global_types' => TRUE,
       '#click_insert' => TRUE,
       '#dialog' => TRUE,
     );

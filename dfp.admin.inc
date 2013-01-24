@@ -131,7 +131,7 @@ function dfp_admin_settings($form, $form_state) {
   $form['adtest']['tokens'] = array(
     '#theme' => 'token_tree',
     '#token_types' => array('dfp_tag', 'node', 'term', 'user'),
-    '#global_types' => FALSE,
+    '#global_types' => TRUE,
     '#click_insert' => TRUE,
     '#dialog' => TRUE,
   );

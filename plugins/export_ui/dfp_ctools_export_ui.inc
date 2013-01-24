@@ -108,7 +108,7 @@ function dfp_tag_form(&$form, &$form_state) {
   $form['tag_settings']['tokens'] = array(
     '#theme' => 'token_tree',
     '#token_types' => array('dfp_tag', 'node', 'term', 'user'),
-    '#global_types' => FALSE,
+    '#global_types' => TRUE,
     '#click_insert' => TRUE,
     '#dialog' => TRUE,
   );

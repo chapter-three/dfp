@@ -249,7 +249,7 @@ function dfp_context_plugins() {
 }
 
 /**
- * Implements of hook_token_info().
+ * Implements hook_token_info().
  */
 function dfp_token_info() {
   $type = array(
@@ -282,7 +282,7 @@ function dfp_token_info() {
 }
 
 /**
- * Implements of hook_token().
+ * Implements hook_token().
  */
 function dfp_tokens($type, $tokens, array $data = array(), array $options = array()) {
   $replacements = array();
@@ -779,7 +779,7 @@ function template_preprocess_dfp_short_tag(&$variables) {
 
   $targets = array();
   foreach ($tag->targeting as $data) {
-    $tagets[] = check_plain($data['target']) . '=' . check_plain($data['value']);
+    $targets[] = check_plain($data['target']) . '=' . check_plain($data['value']);
   }
   if (!empty($targets)) {
     $keyvals['t'] = implode('&', $targets);
