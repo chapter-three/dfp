@@ -61,11 +61,11 @@ class dfp_context_reaction_adunit extends context_reaction {
     // machinename should be overridden or not.
     foreach ($this->get_contexts() as $context_name => $context) {
       if (isset($context->reactions['dfp_adunit'])) {
-	$tags = $context->reactions['dfp_adunit']['adunit_override_tags'];
-	if (isset($tags[$tag->machinename]) && !empty($tags[$tag->machinename])) {
-	  $tag->adunit = $context->reactions['dfp_adunit']['adunit_override'];
-	}
-	break;
+      $tags = $context->reactions['dfp_adunit']['adunit_override_tags'];
+      if (isset($tags[$tag->machinename]) && !empty($tags[$tag->machinename])) {
+        $tag->adunit = $context->reactions['dfp_adunit']['adunit_override'];
+      }
+      break;
       }
     }
   }

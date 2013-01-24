@@ -52,6 +52,10 @@ function dfp_theme($existing, $type, $theme, $path) {
       'render element' => 'form',
       'file' => 'dfp.admin.inc',
     ),
+    'dfp_size_settings' => array(
+      'render element' => 'form',
+      'file' => 'dfp.admin.inc',
+    ),
   );
 
   return $theme_hooks;
@@ -189,12 +193,16 @@ function dfp_context_registry() {
         'plugin' => 'dfp_context_reaction_tags',
       ),
       'dfp_settings' => array(
-        'title' => t('DFP Settings'),
+        'title' => t('DFP Variables'),
         'plugin' => 'dfp_context_reaction_settings',
       ),
       'dfp_adunit' => array(
         'title' => t('DFP AdUnit'),
         'plugin' => 'dfp_context_reaction_adunit',
+      ),
+      'dfp_adsize' => array(
+        'title' => t('DFP Sizes'),
+        'plugin' => 'dfp_context_reaction_sizes',
       ),
     ),
   );
@@ -226,6 +234,14 @@ function dfp_context_plugins() {
       'path' => drupal_get_path('module', 'dfp') . '/plugins/contexts',
       'file' => 'dfp_context_reaction_adunit.inc',
       'class' => 'dfp_context_reaction_adunit',
+      'parent' => 'context_reaction',
+    ),
+  );
+  $plugins['dfp_context_reaction_sizes'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'dfp') . '/plugins/contexts',
+      'file' => 'dfp_context_reaction_sizes.inc',
+      'class' => 'dfp_context_reaction_sizes',
       'parent' => 'context_reaction',
     ),
   );
@@ -455,19 +471,13 @@ function dfp_tag_save(&$tag) {
  * Alter a dfp tag object to integrate with the contexts module.
  */
 function dfp_dfp_tag_load_alter(&$tag) {
+  // Execute context reactions for each plugin.
   if (module_exists('context')) {
-    // Hide the tag based on the current context.
-    if ($plugin = context_get_plugin('reaction', 'dfp_tags')) {
-      $plugin->execute($tag);
-    }
-    // Override the tag's settings based on the current context. This must
-    // come after settings is unserialized.
-    if ($plugin = context_get_plugin('reaction', 'dfp_settings')) {
-      $plugin->execute($tag);
-    }
-    // Override the adunit tag based on the current context.
-    if ($plugin = context_get_plugin('reaction', 'dfp_adunit')) {
-      $plugin->execute($tag);
+    $contexts = dfp_context_registry();
+    foreach ($contexts['reactions'] as $key => $val) {
+      if ($plugin = context_get_plugin('reaction', $key)) {
+        $plugin->execute($tag);
+      }
     }
   }
 

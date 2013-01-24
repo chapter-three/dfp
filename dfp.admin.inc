@@ -420,12 +420,25 @@ function theme_dfp_adsense_color_settings($variables) {
   return $output;
 }
 
+/**
+ * Theme function for the "size" context reaction form.
+ */
+function theme_dfp_size_settings($variables) {
+  $form = $variables['form'];
 
+  $headers = array(t('Ad Slot'), t('Size Override'));
+  $rows = array();
+  $caption = t('You can override the size(s) of the ad slot for this context by entering the new size(s) below. Leave the field blank if the size should not be overridden.');
 
+  $children = element_children($form);
+  $last = array_pop($children);
 
-
-
-
-
-
+  foreach (element_children($form) as $key) {
+    if ($key != $last) {
+      unset($form[$key]['#description']);
+    }
+    $rows[] = array($form[$key]['#title'], drupal_render($form[$key]));
+  }
+  return theme('table', array('header' => $headers, 'rows' => $rows, 'caption' => $caption));
+}
 

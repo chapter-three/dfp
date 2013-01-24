@@ -6,7 +6,7 @@
  */
 
 /**
- * Expose DART site & zone settings as context reactions.
+ * Expose DFP variables as context reactions.
  */
 class dfp_context_reaction_settings extends context_reaction {
   /**
