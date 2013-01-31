@@ -772,9 +772,9 @@ function template_preprocess_dfp_short_tag(&$variables) {
 
   // Build a key|vals array and allow third party modules to modify it.
   $keyvals = array();
-  $keyvals['iu'] = $tag->adunit;
+  $keyvals['iu'] = token_replace('[dfp_tag:network_id]/' . $tag->adunit, _dfp_prepare_tokens($tag));
   $keyvals['c'] = rand(100000, 99999);
-  $keyvals['size'] = str_replace(',', '|', check_plain($tag->raw->size));
+  $keyvals['sz'] = str_replace(',', '|', check_plain($tag->raw->size));
   $keyvals['tile'] = ++$tile;
 
   $targets = array();
