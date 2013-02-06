@@ -524,7 +524,7 @@ function dfp_format_targeting($targeting, $tag = '') {
 
   foreach ($targeting as $key => &$target) {
     $target['target'] = '"' . check_plain($target['target']) . '"';
-    $target['value'] = token_replace(check_plain($target['value']), $data);
+    $target['value'] = token_replace(check_plain($target['value']), $data, array('sanitize' => TRUE));
 
     // The target value could be blank if tokens are used. If so, removed it.
     if (empty($target['value'])) {
@@ -747,7 +747,7 @@ function template_preprocess_dfp_tag(&$variables) {
   $tag = $variables['tag'];
 
   // Format certain tag properties for display.
-  $tag->adunit = token_replace('[dfp_tag:network_id]/' . $tag->adunit, _dfp_prepare_tokens($tag));
+  $tag->adunit = token_replace('[dfp_tag:network_id]/' . $tag->adunit, _dfp_prepare_tokens($tag), array('sanitize' => TRUE));
   $tag->size = dfp_format_size($tag->size);
   $tag->slug = dfp_format_slug($tag->slug);
 
@@ -772,7 +772,7 @@ function template_preprocess_dfp_short_tag(&$variables) {
 
   // Build a key|vals array and allow third party modules to modify it.
   $keyvals = array();
-  $keyvals['iu'] = token_replace('[dfp_tag:network_id]/' . $tag->adunit, _dfp_prepare_tokens($tag));
+  $keyvals['iu'] = token_replace('[dfp_tag:network_id]/' . $tag->adunit, _dfp_prepare_tokens($tag), array('sanitize' => TRUE));
   $keyvals['c'] = rand(100000, 99999);
   $keyvals['sz'] = str_replace(',', '|', check_plain($tag->raw->size));
   $keyvals['tile'] = ++$tile;
