@@ -48,7 +48,7 @@ Drupal.behaviors.dfpVerticalTabs = {
       var adType = Drupal.checkPlain($('#edit-settings-adsense-ad-types option:selected', context).text());
       var adTypeVal = Drupal.checkPlain($('#edit-settings-adsense-ad-types', context).val());
 
-      summary = adTypeVal != '' ? Drupal.t('Ad Type: ') + adType : '';
+      summary = adTypeVal !== '' ? Drupal.t('Ad Type: ') + adType : '';
       return summary;
     });
 
@@ -56,7 +56,7 @@ Drupal.behaviors.dfpVerticalTabs = {
       var slot = Drupal.checkPlain($('#edit-slot', context).val());
       var size = Drupal.checkPlain($('#edit-size', context).val());
 
-      summary = slot != '' ?  slot  + ' [' + size + ']' : '';
+      summary = slot !== '' ?  slot  + ' [' + size + ']' : '';
       return summary;
     });
 
@@ -69,7 +69,7 @@ Drupal.behaviors.dfpVerticalTabs = {
       var summary = '';
       $('.field-target-target', context).each(function (context) {
         target = Drupal.checkPlain($(this).val());
-        if (target != '') {
+        if (target !== '') {
           value = Drupal.checkPlain($(this).closest('tr').find('.field-target-value').val());
           summary += target + ' = ' + value + '<br/>';
         }
