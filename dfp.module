@@ -639,6 +639,7 @@ function _dfp_js_global_settings() {
     'group' => JS_LIBRARY,
     'every_page' => TRUE,
     'weight' => -10,
+    'force header' => TRUE,
   );
   drupal_add_js($js, $options);
 
@@ -680,6 +681,7 @@ function _dfp_js_global_settings() {
     'group' => JS_DEFAULT,
     'every_page' => TRUE,
     'weight' => 10,
+    'force header' => TRUE,
   );
   drupal_add_js($js, $options);
 }
