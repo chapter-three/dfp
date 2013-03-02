@@ -91,6 +91,14 @@ function dfp_menu() {
 }
 
 /**
+ * Implements hook_menu_alter().
+ */
+function dfp_menu_alter(&$items) {
+  $items['admin/structure/dfp_ads/list/%ctools_export_ui/edit']['context'] = MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE;
+  $items['admin/structure/dfp_ads/list/%ctools_export_ui/edit']['title'] = t('Edit DFP ad tag');
+}
+
+/**
  * Implements hook_block_info().
  */
 function dfp_block_info() {
@@ -142,6 +150,9 @@ function dfp_block_view($delta) {
 
   if (empty($tag->disabled)) {
     $block['content'] = dfp_tag($delta);
+    $block['content']['#contextual_links'] = array(
+      'dfp' => array('admin/structure/dfp_ads/list', array($delta, 'edit'))
+    );
   }
 
   return $block;
