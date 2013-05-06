@@ -38,6 +38,21 @@ function dfp_admin_settings($form, $form_state) {
     '#required' => TRUE,
     '#description' => t('The Network ID to use on all tags. According to Google this value should begin with a /.'),
   );
+  $form['global_tag_settings']['dfp_default_adunit'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Default Ad Unit Pattern'),
+    '#required' => FALSE,
+    '#maxlength' => 255,
+    '#default_value' => variable_get('dfp_default_adunit', ''),
+    '#description' => t('Use the tokens below to define how the default ad unit should display. This can be overridden on each tag. The network id will be included automatically. Example: [dfp_tag:url_parts:4]/[dfp_tag:slot]'),
+  );
+  $form['global_tag_settings']['tokens'] = array(
+    '#theme' => 'token_tree',
+    '#token_types' => array('dfp_tag', 'node', 'term', 'user'),
+    '#global_types' => TRUE,
+    '#click_insert' => TRUE,
+    '#dialog' => TRUE,
+  );
   $form['global_tag_settings']['dfp_async_rendering'] = array(
     '#type' => 'checkbox',
     '#title' => t('Render ads asynchronously'),

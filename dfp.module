@@ -754,10 +754,26 @@ function _dfp_prepare_tokens($tag = NULL) {
 }
 
 /**
+ * Check adunit has a value and/or if the global should be used.
+ *
+ * @param  object $tag
+ * @return object $tag
+ */
+function _dfp_prepare_adunit($tag) {
+  $global_adunit = variable_get('dfp_default_adunit', '');
+  if (empty($tag->adunit) && !empty($global_adunit)) {
+    $tag->adunit = $global_adunit;
+  }
+
+  return $tag;
+}
+
+/**
  * Preprocess function for DFP tags.
  */
 function template_preprocess_dfp_tag(&$variables) {
   $tag = $variables['tag'];
+  $tag = _dfp_prepare_adunit($tag);
 
   // Format certain tag properties for display.
   $tag->adunit = token_replace('[dfp_tag:network_id]/' . $tag->adunit, _dfp_prepare_tokens($tag), array('sanitize' => TRUE, 'clear' => TRUE));
@@ -782,6 +798,7 @@ function template_preprocess_dfp_tag(&$variables) {
 function template_preprocess_dfp_short_tag(&$variables) {
   static $tile = 0;
   $tag = $variables['tag'];
+  $tag = _dfp_prepare_adunit($tag);
 
   // Build a key|vals array and allow third party modules to modify it.
   $keyvals = array();
