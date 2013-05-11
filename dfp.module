@@ -667,6 +667,9 @@ function _dfp_js_global_settings() {
   if (variable_get('dfp_async_rendering', 1)) {
     $js .= '  googletag.pubads().enableAsyncRendering();' . "\n";
   }
+  else {
+     $js .= '  googletag.pubads().enableSyncRendering();' . "\n";
+  }
   if (variable_get('dfp_single_request', 1)) {
     $js .= '  googletag.pubads().enableSingleRequest();' . "\n";
   }
