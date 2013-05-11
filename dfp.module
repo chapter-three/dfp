@@ -543,6 +543,9 @@ function dfp_format_targeting($targeting, $tag = '') {
       continue;
     }
 
+    // Allow other modules to alter the target.
+    drupal_alter('dfp_target', $target);
+
     // Convert the values into an array and trim the whitespace from each value.
     $values = explode(',', $target['value']);
     $values = array_map('trim', $values);
