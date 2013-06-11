@@ -650,6 +650,9 @@ function _dfp_js_global_settings() {
   $js .= 'googletag.cmd = googletag.cmd || [];';
   $js .= variable_get('dfp_injected_js', '') . "\n";
 
+  // Add a place to store the slot name variable
+  $js .= 'googletag.slots = googletag.slots || {};';
+
   $options = array(
     'type' => 'inline',
     'group' => JS_LIBRARY,
@@ -681,6 +684,9 @@ function _dfp_js_global_settings() {
   if (variable_get('dfp_collapse_empty_divs', 1)) {
     $js .= '  googletag.pubads().collapseEmptyDivs();' . "\n";
   }
+  if (variable_get('dfp_disable_init_load', 0)) {
+    $js .= '  googletag.pubads().disableInitialLoad();' . "\n";
+  }
 
   // Set global targeting values for this page.
   $targeting = variable_get('dfp_targeting', array());
@@ -711,7 +717,7 @@ function _dfp_js_global_settings() {
  */
 function _dfp_js_slot_definition($tag) {
   // Add the js needed to define this adSlot to <head>.
-  $js = 'googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
+  $js = 'googletag.slots.' . $tag->machinename . ' = googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
   $js .= '  .addService(googletag.pubads())' . "\n";
 
   if (!empty($tag->adsense_ad_types)) {

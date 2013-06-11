@@ -59,6 +59,17 @@ function dfp_admin_settings($form, $form_state) {
     '#default_value' => variable_get('dfp_async_rendering', 1),
     '#description' => t('This can speed up page rendering time by loading page content without waiting for ads to load.'),
   );
+  $form['global_tag_settings']['dfp_disable_init_load'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Disable initial ad load'),
+    '#default_value' => variable_get('dfp_disable_init_load', 0),
+    '#description' => t('(Async mode only) Disables the initial fetch of ads from Google when the page is first loaded. Calls to refresh() can still be used to fetch ads.'),
+     '#states' => array(
+      'enabled' => array(
+        'input[name="dfp_async_rendering"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
   $form['global_tag_settings']['dfp_single_request'] = array(
     '#type' => 'checkbox',
     '#title' => t('Combine all ad requests into a single request'),
