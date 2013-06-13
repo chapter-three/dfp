@@ -477,7 +477,7 @@ function dfp_tag_load_all($include_disabled = FALSE) {
  */
 function dfp_tag_save(&$tag) {
   $update = (isset($tag->adid) && is_numeric($tag->adid)) ? array('adid') : array();
-  return drupal_write_record('dfp_tag', $tag, $update);
+  return drupal_write_record('dfp_tags', $tag, $update);
 }
 
 /**
