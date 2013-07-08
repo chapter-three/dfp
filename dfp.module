@@ -165,6 +165,15 @@ function dfp_entity_view($entity, $type, $view_mode, $langcode) {
   $dfp_targeting_terms = &drupal_static('dfp_entity_targeting_terms', array());
 
   if (variable_get('dfp_enable_ad_categories', 0) && $view_mode == 'full') {
+    // If this entity is itself a taxonomy term add it to the
+    // dfp_targetting_terms array. Check it to see if a DFP Ad Category
+    // has been assigned to it. If so, add that term to the array instead. Note
+    // that we check all types of entities here because any fieldable entity can
+    // have a taxonomy term reference field attached to it.
+    if ($type == 'taxonomy_term') {
+      $dfp_targeting_terms[] = _dfp_get_ad_category($entity, TRUE);
+    }
+
     // Find all taxonomy terms attached to the given entity and add them to the
     // dfp_targeting_terms array. Check each term to see if a DFP Ad Category
     // has been assigned to it. If so, add that term to the array instead.
@@ -295,7 +304,7 @@ function dfp_token_info() {
 }
 
 /**
- * Implements hook_token().
+ * Implements hook_tokens().
  */
 function dfp_tokens($type, $tokens, array $data = array(), array $options = array()) {
   $replacements = array();
@@ -315,16 +324,6 @@ function dfp_tokens($type, $tokens, array $data = array(), array $options = arra
 
         case 'ad_categories':
           $term_names = &drupal_static('dfp_entity_targeting_terms', array());
-
-          // If a term has been explicitly defined because we are on a term page
-          // then add the term to the list.
-          // @todo: If http://drupal.org/node/1067120 ever lands, this logic can
-          // be moved to dfp_entity_view() where it belongs.
-          if (isset($data['term'])) {
-            $term_names[] = _dfp_get_ad_category($data['term'], TRUE);
-            $term_names = array_unique($term_names);
-          }
-
           $replacements[$original] = implode(',', $term_names);
           break;
       }
@@ -759,7 +758,11 @@ function _dfp_prepare_tokens($tag = NULL) {
   $data = array();
   $data['user'] = $user;
   $data['node'] = menu_get_object();
-  $data['term'] = menu_get_object('taxonomy_term', 2);
+
+  // We cannot use menu_get_object because the views version of the taxonomy
+  // term pages will not work properly.
+  $data['term'] = (arg(0) == 'taxonomy' && arg(1) == 'term' && is_numeric(arg(2))) ? taxonomy_term_load(arg(2)) : NULL;
+
   if (!empty($tag)) {
     $data['tag'] = $tag;
   }
