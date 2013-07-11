@@ -44,7 +44,7 @@ function dfp_admin_settings($form, $form_state) {
     '#required' => FALSE,
     '#maxlength' => 255,
     '#default_value' => variable_get('dfp_default_adunit', ''),
-    '#description' => t('Use the tokens below to define how the default ad unit should display. This can be overridden on each tag. The network id will be included automatically. Example: [dfp_tag:url_parts:4]/[dfp_tag:slot]'),
+    '#description' => t('Use the tokens below to define how the default ad unit should display. This can be overridden on each tag. The network id will be included automatically. Example: [current-page:url:args:value:0]/[current-page:url:args:value:1]/[dfp_tag:slot]'),
   );
   $form['global_tag_settings']['tokens'] = array(
     '#theme' => 'token_tree',
