@@ -128,6 +128,16 @@ function dfp_admin_settings($form, $form_state) {
     '#title' => t('Hide ad slots if no ad is served'),
     '#default_value' => variable_get('dfp_collapse_empty_divs', 1),
   );
+  $form['global_display_options']['dfp_slug_placement'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Hide slug if no ad is served (recommended)'),
+    '#default_value' => variable_get('dfp_slug_placement', 1),
+    '#states' => array(
+      'visible' => array(
+        'input[name="dfp_collapse_empty_divs"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
 
   // Global targeting options.
   $form['targeting_settings'] = array(

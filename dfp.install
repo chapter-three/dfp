@@ -258,3 +258,11 @@ function dfp_update_7003() {
     drupal_set_message(t('Your network ID has been prepended with a "/" to match Google\'s recommendations. It\'s possible this could effect your reporting on DFP so if you are not certain this change is right for your site, you should remove the "/" by editing the network id on the <a href="admin/structure/dfp_ads/settings">global DFP settings form</a>.'), 'warning');
   }
 }
+
+/**
+ * Add the default setting for slug placement
+*/
+
+function dfp_update_7004() {
+  variable_set('dfp_slug_placement', 0);
+}

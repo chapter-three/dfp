@@ -6,6 +6,9 @@
 ?>
 
 <div <?php print drupal_attributes($placeholder_attributes) ?>>
+  <?php if ($slug):
+    print drupal_render($slug);
+  endif; ?>
   <script type="text/javascript">
     googletag.cmd.push(function() {
       googletag.display("<?php print $tag->placeholder_id ?>");

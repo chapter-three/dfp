@@ -35,6 +35,7 @@ function dfp_theme($existing, $type, $theme, $path) {
     'dfp_tag' => array(
       'variables' => array(
         'tag' => NULL,
+        'slug' => NULL,
       ),
       'template' => 'theme/dfp_tag',
     ),
@@ -362,6 +363,7 @@ function dfp_tag($machinename) {
   }
   else {
     $tag->slug = dfp_format_slug($tag->slug);
+    $slug_placement = variable_get('dfp_slug_placement', 0);
 
     if (!empty($tag)) {
       $render_array = array(
@@ -379,7 +381,7 @@ function dfp_tag($machinename) {
           ),
         ),
       );
-      if (!empty($tag->slug)) {
+      if (!empty($tag->slug) && $slug_placement == 0) {
         $render_array['dfp_wrapper']['slug_wrapper'] = array(
           '#type' => 'container',
           '#attributes' => array(
@@ -791,6 +793,7 @@ function _dfp_prepare_adunit($tag) {
 function template_preprocess_dfp_tag(&$variables) {
   $tag = $variables['tag'];
   $tag = _dfp_prepare_adunit($tag);
+  $slug_placement = variable_get('dfp_slug_placement', 0);
 
   // Format certain tag properties for display.
   $tag->adunit = token_replace('[dfp_tag:network_id]/' . $tag->adunit, _dfp_prepare_tokens($tag), array('sanitize' => TRUE, 'clear' => TRUE));
@@ -804,6 +807,21 @@ function template_preprocess_dfp_tag(&$variables) {
       'dfp-tag-wrapper',
     ),
   );
+
+  if (!empty($tag->slug) && $slug_placement == 1) {
+    $variables['slug'] = array(
+      '#type' => 'container',
+      '#attributes' => array(
+        'class' => array(
+          'slug',
+        ),
+      ),
+      'slug' => array(
+        '#markup' => $tag->slug,
+      ),
+      '#weight' => -1,
+    );
+  }
 
   // Define a javascript ad slot for this tag.
   _dfp_js_slot_definition($tag);
