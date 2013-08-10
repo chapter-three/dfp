@@ -36,10 +36,20 @@ Drupal.behaviors.dfpVerticalTabs = {
     $('fieldset#edit-global-display-options', context).drupalSetSummary(function (context) {
       var slug = Drupal.checkPlain($('#edit-dfp-default-slug', context).val());
       var noscript = Drupal.checkPlain($('#edit-dfp-use-noscript', context).is(':checked'));
-      var collapse = Drupal.checkPlain($('#edit-dfp-collapse-empty-divs', context).is(':checked'));
+      var collapse = Drupal.checkPlain($('input[name="dfp_collapse_empty_divs"]:checked', context).val());
 
       summary = 'Global Slug: ' + slug + '<br/>';
-      summary += (collapse == "true" ? checkmark : exmark) + ' Hide ad slots if no ad is served';
+      switch (collapse) {
+        case '0':
+          summary += exmark + ' Never collapse empty divs';
+          break;
+        case '1':
+          summary += checkmark + ' Collapse divs only if empty';
+          break;
+        case '2':
+          summary += checkmark + ' Expand divs only if non-empty';
+          break;
+      }
 
       return summary;
     });

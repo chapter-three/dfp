@@ -124,9 +124,15 @@ function dfp_admin_settings($form, $form_state) {
     '#description' => t('Slug all ad tags with this label. Example: Advertisement', array('@tag' => '<none>')),
   );
   $form['global_display_options']['dfp_collapse_empty_divs'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Hide ad slots if no ad is served'),
+    '#type' => 'radios',
+    '#title' => t('Collapse empty divs'),
     '#default_value' => variable_get('dfp_collapse_empty_divs', 1),
+    '#options' => array(
+      0 => t('Never'),
+      1 => t('Collapse only if no ad is served'),
+      2 => t('Expand only if an ad is served'),
+    ),
+    '#description' => t('<dl><dt>Never</dt><dd>Never collapse ad slots.</dd><dt>Collapse only</dt><dd>Collapse before any ad is loaded. Useful if ad slots will get filled most of the time.</dd><dt>Expand only</dt><dd>Collapse all divs on the page before any ads are fetched and expand if an ad is loaded into the ad slot. Useful if ad slots will stay empty most of the time.</dd></dl>'),
   );
   $form['global_display_options']['dfp_slug_placement'] = array(
     '#type' => 'checkbox',
@@ -134,7 +140,7 @@ function dfp_admin_settings($form, $form_state) {
     '#default_value' => variable_get('dfp_slug_placement', 1),
     '#states' => array(
       'visible' => array(
-        'input[name="dfp_collapse_empty_divs"]' => array('checked' => TRUE),
+        'input[name="dfp_collapse_empty_divs"]' => array('!value' => 0),
       ),
     ),
   );

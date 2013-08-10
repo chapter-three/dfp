@@ -682,8 +682,13 @@ function _dfp_js_global_settings() {
   if (variable_get('dfp_single_request', 1)) {
     $js .= '  googletag.pubads().enableSingleRequest();' . "\n";
   }
-  if (variable_get('dfp_collapse_empty_divs', 1)) {
-    $js .= '  googletag.pubads().collapseEmptyDivs();' . "\n";
+  switch (variable_get('dfp_collapse_empty_divs', 1)) {
+    case 1:
+      $js .= '  googletag.pubads().collapseEmptyDivs();' . "\n";
+      break;
+    case 2:
+      $js .= '  googletag.pubads().collapseEmptyDivs(true);' . "\n";
+      break;
   }
   if (variable_get('dfp_disable_init_load', 0)) {
     $js .= '  googletag.pubads().disableInitialLoad();' . "\n";
