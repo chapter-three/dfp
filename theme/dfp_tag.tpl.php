@@ -6,7 +6,7 @@
 ?>
 
 <div <?php print drupal_attributes($placeholder_attributes) ?>>
-  <?php if ($slug):
+  <?php if (isset($slug)):
     print drupal_render($slug);
   endif; ?>
   <script type="text/javascript">
