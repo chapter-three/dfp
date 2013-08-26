@@ -16,6 +16,7 @@ function dfp_admin_settings($form, $form_state) {
     '#type' => 'vertical_tabs',
   );
 
+  $form['#validate'][] = 'dfp_admin_form_validate';
   $form['#submit'][] = 'dfp_admin_form_submit';
 
   // Default tag settings.
@@ -45,6 +46,17 @@ function dfp_admin_settings($form, $form_state) {
     '#maxlength' => 255,
     '#default_value' => variable_get('dfp_default_adunit', ''),
     '#description' => t('Use the tokens below to define how the default ad unit should display. This can be overridden on each tag. The network id will be included automatically. Example: [current-page:url:args:value:0]/[current-page:url:args:value:1]/[dfp_tag:slot]'),
+  );
+  $form['global_tag_settings']['dfp_click_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('DFP Click URL (Sync mode only)'),
+    '#default_value' => variable_get('dfp_click_url', ''),
+    '#description' => t('Sets a click URL on each DFP tag. Useful for intercepting ad click calls for reporting. Values beginning with http:// are treated as absolute; otherwise relative to current site domain.'),
+    '#states' => array(
+      'enabled' => array(
+        'input[name="dfp_async_rendering"]' => array('checked' => FALSE),
+      ),
+    ),
   );
   $form['global_tag_settings']['tokens'] = array(
     '#theme' => 'token_tree',
@@ -196,6 +208,17 @@ function dfp_admin_settings($form, $form_state) {
   );
 
   return system_settings_form($form);
+}
+
+/**
+ * Submit handler for the global DFP settings form.
+ */
+function dfp_admin_form_validate($element, &$form_state)
+{
+  $settings = $element['global_tag_settings'];
+  if (!empty($settings['dfp_click_url']['#value']) && $settings['dfp_async_rendering']['#value'] == 1) {
+    form_error($settings['dfp_click_url'], t('Setting a click URL does not work with async rendering.'));
+  }
 }
 
 /**
