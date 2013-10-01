@@ -723,7 +723,7 @@ function _dfp_js_global_settings() {
  */
 function _dfp_js_slot_definition($tag) {
   // Add the js needed to define this adSlot to <head>.
-  $js = 'googletag.slots.' . $tag->machinename . ' = googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
+  $js = 'googletag.slots["' . $tag->machinename . '"] = googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
   $click_url = variable_get('dfp_click_url', '');
   if (!empty($click_url)) {
     if (!preg_match("/^https?:\/\//", $click_url)) {
