@@ -103,7 +103,7 @@ function dfp_tag_form(&$form, &$form_state) {
     '#required' => FALSE,
     '#maxlength' => 255,
     '#default_value' => $tag->adunit,
-    '#description' => t('Use the tokens below to define how the ad unit should display. The network id will be included automatically. Example: [dfp_tag:url_parts:4]/[dfp_tag:slot]. Leave this field empty to use the default ad unit pattern as defined in <a href="@url">Global DFP Settings</a>.', array('@url' => '/admin/structure/dfp_ads/settings')),
+    '#description' => t('Use the tokens below to define how the ad unit should display. The network id will be included automatically. Example: [dfp_tag:url_parts:4]/[dfp_tag:slot]. Leave this field empty to use the default ad unit pattern as defined in <a href="@url">Global DFP Settings</a>.', array('@url' => 'admin/structure/dfp_ads/settings')),
   );
   $form['tag_settings']['tokens'] = array(
     '#theme' => 'token_tree',
