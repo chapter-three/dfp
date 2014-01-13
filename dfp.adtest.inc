@@ -25,7 +25,7 @@ function dfp_adtest_page() {
   foreach ($tags as $tag) {
     $tag_slot = array(
       'tag slot name' => array(
-        '#markup' => '<h3>' . $tag->slot . '</h3>',
+        '#markup' => '<h3>' . check_plain($tag->slot) . '</h3>',
       ),
     );
     $tag_tag = dfp_tag($tag->machinename);

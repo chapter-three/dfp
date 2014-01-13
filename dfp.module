@@ -119,7 +119,7 @@ function dfp_block_info() {
         $delta = $tag->machinename;
       }
 
-      $blocks[$delta]['info'] = t('DFP tag: !slotname', array('!slotname' => $tag->slot));
+      $blocks[$delta]['info'] = t('DFP tag: @slotname', array('@slotname' => $tag->slot));
       $blocks[$delta]['cache'] = DRUPAL_CACHE_PER_PAGE;
     }
   }

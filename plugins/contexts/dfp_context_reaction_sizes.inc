@@ -25,7 +25,7 @@ class dfp_context_reaction_sizes extends context_reaction {
     foreach ($tags as $tag) {
       $form[$tag->machinename . '_size'] = array(
         '#type' => 'textfield',
-        '#title' => $tag->slot,
+        '#title' => check_plain($tag->slot),
         '#title_display' => 'invisible',
         '#description' => t('Example: 300x600,300x250'),
         '#default_value' => isset($values[$tag->machinename . '_size']) ? $values[$tag->machinename . '_size'] : '',
