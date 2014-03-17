@@ -201,9 +201,16 @@ function dfp_admin_settings($form, $form_state) {
   );
   $form['javascript']['dfp_injected_js'] = array(
     '#type' => 'textarea',
-    '#title' => t('Inject javascript'),
-    '#description' => t('Inject this javascript into the @tag on every page request. The googletag object is available to use in this code.', array('@tag' => '<head>')),
+    '#title' => t('Inject javascript') . ' 1',
+    '#description' => t('Inject this javascript into the @tag on every page request immediately after the googletag object becomes available.', array('@tag' => '<head>')),
     '#default_value' => variable_get('dfp_injected_js', ''),
+    '#rows' => 5,
+  );
+  $form['javascript']['dfp_injected_js2'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Inject javascript') . ' 2',
+    '#description' => t('Inject this javascript into the @tag on every page request immediately before the enableServices call.', array('@tag' => '<head>')),
+    '#default_value' => variable_get('dfp_injected_js2', ''),
     '#rows' => 5,
   );
 

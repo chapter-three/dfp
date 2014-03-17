@@ -705,6 +705,7 @@ function _dfp_js_global_settings() {
   }
 
   $js .= '});' . "\n";
+  $js .= variable_get('dfp_injected_js2', '') . "\n";
   $js .= 'googletag.enableServices();';
 
   $options = array(
