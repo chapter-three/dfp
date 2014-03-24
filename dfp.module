@@ -599,7 +599,7 @@ function dfp_format_size($size) {
  *
  */
 function dfp_format_slug($slug) {
-  $formatted_slug = check_plain(variable_get('dfp_default_slug', ''));
+  $formatted_slug = t(check_plain(variable_get('dfp_default_slug', '')));
 
   if ($slug == '<none>') {
     $formatted_slug = "";
