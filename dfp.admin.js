@@ -75,6 +75,11 @@ Drupal.behaviors.dfpVerticalTabs = {
       return summary;
     });
 
+    $('fieldset#edit-breakpoint-settings', context).drupalSetSummary(function (context) {
+      var summary = 'Configure DFP mappings.';
+      return summary;
+    });
+
     $('fieldset#edit-targeting-settings', context).drupalSetSummary(function (context) {
       var summary = '';
       $('.field-target-target', context).each(function (context) {

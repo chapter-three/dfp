@@ -45,6 +45,8 @@ class dfpBaseTest extends DrupalWebTestCase {
       'settings[adsense_colors][url]' => '',
       'targeting[0][target]' => $this->randomName(8),
       'targeting[0][value]' => $this->randomName(8),
+      'breakpoints[0][browser_size]' => $this->dfpGenerateSize(),
+      'breakpoints[0][ad_sizes]' => implode(',', $this->dfpGenerateSize(2)),
     );
 
     return $basic_tag;
@@ -90,10 +92,8 @@ class dfpBaseTest extends DrupalWebTestCase {
     if (isset($edit['machinename'])) {
       unset($edit['machinename']);
     }
-
     $this->drupalPost('admin/structure/dfp_ads/list/' . $machinename . '/edit', $edit, t('Save'));
     $tag = dfp_tag_load($machinename);
-
     return $tag;
   }
 
@@ -150,7 +150,38 @@ class dfpDisplayTagTest extends dfpBaseTest {
     $edit = array('machinename' => drupal_strtolower($this->randomName(64)));
     $tag = $this->createTag($edit);
     $this->assertRaw('googletag.defineSlot("' . variable_get('dfp_network_id', '') . '/' . $tag->adunit . '", ' . dfp_format_size($tag->size) . ', "' . $tag->placeholder_id . '")', 'The ad slot with a very long machine name has been correctly defined in javascript.');
+  }
 
+  function testDisplayTagWithMapping() {
+    $edit = $this->dfpBasicTagEditValues();
+
+    // Create a simple tag with a mapping. Verify javascript on page.
+    $tag = $this->createTag($edit);
+    $mapping_sizes = explode(',', $edit['breakpoints[0][ad_sizes]']);
+    $size_count = count($mapping_sizes);
+    // Calculate addSize mappings.
+    $mapping_tag = '.addSize(';
+    $mapping_tag .= '[' . str_replace('x', ', ', $edit['breakpoints[0][browser_size]']) . '], ';
+    $mapping_tag .= ($size_count > 1) ? '[' : '';
+    for ($i = 0; $i < $size_count; $i++) {
+      $mapping_sizes[$i] = '[' . str_replace('x', ', ', $mapping_sizes[$i]) . ']';
+      $mapping_tag .= ($i + 1 !== $size_count) ? $mapping_sizes[$i] . ', ' : $mapping_sizes[$i];
+    }
+    $mapping_tag .= ($size_count > 1) ? '])' : ')';
+    $this->assertRaw('googletag.sizeMapping()', 'The ad slot correctly attaches size mapping.');
+    $this->assertRaw('.defineSizeMapping(mapping)', 'The ad slot correctly defines size mapping.');
+    $this->assertRaw($mapping_tag, 'The ad slot correctly defines specific size mappings.');
+
+    // Create a tag with invalid browser size mappings.
+    $edit['breakpoints[0][browser_size]'] = $this->randomName(8);
+    $this->editTag($tag->machinename, $edit);
+    $this->assertText(t('The browser size can only contain numbers and the character x.'), 'An error was correctly thrown when invalid characters.');
+
+    // Create a tag with invalid ad size mappings.
+    $edit['breakpoints[0][browser_size]'] = $this->dfpGenerateSize();
+    $edit['breakpoints[0][ad_sizes]'] = $this->randomName(8);
+    $this->editTag($tag->machinename, $edit);
+    $this->assertText(t('The ad size(s) can only contain numbers, the character x and commas.'), 'An error was correctly thrown when invalid characters.');
   }
 
   function testSlug() {

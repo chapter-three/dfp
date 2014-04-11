@@ -49,6 +49,10 @@ function dfp_theme($existing, $type, $theme, $path) {
       'render element' => 'form',
       'file' => 'dfp.admin.inc',
     ),
+    'dfp_breakpoint_settings' => array(
+      'render element' => 'form',
+      'file' => 'dfp.admin.inc',
+    ),
     'dfp_adsense_color_settings' => array(
       'render element' => 'form',
       'file' => 'dfp.admin.inc',
@@ -724,7 +728,18 @@ function _dfp_js_global_settings() {
  */
 function _dfp_js_slot_definition($tag) {
   // Add the js needed to define this adSlot to <head>.
-  $js = 'googletag.slots["' . $tag->machinename . '"] = googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
+  $js = '';
+  // Start by defining breakpoints for this ad.
+  if (!empty($tag->breakpoints)) {
+    $breakpoints = $tag->breakpoints;
+    $js .= 'var mapping = googletag.sizeMapping()' . "\n";
+    foreach ($breakpoints as $breakpoint) {
+      $js .= '  .addSize(' . dfp_format_size($breakpoint['browser_size']) . ', ' . dfp_format_size($breakpoint['ad_sizes']) . ')' . "\n";
+    }
+    $js .= '  .build();' . "\n";
+  }
+  $js .= 'googletag.slots["' . $tag->machinename . '"] = googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
+
   $click_url = variable_get('dfp_click_url', '');
   if (!empty($click_url)) {
     if (!preg_match("/^https?:\/\//", $click_url)) {
@@ -751,6 +766,10 @@ function _dfp_js_slot_definition($tag) {
   $targeting = dfp_format_targeting($tag->targeting, $tag);
   foreach ($targeting as $target) {
     $js .= '  .setTargeting(' . $target['target'] . ', ' . $target['value'] . ')' . "\n";
+  }
+  // Apply size mapping when there are breakpoints.
+  if (!empty($tag->breakpoints)) {
+    $js .= '  .defineSizeMapping(mapping)' . "\n";
   }
   $js = rtrim($js, "\n") . ';';
 

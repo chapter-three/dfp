@@ -429,6 +429,186 @@ function _dfp_targeting_remove_empty(&$target) {
 }
 
 /**
+ * Validation function used by an individual breakpoint in the breakpoints form.
+ */
+function dfp_breakpoint_form_validate($element, &$form_state) {
+  if (empty($element['browser_size']['#value']) && !empty($element['ad_sizes']['#value'])) {
+    form_error($element['browser_size'], t('The browser size cannot be empty if ad size(s) exists.'));
+  }
+  elseif (!empty($element['browser_size']['#value']) && empty($element['ad_sizes']['#value'])) {
+    form_error($element['ad_sizes'], t('The ad size(s) cannot be empty if a browser size exists.'));
+  }
+  if (!empty($element['browser_size']['#value']) && !empty($element['ad_sizes']['#value'])) {
+    if (preg_match('/[^x|0-9]/', $element['browser_size']['#value'])) {
+      form_error($element['browser_size'], t('The browser size can only contain numbers and the character x.'));
+    }
+    elseif (preg_match('/[^x|,|0-9]/', $element['ad_sizes']['#value'])) {
+      form_error($element['ad_sizes'], t('The ad size(s) can only contain numbers, the character x and commas.'));
+    }
+  }
+}
+
+/**
+ * Validation function used by the breakpoints form.
+ */
+function dfp_breakpoints_form_validate(&$element, &$form_state) {
+  if ($form_state['triggering_element']['#value'] != t('Add another breakpoint')) {
+    dfp_breakpoints_trim($form_state['values']);
+  }
+}
+
+/**
+ * Helper function that takes a form_state['values'] and removes
+ * empty breakpoints.
+ */
+function dfp_breakpoints_trim(&$values, $parent = 'breakpoints') {
+  foreach ($values as $key => &$val) {
+    if ($key === $parent) {
+      // We found the browser_size values.
+      foreach ($val as $k => $v) {
+        if (empty($val[$k]['browser_size']) && empty($val[$k]['ad_sizes'])) {
+          unset($val[$k]);
+        }
+      }
+      // Reset the array indexes to prevent wierd behavior caused by a
+      // breakpoint being removed in the middle of the array.
+      $val = array_values($val);
+      break;
+    }
+    elseif (is_array($val)) {
+      dfp_breakpoints_trim($val, $parent);
+    }
+  }
+}
+
+/**
+ * Submit handler to add more breakpoints to an ad tag.
+ */
+function dfp_more_breakpoints_submit($form, &$form_state) {
+  $form_state['breakpoints'] = $form_state['input']['breakpoints'];
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * Ajax callback for adding breakpoints to the breakpoint form.
+ */
+function dfp_more_breakpoints_js($form, $form_state) {
+  return $form['breakpoint_settings']['breakpoints'];
+}
+
+/**
+ * Helper form builder for the breakpoints form.
+ */
+function _dfp_breakpoints_form(&$breakpoints_form, $existing_breakpoints = array()) {
+  // Display settings.
+  $breakpoints_form['breakpoints'] = array(
+    '#type' => 'markup',
+    '#tree' => FALSE,
+    '#prefix' => '<div id="dfp-breakpoints-wrapper">',
+    '#suffix' => '</div>',
+    '#theme' => 'dfp_breakpoint_settings',
+    '#element_validate' => array('dfp_breakpoints_form_validate'),
+  );
+
+  // Add existing breakpoints to the form unless they are empty.
+  foreach ($existing_breakpoints as $key => $data) {
+    _dfp_breakpoint_form($breakpoints_form, $key, $data);
+  }
+  // Add one blank set of breakpoint fields.
+  _dfp_breakpoint_form($breakpoints_form, count($existing_breakpoints));
+
+  $breakpoints_form['breakpoints']['dfp_more_breakpoints'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add another breakpoint'),
+    '#submit' => array('dfp_more_breakpoints_submit'),
+    '#limit_validation_errors' => array(),
+    '#ajax' => array(
+      'callback' => 'dfp_more_breakpoints_js',
+      'wrapper' => 'dfp-breakpoints-wrapper',
+      'effect' => 'fade',
+      'file' => 'plugins/export_ui/dfp_ctools_export_ui.inc',
+    ),
+  );
+}
+
+/**
+ * Helper form builder for an individual breakpoint.
+ */
+function _dfp_breakpoint_form(&$form, $key, $data = array()) {
+  $form['breakpoints'][$key] = array(
+    '#prefix' => '<div class="breakpoint" id="breakpoint-' . $key . '">',
+    '#suffix' => '</div>',
+    '#element_validate' => array('dfp_breakpoint_form_validate'),
+  );
+  $form['breakpoints'][$key]['browser_size'] = array(
+    '#type' => 'textfield',
+    '#title_display' => 'invisible',
+    '#title' => t('Minimum Browser Size'),
+    '#size' => 10,
+    '#default_value' => isset($data['browser_size']) ? $data['browser_size'] : '',
+    '#parents' => array('breakpoints', $key, 'browser_size'),
+    '#attributes' => array('class' => array('field-breakpoint-browser-size')),
+  );
+  $form['breakpoints'][$key]['ad_sizes'] = array(
+    '#type' => 'textfield',
+    '#title_display' => 'invisible',
+    '#title' => t('Ad Sizes'),
+    '#size' => 20,
+    '#default_value' => isset($data['ad_sizes']) ? $data['ad_sizes'] : '',
+    '#parents' => array('breakpoints', $key, 'ad_sizes'),
+    '#attributes' => array('class' => array('field-breakpoint-ad-sizes')),
+  );
+  $form['breakpoints'][$key]['delete_breakpoint'] = array(
+    '#type' => 'textfield',
+    '#title_display' => 'invisible',
+    '#title' => t('Ad Sizes'),
+    '#size' => 20,
+    '#default_value' => isset($data['ad_sizes']) ? $data['ad_sizes'] : '',
+    '#parents' => array('breakpoints', $key, 'ad_sizes'),
+    '#attributes' => array('class' => array('field-breakpoint-ad-sizes')),
+  );
+  if (empty($data)) {
+    $form['breakpoints'][$key]['browser_size']['#description'] = t('Example: 1024x768');
+    $form['breakpoints'][$key]['ad_sizes']['#description'] = t('Example: 300x600,300x250');
+  }
+}
+
+/**
+ * Returns the current breakpoints. The default value will be used unless an
+ * "input" exists in the form_state variable, in which case that will be used.
+ */
+function _dfp_breakpoints_get_existing($form_state, $default = array()) {
+  $breakpoints = array();
+  if (isset($form_state['input']['breakpoints'])) {
+    $breakpoints = $form_state['input']['breakpoints'];
+  }
+  elseif (!empty($default)) {
+    $breakpoints = $default;
+  }
+
+  return $breakpoints;
+}
+
+/**
+ * Theme function for the "breakpoint" form.
+ */
+function theme_dfp_breakpoint_settings($variables) {
+  $form = $variables['form'];
+
+  $more_button = drupal_render($form['dfp_more_breakpoints']);
+  unset($form['dfp_more_breakpoints']);
+
+  $headers = array(t('Browser Size'), t('Ad Size(s)'));
+  $rows = array();
+  foreach (element_children($form) as $key) {
+    $rows[] = array(drupal_render($form[$key]['browser_size']), drupal_render($form[$key]['ad_sizes']));
+  }
+  $rows[] = array(array('data' => 'These breakpoints are set to implement DFP responsive mappings. See <a href="https://support.google.com/dfp_premium/answer/3423562?hl=en">this support article</a> for more information.', 'colspan' => 2));
+  return theme('table', array('header' => $headers, 'rows' => $rows)) . $more_button;
+}
+
+
+/**
  * Helper function returns the a value from a givne multidimensional array given
  * a specific key. If the key exists in more than one place, the first occurance
  * is used.

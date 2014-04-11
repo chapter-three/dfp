@@ -144,6 +144,17 @@ function dfp_tag_form(&$form, &$form_state) {
     '#parents' => array('settings', 'short_tag'),
   );
 
+  // Responsive settings.
+  $form['breakpoint_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Responsive Settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#group' => 'settings',
+  );
+  $existing_breakpoints = _dfp_breakpoints_get_existing($form_state, isset($tag->settings['breakpoints']) ? $tag->settings['breakpoints'] : array());
+  _dfp_breakpoints_form($form['breakpoint_settings'], $existing_breakpoints);
+
   // Targeting options.
   $form['targeting_settings'] = array(
     '#type' => 'fieldset',
