@@ -693,4 +693,3 @@ function theme_dfp_size_settings($variables) {
   }
   return theme('table', array('header' => $headers, 'rows' => $rows, 'caption' => $caption));
 }
-

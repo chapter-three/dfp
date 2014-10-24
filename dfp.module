@@ -219,6 +219,10 @@ function dfp_context_registry() {
         'title' => t('DFP Tags'),
         'plugin' => 'dfp_context_reaction_tags',
       ),
+      'dfp_outofpage' => array(
+        'title' => t('DFP Out of page'),
+        'plugin' => 'dfp_context_reaction_outofpage',
+      ),
       'dfp_settings' => array(
         'title' => t('DFP Variables'),
         'plugin' => 'dfp_context_reaction_settings',
@@ -245,6 +249,14 @@ function dfp_context_plugins() {
       'path' => drupal_get_path('module', 'dfp') . '/plugins/contexts',
       'file' => 'dfp_context_reaction_tags.inc',
       'class' => 'dfp_context_reaction_tags',
+      'parent' => 'context_reaction',
+    ),
+  );
+  $plugins['dfp_context_reaction_outofpage'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'dfp') . '/plugins/contexts',
+      'file' => 'dfp_context_reaction_outofpage.inc',
+      'class' => 'dfp_context_reaction_outofpage',
       'parent' => 'context_reaction',
     ),
   );
@@ -738,8 +750,12 @@ function _dfp_js_slot_definition($tag) {
     }
     $js .= '  .build();' . "\n";
   }
-  $js .= 'googletag.slots["' . $tag->machinename . '"] = googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
-
+  if (!empty($tag->settings['out_of_page'])) {
+    $js .= 'googletag.slots["' . $tag->machinename . '"] = googletag.defineOutOfPageSlot("' . $tag->adunit . '", "' . $tag->placeholder_id . '")' . "\n";
+  }
+  else {
+    $js .= 'googletag.slots["' . $tag->machinename . '"] = googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
+  }
   $click_url = variable_get('dfp_click_url', '');
   if (!empty($click_url)) {
     if (!preg_match("/^https?:\/\//", $click_url)) {
@@ -885,4 +901,39 @@ function template_preprocess_dfp_short_tag(&$variables) {
 
   $variables['url_jump'] = 'http://' . DFP_GOOGLE_SHORT_TAG_SERVICES_URL . '/jump?' . http_build_query($keyvals);
   $variables['url_ad'] = 'http://' . DFP_GOOGLE_SHORT_TAG_SERVICES_URL . '/ad?' . http_build_query($keyvals);
+}
+
+/**
+ * Implements of hook_page_build().
+ */
+function dfp_page_build(&$page) {
+  $html = '';
+
+  $tags = dfp_tag_load_all();
+  foreach ($tags as $tag) {
+    if (isset($tag->settings['out_of_page']) && $tag->settings['out_of_page'] == TRUE) {
+      drupal_alter('dfp_tag_load', $tag);
+    }
+  }
+
+  if (module_exists('context')) {
+    if ($plugin = context_get_plugin('reaction', 'dfp_outofpage')) {
+      if (isset($plugin->out_of_page_tags)) {
+        foreach ($plugin->out_of_page_tags as $key => $machinename) {
+          $tag = dfp_tag_load($machinename);
+          if (empty($tag->disabled)) {
+            $dfp_tag = dfp_tag($machinename);
+            $dfp_tag['dfp_wrapper']['#attributes']['class'][] = 'element-hidden';
+            $html .= render($dfp_tag);
+          }
+        }
+      }
+    }
+  }
+
+  // Add Out Of Page slots on the top of the page.
+  $page['page_top']['dfp_out_of_page'] = array(
+    '#weight' => -1000,
+    '#markup' => $html,
+  );
 }

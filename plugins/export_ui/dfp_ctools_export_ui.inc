@@ -89,10 +89,18 @@ function dfp_tag_form(&$form, &$form_state) {
     ),
   ) + $form['info']['machinename'];
   unset($form['info']);
+  $form['tag_settings']['out_of_page'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Out of page (interstitial) ad slot'),
+    '#description' => t('Use Context module to place the Ad slot on the page.'),
+    '#default_value' => isset($tag->settings['out_of_page']) ? $tag->settings['out_of_page'] : 0,
+    '#parents' => array('settings', 'out_of_page'),
+    '#weight' => 0,
+  );
   $form['tag_settings']['size'] = array(
     '#type' => 'textfield',
     '#title' => t('Size(s)'),
-    '#description' => t('Example: 300x600,300x250'),
+    '#description' => t('Example: 300x600,300x250. For Out Of Page slots, use 0x0'),
     '#required' => TRUE,
     '#maxlength' => 64,
     '#default_value' => $tag->size,
@@ -236,7 +244,6 @@ function dfp_tag_form(&$form, &$form_state) {
       '#parents' => array('settings', 'adsense_colors', $setting),
     );
   }
-
 }
 
 /**
