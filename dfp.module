@@ -899,8 +899,8 @@ function template_preprocess_dfp_short_tag(&$variables) {
   }
   drupal_alter('dfp_short_tag_keyvals', $keyvals);
 
-  $variables['url_jump'] = 'http://' . DFP_GOOGLE_SHORT_TAG_SERVICES_URL . '/jump?' . http_build_query($keyvals);
-  $variables['url_ad'] = 'http://' . DFP_GOOGLE_SHORT_TAG_SERVICES_URL . '/ad?' . http_build_query($keyvals);
+  $variables['url_jump'] = 'http://' . DFP_GOOGLE_SHORT_TAG_SERVICES_URL . '/jump?' . drupal_http_build_query($keyvals);
+  $variables['url_ad'] = 'http://' . DFP_GOOGLE_SHORT_TAG_SERVICES_URL . '/ad?' . drupal_http_build_query($keyvals);
 }
 
 /**
