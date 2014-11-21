@@ -679,7 +679,7 @@ function _dfp_js_global_settings() {
   );
   drupal_add_js($js, $options);
 
-  // Inlclude a script tag for the Google Tag Services.
+  // Include a script tag for the Google Tag Services.
   // @todo: One day this should include an async=true attribute. See #1140356.
   //        However, there is a good chance this might break <= IE8.
   $options['type'] = 'external';
