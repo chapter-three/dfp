@@ -141,7 +141,7 @@ function dfp_tag_form(&$form, &$form_state) {
   $form['tag_display_options']['block'] = array(
     '#type' => 'checkbox',
     '#title' => t('Create a block for this ad tag'),
-    '#description' => t('Display this ad in a block configurable at !url.', array('!url' => l(t('admin/build/block'), 'admin/build/block'))),
+    '#description' => t('Display this ad in a block configurable at !url.', array('!url' => l(t('admin/structure/block'), 'admin/structure/block'))),
     '#default_value' => $tag->block,
   );
   $form['tag_display_options']['short_tag'] = array(
