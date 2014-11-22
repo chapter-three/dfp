@@ -793,6 +793,7 @@ function _dfp_js_slot_definition($tag) {
     'type' => 'inline',
     'group' => JS_LIBRARY,
     'weight' => 0,
+    'force header' => TRUE,
   );
   drupal_add_js($js, $options);
 }
