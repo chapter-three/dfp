@@ -204,8 +204,8 @@ function dfp_entity_view($entity, $type, $view_mode, $langcode) {
  */
 function dfp_ctools_plugin_directory($module, $type) {
   // Load the export_ui plugin.
-  if ($type == 'export_ui') {
-    return 'plugins/export_ui';
+  if ($type == 'export_ui' || $type == 'content_types') {
+    return 'plugins/' . $type;
   }
 }
 
