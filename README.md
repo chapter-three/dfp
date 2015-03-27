@@ -263,4 +263,5 @@ To enable the Exportable Scheduler Module:
 1.  Click the Modules menu. 
 1.  Click Advertising. 
 1.  Check the Exportable Scheduler Modle box. 
-1.  Click the Save configuration button. **_  
+1.  Click the Save configuration button. **_ 
+
