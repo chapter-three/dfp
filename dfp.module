@@ -2,6 +2,7 @@
 
 define('DFP_GOOGLE_TAG_SERVICES_URL', 'www.googletagservices.com/tag/js/gpt.js');
 define('DFP_GOOGLE_SHORT_TAG_SERVICES_URL', 'pubads.g.doubleclick.net/gampad');
+define('DFP_TOKEN_CACHE', 'dfp:tag_token_results');
 
 /**
  * Implements hook_help().
@@ -548,13 +549,9 @@ function dfp_form_ctools_export_ui_edit_item_form_alter(&$form, &$form_state) {
  *
  */
 function dfp_format_targeting($targeting, $tag = '') {
-  if (!empty($targeting)) {
-    $data = _dfp_prepare_tokens($tag);
-  }
-
   foreach ($targeting as $key => &$target) {
     $target['target'] = '"' . check_plain($target['target']) . '"';
-    $target['value'] = token_replace(check_plain($target['value']), $data, array('sanitize' => TRUE, 'clear' => TRUE));
+    $target['value'] = dfp_token_replace(check_plain($target['value']), $tag, array('sanitize' => TRUE, 'clear' => TRUE));
 
     // The target value could be blank if tokens are used. If so, removed it.
     if (empty($target['value'])) {
@@ -838,6 +835,95 @@ function _dfp_prepare_adunit($tag) {
 }
 
 /**
+ * Replaces all tokens in a given string with appropriate values, with caching.
+ *
+ * This function is a memoizing wrapper for token_replace(), which is quite slow
+ * and inefficient. It takes advantage of specific knowledge about how DFP works
+ * to cache the result of token replacement. It is not a fully general solution
+ * but works for this module.
+ *
+ * @param string $text
+ *   A string potentially containing replaceable tokens.
+ * @param stdClass $tag
+ *   The tag for which we are encoding a string. This value will be provided
+ *   as additional context to token_replace().
+ * @param array $options
+ *   An array of options to pass to token_replace().  See that function for
+ *   further documentation.
+ * @return string
+ *   Text with tokens replaced.
+ *
+ * @see token_replace()
+ */
+function dfp_token_replace($text, $tag = NULL, array $options = array()) {
+  $processed_strings =& drupal_static(__FUNCTION__, NULL);
+
+  // Short-circuit the degenerate case, just like token_replace() does.
+  $text_tokens = token_scan($text);
+  if (empty($text_tokens)) {
+    return $text;
+  }
+
+  // Get the possible replacement sources.
+  // @todo This doesn't vary, so we could probably refactor it to be cached,
+  // too.
+  $data = _dfp_prepare_tokens($tag);
+
+  // Determine the cache key for this text string. That way we can cache
+  // reliably.
+  $key = _dfp_token_replace_make_key($text, $data);
+
+  $cache_item = DFP_TOKEN_CACHE . ':' . current_path();
+
+  // Lookup any already-cached token replacements.
+  if (is_null($processed_strings)) {
+    $cache = cache_get($cache_item, 'cache');
+    $processed_strings = $cache
+      ? $cache->data
+      : array();
+  }
+
+  // If the processed string we're looking for isn't already in the cache,
+  // then, and only then, do we call the expensive token_replace() (and cache
+  // the result).
+  if (!isset($processed_strings[$key]) || is_null($processed_strings[$key])) {
+    // Regenerate this particular replacement.
+    $processed_strings[$key] = token_replace($text, $data, $options);
+    $lifetime = variable_get('dfp_token_cache_lifetime', 0);
+    $expire_at = ($lifetime == 0) ? CACHE_TEMPORARY : (REQUEST_TIME + $lifetime);
+    cache_set($cache_item, $processed_strings, 'cache', $expire_at);
+  }
+
+  return $processed_strings[$key];
+}
+
+/**
+ * Generates an identifying key for the lookup to be processed.
+ *
+ * @param string $text
+ *   The text to be processed.
+ * @param array $data
+ *   The array of data parameters that will be passed to token_generate().
+ *   We'll use knowledge of what is expected in that array to build a
+ *   meaningful lookup key.
+ * @return string
+ *   The key in the lookup array that corresponds to this tokenization request.
+ */
+function _dfp_token_replace_make_key($text, array $data) {
+  // $text may be arbitrarily long, which can slow-down lookups. Hashing it
+  // keeps uniqueness but guarantees a manageable size. Since this value won't
+  // be used as the cache key itself we're not limited to 255 characters but
+  // it will be nicer on array lookups in PHP.
+  $keys[] = sha1($text);
+  $keys[] = isset($data['node']->nid) ? $data['node']->nid . '-' . entity_modified_last('node', $data['node'])  : NULL;
+  $keys[] = isset($data['user']->uid) ? $data['user']->uid . '-' . entity_modified_last('user', $data['user']) : NULL;
+  $keys[] = isset($data['term']->tid) ? $data['term']->tid . '-' . entity_modified_last('taxonomy_term', $data['term']) : NULL;
+  $keys[] = isset($data['tag']->machinename) ? $data['tag']->machinename . '-' . entity_modified_last('tag', $data['tag']) : NULL;
+
+  return implode('|', array_filter($keys));
+}
+
+/**
  * Preprocess function for DFP tags.
  */
 function template_preprocess_dfp_tag(&$variables) {
@@ -846,7 +932,7 @@ function template_preprocess_dfp_tag(&$variables) {
   $slug_placement = variable_get('dfp_slug_placement', 0);
 
   // Format certain tag properties for display.
-  $tag->adunit = token_replace('[dfp_tag:network_id]/' . $tag->adunit, _dfp_prepare_tokens($tag), array('sanitize' => TRUE, 'clear' => TRUE));
+  $tag->adunit = dfp_token_replace('[dfp_tag:network_id]/' . $tag->adunit, $tag, array('sanitize' => TRUE, 'clear' => TRUE));
   $tag->size = dfp_format_size($tag->size);
   $tag->slug = dfp_format_slug($tag->slug);
 
@@ -887,7 +973,7 @@ function template_preprocess_dfp_short_tag(&$variables) {
 
   // Build a key|vals array and allow third party modules to modify it.
   $keyvals = array();
-  $keyvals['iu'] = token_replace('/[dfp_tag:network_id]/' . $tag->adunit, _dfp_prepare_tokens($tag), array('sanitize' => TRUE, 'clear' => TRUE));
+  $keyvals['iu'] = dfp_token_replace('/[dfp_tag:network_id]/' . $tag->adunit, $tag, array('sanitize' => TRUE, 'clear' => TRUE));
   $keyvals['sz'] = str_replace(',', '|', check_plain($tag->raw->size));
   $keyvals['c'] = rand(10000, 99999);
 

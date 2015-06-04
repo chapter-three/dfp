@@ -119,6 +119,13 @@ function dfp_admin_settings($form, $form_state) {
       ),
     ),
   );
+  $form['global_tag_settings']['dfp_token_cache_lifetime'] = array(
+    '#type' => 'textfield',
+    '#title' => t("Token cache lifetime"),
+    '#default_value' => variable_get("dfp_token_cache_lifetime", 0),
+    '#description' => t('The time, in seconds, that the DFP token cache will be valid for. The token cache will always be cleared at the next system cron run after this time period, or when this form is saved.'),
+  );
+
 
   // Global display options.
   $form['global_display_options'] = array(

@@ -13,6 +13,7 @@ configure = admin/structure/dfp_ads/settings
 dependencies[] = system
 dependencies[] = ctools
 dependencies[] = taxonomy
+dependencies[] = entity_modified
 
 files[] = plugins/export_ui/dfp_tag_ui.class.inc
 files[] = plugins/export_ui/dfp_ctools_export_ui.inc
