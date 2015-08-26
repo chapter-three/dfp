@@ -736,6 +736,12 @@ function _dfp_js_global_settings() {
  * it to the head tag.
  */
 function _dfp_js_slot_definition($tag) {
+  // Avoid accidentaly adding ad slot definition more than once.
+  if (isset($tag->processed) && $tag->processed === TRUE) {
+    watchdog('dfp', 'DFP tag %machinename is being added to the page more than once.', array('%machinename' => $tag->machinename), WATCHDOG_WARNING);
+    return;
+  }
+
   // Add the js needed to define this adSlot to <head>.
   $js = '';
   // Start by defining breakpoints for this ad.
@@ -961,6 +967,9 @@ function template_preprocess_dfp_tag(&$variables) {
 
   // Define a javascript ad slot for this tag.
   _dfp_js_slot_definition($tag);
+
+  // Flag the slot as processed.
+  $variables['tag']->processed = TRUE;
 }
 
 /**
