@@ -47,7 +47,14 @@ function hook_dfp_target_alter(&$target) {
  * @param array $target
  */
 function hook_dfp_global_targeting_alter(&$target) {
-
+  // The following example adds the URL arguments array to the targeting.
+  $arg = arg();
+  if (!empty($arg)) {
+    $targeting[] = array(
+      'target' => 'arg',
+      'value' => $arg,
+    );
+  }
 }
 
 /**
