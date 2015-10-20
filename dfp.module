@@ -879,7 +879,8 @@ function dfp_token_replace($text, $tag = NULL, array $options = array()) {
   // reliably.
   $key = _dfp_token_replace_make_key($text, $data);
 
-  $cache_item = DFP_TOKEN_CACHE . ':' . current_path();
+  // Use the same granularity as the blocks.
+  $cache_item = DFP_TOKEN_CACHE . ':' . implode(':', drupal_render_cid_parts(DRUPAL_CACHE_PER_PAGE));
 
   // Lookup any already-cached token replacements.
   if (is_null($processed_strings)) {
