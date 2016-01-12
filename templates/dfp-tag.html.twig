@@ -1,0 +1,27 @@
+{#
+/**
+ * @file
+ * Default theme implementation to display a DFP tag.
+ *
+ * Available variables:
+ * - tag: The DFP Tag configuration entity.
+ * - placeholder_id: The DFP Tag placeholder.
+ * - slug_placement: Boolean indicating...
+ *
+ * @see template_preprocess_dfp_tag()
+ *
+ * @ingroup themeable
+ */
+#}
+<div id="{{ placeholder_id }}">
+    {% if slug_placement and tag.slug %}
+        <div>
+            {{ tag.slug }}
+        </div>
+    {% endif %}
+    <script type="text/javascript">
+        googletag.cmd.push(function() {
+            googletag.display({{ placeholder_id }});
+        });
+    </script>
+</div>

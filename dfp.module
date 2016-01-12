@@ -23,3 +23,39 @@ function dfp_help($route_name, RouteMatchInterface $route_match) {
       return $output;
   }
 }
+
+/**
+ * Implements hook_theme().
+ */
+function dfp_theme() {
+  return array(
+    'dfp_tag' => array(
+      'render element' => 'elements',
+    ),
+  );
+}
+
+
+/**
+ * Preprocess function for DFP tags.
+ */
+function template_preprocess_dfp_tag(&$variables) {
+  /** @var \Drupal\dfp\View\TagView $tag */
+  $tag = $variables['elements']['#tag'];
+  $variables['tag'] = $variables['elements']['#tag'];
+  $variables['placeholder_id'] = $tag->getPlaceholderId();
+  $variables['slug_placement'] = \Drupal::config('dfp.settings')->get('slug_placement');
+
+//  $tag = _dfp_prepare_adunit($tag);
+//
+//  // Format certain tag properties for display.
+//  $tag->adunit = dfp_token_replace('[dfp_tag:network_id]/' . $tag->adunit, $tag, array('sanitize' => TRUE, 'clear' => TRUE));
+//  $tag->size = dfp_format_size($tag->size);
+//
+//  // Define a javascript ad slot for this tag.
+//  _dfp_js_slot_definition($tag);
+//
+//  // Flag the slot as processed.
+//  $variables['tag']->processed = TRUE;
+
+}

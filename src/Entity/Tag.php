@@ -25,6 +25,7 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *       "delete" = "Drupal\Core\Entity\EntityDeleteForm"
  *     },
  *     "list_builder" = "Drupal\dfp\View\TagList",
+ *     "view_builder" = "Drupal\dfp\View\TagViewBuilder",
  *   },
  *   links = {
  *     "edit-form" = "/admin/structure/dfp_ads/tags/manage/{tag}",

@@ -12,6 +12,7 @@ use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Block\BlockManagerInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
+use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Routing\UrlGeneratorInterface;
@@ -46,6 +47,13 @@ class TagBlock extends BlockBase implements ContainerFactoryPluginInterface {
   protected $entityRepository;
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManager
+   */
+  protected $entityTypeManager;
+
+  /**
    * The Drupal account to use for checking for access to block.
    *
    * @var \Drupal\Core\Session\AccountInterface.
@@ -78,10 +86,11 @@ class TagBlock extends BlockBase implements ContainerFactoryPluginInterface {
    * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
    *   The entity manager service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityRepositoryInterface $entity_repository, AccountInterface $account) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityRepositoryInterface $entity_repository, EntityTypeManager $entity_type_manager, AccountInterface $account) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->entityRepository = $entity_repository;
+    $this->entityTypeManager = $entity_type_manager;
     $this->account = $account;
   }
 
@@ -94,6 +103,7 @@ class TagBlock extends BlockBase implements ContainerFactoryPluginInterface {
       $plugin_id,
       $plugin_definition,
       $container->get('entity.repository'),
+      $container->get('entity_type.manager'),
       $container->get('current_user')
     );
   }
@@ -155,14 +165,11 @@ class TagBlock extends BlockBase implements ContainerFactoryPluginInterface {
    */
   public function build() {
     if ($tag = $this->getEntity()) {
-      return [
-        '#markup' => 'Tag: ' . $tag->slot(),
-      ];
-      //return $this->entityManager->getViewBuilder($block->getEntityTypeId())->view($block, $this->configuration['view_mode']);
+      return $this->entityTypeManager->getViewBuilder($tag->getEntityTypeId())->view($tag);
     }
     else {
       return [
-        '#markup' => $this->t('Block with uuid %uuid does not exist. <a href=":url">Add custom block</a>.', [
+        '#markup' => $this->t('DFP tag with uuid %uuid does not exist. <a href=":url">Add DFP tag</a>.', [
           '%uuid' => $this->getDerivativeId(),
           ':url' => Url::fromRoute('entity.dfp_tag.add_form')->toString()
         ]),

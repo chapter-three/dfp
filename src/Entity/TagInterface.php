@@ -11,7 +11,6 @@ interface TagInterface extends ConfigEntityInterface {
   const ADSENSE_IMAGE = 'image';
   const ADSENSE_TEXT = 'text';
 
-
   /**
    * @return string
    */
@@ -38,17 +37,33 @@ interface TagInterface extends ConfigEntityInterface {
   public function hasBlock();
 
   /**
-   * @return string
+   * @return bool
    */
   public function shortTag();
 
+  /**
+   * @return array
+   */
   public function targeting();
 
+  /**
+   * @return string
+   */
   public function adsenseAdTypes();
 
+  /**
+   * @return string
+   */
   public function adsenseChannelIds();
 
+  /**
+   * @return string
+   */
   public function adsenseColor($item);
 
+  /**
+   * @return array
+   */
   public function breakpoints();
+
 }

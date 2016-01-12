@@ -1,0 +1,4 @@
+entity.dfp_tag.edit_form:
+  route_name: entity.dfp_tag.edit_form
+  group: dfp_tag
+  title: Edit DFP tag
