@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - dfp
+name: 'DFP Ad Categories'
+vid: dfp_ad_categories
+description: '@todo'
+hierarchy: 1
+weight: 0

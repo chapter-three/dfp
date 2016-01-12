@@ -1,0 +1,9 @@
+dfp.admin_settings:
+  title: 'Global settings'
+  route_name: dfp.admin_settings
+  base_route: entity.dfp_tag.collection
+
+entity.dfp_tag.collection:
+  title: List
+  route_name: entity.dfp_tag.collection
+  base_route: entity.dfp_tag.collection

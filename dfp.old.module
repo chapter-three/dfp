@@ -1,0 +1,831 @@
+<?php
+
+/**
+ * Implements hook_theme().
+ */
+function dfp_theme($existing, $type, $theme, $path) {
+  $theme_hooks = array(
+    'dfp_tag' => array(
+      'variables' => array(
+        'tag' => NULL,
+        'slug' => NULL,
+      ),
+      'template' => 'theme/dfp_tag',
+    ),
+    'dfp_short_tag' => array(
+      'variables' => array(
+        'tag' => NULL,
+      ),
+      'template' => 'theme/dfp_short_tag',
+    ),
+    'dfp_target_settings' => array(
+      'render element' => 'form',
+      'file' => 'dfp.admin.inc',
+    ),
+    'dfp_breakpoint_settings' => array(
+      'render element' => 'form',
+      'file' => 'dfp.admin.inc',
+    ),
+    'dfp_adsense_color_settings' => array(
+      'render element' => 'form',
+      'file' => 'dfp.admin.inc',
+    ),
+    'dfp_size_settings' => array(
+      'render element' => 'form',
+      'file' => 'dfp.admin.inc',
+    ),
+  );
+
+  return $theme_hooks;
+}
+
+
+/**
+ * Implements hook_block_view().
+ */
+function dfp_block_view($delta) {
+  $block = array();
+
+  // If this is 32, this should be an md5 hash.
+  if (drupal_strlen($delta) == 32) {
+    $hashes = variable_get('dfp_block_hashes', array());
+    if (!empty($hashes[$delta])) {
+      $delta = $hashes[$delta];
+    }
+  }
+
+  $tag = dfp_tag_load($delta);
+
+  if (empty($tag->disabled)) {
+    $block['content'] = dfp_tag($delta);
+    $block['content']['#contextual_links'] = array(
+      'dfp' => array('admin/structure/dfp_ads/list', array($delta, 'edit'))
+    );
+  }
+
+  return $block;
+}
+
+/**
+ * Implements hook_entity_view().
+ */
+function dfp_entity_view($entity, $type, $view_mode, $langcode) {
+  $dfp_targeting_terms = &drupal_static('dfp_entity_targeting_terms', array());
+
+  if (variable_get('dfp_enable_ad_categories', 0) && $view_mode == 'full') {
+    // If this entity is itself a taxonomy term add it to the
+    // dfp_targetting_terms array. Check it to see if a DFP Ad Category
+    // has been assigned to it. If so, add that term to the array instead. Note
+    // that we check all types of entities here because any fieldable entity can
+    // have a taxonomy term reference field attached to it.
+    if ($type == 'taxonomy_term') {
+      $dfp_targeting_terms[] = _dfp_get_ad_category($entity, TRUE);
+    }
+
+    // Find all taxonomy terms attached to the given entity and add them to the
+    // dfp_targeting_terms array. Check each term to see if a DFP Ad Category
+    // has been assigned to it. If so, add that term to the array instead.
+    foreach (element_children($entity->content) as $key) {
+      if (isset($entity->content[$key]['#field_type']) && $entity->content[$key]['#field_type'] == 'taxonomy_term_reference') {
+        $terms = field_view_field($type, $entity, $key);
+        if (isset($terms['#items']) && is_array($terms['#items'])) {
+          foreach ($terms['#items'] as $item) {
+            if (array_key_exists('taxonomy_term', $item)) {
+              $dfp_targeting_terms[] = _dfp_get_ad_category($item['taxonomy_term'], TRUE);
+            }
+          }
+        }
+      }
+    }
+
+    $dfp_targeting_terms = array_unique($dfp_targeting_terms);
+  }
+}
+
+/**
+ * Implements hook_context_registry().
+ */
+function dfp_context_registry() {
+  return array(
+    'reactions' => array(
+      'dfp_tags' => array(
+        'title' => t('DFP Tags'),
+        'plugin' => 'dfp_context_reaction_tags',
+      ),
+      'dfp_outofpage' => array(
+        'title' => t('DFP Out of page'),
+        'plugin' => 'dfp_context_reaction_outofpage',
+      ),
+      'dfp_settings' => array(
+        'title' => t('DFP Variables'),
+        'plugin' => 'dfp_context_reaction_settings',
+      ),
+      'dfp_adunit' => array(
+        'title' => t('DFP AdUnit'),
+        'plugin' => 'dfp_context_reaction_adunit',
+      ),
+      'dfp_adsize' => array(
+        'title' => t('DFP Sizes'),
+        'plugin' => 'dfp_context_reaction_sizes',
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_context_plugins().
+ */
+function dfp_context_plugins() {
+  $plugins = array();
+  $plugins['dfp_context_reaction_tags'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'dfp') . '/plugins/contexts',
+      'file' => 'dfp_context_reaction_tags.inc',
+      'class' => 'dfp_context_reaction_tags',
+      'parent' => 'context_reaction',
+    ),
+  );
+  $plugins['dfp_context_reaction_outofpage'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'dfp') . '/plugins/contexts',
+      'file' => 'dfp_context_reaction_outofpage.inc',
+      'class' => 'dfp_context_reaction_outofpage',
+      'parent' => 'context_reaction',
+    ),
+  );
+  $plugins['dfp_context_reaction_settings'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'dfp') . '/plugins/contexts',
+      'file' => 'dfp_context_reaction_settings.inc',
+      'class' => 'dfp_context_reaction_settings',
+      'parent' => 'context_reaction',
+    ),
+  );
+  $plugins['dfp_context_reaction_adunit'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'dfp') . '/plugins/contexts',
+      'file' => 'dfp_context_reaction_adunit.inc',
+      'class' => 'dfp_context_reaction_adunit',
+      'parent' => 'context_reaction',
+    ),
+  );
+  $plugins['dfp_context_reaction_sizes'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'dfp') . '/plugins/contexts',
+      'file' => 'dfp_context_reaction_sizes.inc',
+      'class' => 'dfp_context_reaction_sizes',
+      'parent' => 'context_reaction',
+    ),
+  );
+  return $plugins;
+}
+
+/**
+ * Implements preprocess_html().
+ */
+function dfp_preprocess_html($variables) {
+  // Add the header js here so that enough information has been loaded for
+  // tokens to work properly.
+  _dfp_js_global_settings();
+}
+
+
+/**
+ * Return a render array for the tag specified by machinename.
+ */
+function dfp_tag($machinename) {
+  $tag = dfp_tag_load($machinename);
+  $render_array = array();
+
+  if (!$tag) {
+    watchdog('dfp', 'Unknown ad tag %machinename passed to dfp_tag().', array('%machinename' => $machinename), WATCHDOG_WARNING);
+  }
+  else {
+    $tag->slug = dfp_format_slug($tag->slug);
+    $slug_placement = variable_get('dfp_slug_placement', 0);
+
+    if (!empty($tag)) {
+      $render_array = array(
+        'dfp_wrapper' => array(
+          '#type' => 'container',
+          '#attributes' => array(
+            'id' => $tag->wrapper_id,
+            'class' => array(
+              'dfp-tag-wrapper',
+            ),
+          ),
+          'tag' => array(
+            '#theme' => $tag->short_tag ? 'dfp_short_tag' : 'dfp_tag',
+            '#tag' => $tag,
+          ),
+        ),
+      );
+      if (!empty($tag->slug) && $slug_placement == 0) {
+        $render_array['dfp_wrapper']['slug_wrapper'] = array(
+          '#type' => 'container',
+          '#attributes' => array(
+            'class' => array(
+              'slug',
+            ),
+          ),
+          'slug' => array(
+            '#markup' => $tag->slug,
+          ),
+          '#weight' => -1,
+        );
+      }
+    }
+  }
+
+  return $render_array;
+}
+
+/**
+ * Load function.
+ *
+ * @param string $machinename
+ *
+ * @return object
+ *
+ */
+function dfp_tag_load($machinename) {
+  ctools_include('export');
+
+  $tags = &drupal_static(__FUNCTION__, array());
+
+  if (!isset($tags[$machinename])) {
+    // Load the tag.
+    $result = ctools_export_load_object('dfp_tags', 'names', array($machinename));
+    if (isset($result[$machinename])) {
+      $tag = $result[$machinename];
+    }
+    else {
+      return NULL;
+    }
+
+    // Store the original tag. This is used by the tag edit form.
+    $tag->raw = clone $tag;
+
+    // Allow modules to alter the raw tag object.
+    drupal_alter('dfp_tag_load', $tag);
+
+    // Move the settings out of the settings array.
+    foreach ($tag->settings as $key => $val) {
+      $tag->{$key} = $val;
+    }
+
+    // Configure this tag based on the defined settings.
+    $tag->wrapper_id = 'dfp-ad-' . $tag->machinename . '-wrapper';
+    $tag->placeholder_id = 'dfp-ad-' . $tag->machinename;
+
+    // Allow modules to alter the fully-loaded tag object.
+    drupal_alter('dfp_tag', $tag);
+
+    // Statically cache the fully loaded tag.
+    $tags[$machinename] = $tag;
+  }
+  else {
+    // Use the statically cached tag object.
+    $tag = $tags[$machinename];
+  }
+
+  return $tag;
+}
+
+
+/**
+ * Alter a dfp tag object to integrate with the contexts module.
+ */
+function dfp_dfp_tag_load_alter(&$tag) {
+  // Execute context reactions for each plugin.
+  if (module_exists('context')) {
+    $contexts = dfp_context_registry();
+    foreach ($contexts['reactions'] as $key => $val) {
+      if ($plugin = context_get_plugin('reaction', $key)) {
+        $plugin->execute($tag);
+      }
+    }
+  }
+
+  // Handle ad testing.
+  module_load_include('inc', 'dfp', 'dfp.adtest');
+  dfp_adtest_alter_tag($tag);
+}
+
+/**
+ * Alter the vertical tabs group in which the exportable scheduler form should
+ * live.
+ */
+function dfp_exportable_scheduler_form_group_alter(&$group) {
+  $group = 'settings';
+}
+
+/**
+ * Form alter for the ctools_export_ui_edit_item_form.
+ */
+function dfp_form_ctools_export_ui_edit_item_form_alter(&$form, &$form_state) {
+  if (arg(2) == 'context') {
+    // Make sure that dfp.admin.inc is included on the context ui form to avoid
+    // errors when doing an ajax submit.
+    form_load_include($form_state, 'inc', 'dfp', 'dfp.admin');
+    //array_unshift($form['#submit'], 'dps_targeting_form_submit');
+  }
+}
+
+/**
+ * Format the given array of values to be displayed as part of a javascript.
+ *
+ * @param array $variables
+ *  'values' => A simple array of targeting values. Ex. val1, val2, val3
+ *
+ * @return string
+ *   If $values had one item, then a string in the format ["val1"]. If $values
+ *   has more than one item, then a string in the format ["val1","val2","val3"].
+ *
+ */
+function dfp_format_targeting($targeting, $tag = '') {
+  foreach ($targeting as $key => &$target) {
+    $target['target'] = '"' . check_plain($target['target']) . '"';
+    $target['value'] = dfp_token_replace(check_plain($target['value']), $tag, array('sanitize' => TRUE, 'clear' => TRUE));
+
+    // The target value could be blank if tokens are used. If so, removed it.
+    if (empty($target['value'])) {
+      unset($targeting[$key]);
+      continue;
+    }
+
+    // Allow other modules to alter the target.
+    drupal_alter('dfp_target', $target);
+
+    // Convert the values into an array and trim the whitespace from each value.
+    $values = explode(',', $target['value']);
+    $values = array_map('trim', $values);
+
+    if (count($values) == 1) {
+      $target['value'] = '"' . $values[0] . '"';
+    }
+    elseif (count($values) > 1) {
+      $target['value'] = '["' . implode('","', $values) . '"]';
+    }
+  }
+
+  return $targeting;
+}
+
+/**
+ * Format the the size of an ad tag.
+ *
+ * @param array $variables
+ *   'size' => A string in the format 123x321,987x789.
+ *
+ * @return string
+ *   A string in the format [456, 654] or [[123, 321], [987, 789]].
+ *
+ */
+function dfp_format_size($size) {
+  $formatted_sizes = array();
+
+  $sizes = explode(',', check_plain($size));
+  foreach ($sizes as $size) {
+    $formatted_size = explode('x', trim($size));
+    $formatted_sizes[] = '[' . implode(', ', $formatted_size) . ']';
+  }
+
+  return count($formatted_sizes) == 1 ? $formatted_sizes[0] : '[' . implode(', ', $formatted_sizes) . ']';
+}
+
+/**
+ * Format the the size of an ad tag.
+ *
+ * @param array $variables
+ *   'slug' => A label for for this particular ad tag.
+ *
+ * @return string
+ *   If $slug is none, an empty string will be returned; if $slug is a non-empty
+ *   string then it will be returned unchanged; if $slug is empty, then the
+ *   default slug will be returned.
+ *
+ */
+function dfp_format_slug($slug) {
+  $formatted_slug = t(check_plain(variable_get('dfp_default_slug', '')));
+
+  if ($slug == '<none>') {
+    $formatted_slug = "";
+  }
+  elseif (!empty($slug)) {
+    $formatted_slug = $slug;
+  }
+
+  return $formatted_slug;
+}
+
+/**
+ * Return the term object to use as the DFP Ad Category given a specific term.
+ *
+ * @param object $term
+ *   The term object to analyze. If it is tagged with a DFP Ad Cateegory, then
+ *   that term is returned, otherwise the original term is returned unchanged.
+ *
+ * @param boolean $clean_string
+ *   If true, use ctools_cleanstring. In future versions, this should default to
+ *   TRUE, but for now it defaults to FALSE.
+ *
+ * @return string
+ *   The term name to be included in an ad tag.
+ */
+function _dfp_get_ad_category($term, $clean_string = FALSE) {
+  if (!empty($term->field_dfp_ad_categories)) {
+    $term = taxonomy_term_load($term->field_dfp_ad_categories[LANGUAGE_NONE][0]['tid']);
+  }
+
+  $term_name = $term->name;
+  if ($clean_string) {
+    ctools_include('cleanstring');
+    $term_name = ctools_cleanstring($term_name, array(
+      'lower_case' => TRUE,
+    ));
+  }
+
+  return $term->name;
+}
+
+/**
+ * Helper function to include javascript variables, etc in the header above all
+ * slot definitions.
+ */
+function _dfp_js_global_settings() {
+  // Initialize the google varibales and inject user-defined javascript.
+  $js = 'var googletag = googletag || {};' . "\n";
+  $js .= 'googletag.cmd = googletag.cmd || [];';
+  $js .= variable_get('dfp_injected_js', '') . "\n";
+
+  // Add a place to store the slot name variable
+  $js .= 'googletag.slots = googletag.slots || {};';
+
+  $options = array(
+    'type' => 'inline',
+    'group' => JS_LIBRARY,
+    'every_page' => TRUE,
+    'weight' => -10,
+    'force header' => TRUE,
+  );
+  drupal_add_js($js, $options);
+
+  // Include a script tag for the Google Tag Services.
+  // @todo: One day this should include an async=true attribute. See #1140356.
+  //        However, there is a good chance this might break <= IE8.
+  $options['type'] = 'external';
+  $options['weight']++;
+  drupal_add_js(($GLOBALS['is_https'] ? "https://" : "http://") . DFP_GOOGLE_TAG_SERVICES_URL, $options);
+
+  // Add global settings with a heavy weight so that they appear after all the
+  // defineSlot() calls otherwise IE8 and Opera fail to display ads properly.
+  $js = 'googletag.cmd.push(function() {' . "\n";
+  if (variable_get('dfp_async_rendering', 1)) {
+    $js .= '  googletag.pubads().enableAsyncRendering();' . "\n";
+  }
+  else {
+     $js .= '  googletag.pubads().enableSyncRendering();' . "\n";
+  }
+  if (variable_get('dfp_single_request', 1)) {
+    $js .= '  googletag.pubads().enableSingleRequest();' . "\n";
+  }
+  switch (variable_get('dfp_collapse_empty_divs', 1)) {
+    case 1:
+      $js .= '  googletag.pubads().collapseEmptyDivs();' . "\n";
+      break;
+    case 2:
+      $js .= '  googletag.pubads().collapseEmptyDivs(true);' . "\n";
+      break;
+  }
+  if (variable_get('dfp_disable_init_load', 0)) {
+    $js .= '  googletag.pubads().disableInitialLoad();' . "\n";
+  }
+
+  // Set global targeting values for this page.
+  $targeting = variable_get('dfp_targeting', array());
+  drupal_alter('dfp_global_targeting', $targeting);
+  $targeting = dfp_format_targeting($targeting);
+  foreach ($targeting as $key => $target) {
+    if (!empty($target['target']) && !empty($target['value'])) {
+      $js .= '  googletag.pubads().setTargeting(' . $target['target'] . ', ' . $target['value'] . ');' . "\n";
+    }
+  }
+
+  $js .= '});' . "\n";
+  $js .= variable_get('dfp_injected_js2', '') . "\n";
+  $js .= 'googletag.enableServices();';
+
+  $options = array(
+    'type' => 'inline',
+    'group' => JS_DEFAULT,
+    'every_page' => TRUE,
+    'weight' => 10,
+    'force header' => TRUE,
+  );
+  drupal_add_js($js, $options);
+}
+
+/**
+ * Helper function to build the javascript needed to define an ad slot and add
+ * it to the head tag.
+ */
+function _dfp_js_slot_definition($tag) {
+  // Avoid accidentaly adding ad slot definition more than once.
+  if (isset($tag->processed) && $tag->processed === TRUE) {
+    watchdog('dfp', 'DFP tag %machinename is being added to the page more than once.', array('%machinename' => $tag->machinename), WATCHDOG_WARNING);
+    return;
+  }
+
+  // Add the js needed to define this adSlot to <head>.
+  $js = '';
+  // Start by defining breakpoints for this ad.
+  if (!empty($tag->breakpoints)) {
+    $breakpoints = $tag->breakpoints;
+    $js .= 'var mapping = googletag.sizeMapping()' . "\n";
+    foreach ($breakpoints as $breakpoint) {
+      $js .= '  .addSize(' . dfp_format_size($breakpoint['browser_size']) . ', ' . dfp_format_size($breakpoint['ad_sizes']) . ')' . "\n";
+    }
+    $js .= '  .build();' . "\n";
+  }
+  if (!empty($tag->settings['out_of_page'])) {
+    $js .= 'googletag.slots["' . $tag->machinename . '"] = googletag.defineOutOfPageSlot("' . $tag->adunit . '", "' . $tag->placeholder_id . '")' . "\n";
+  }
+  else {
+    $js .= 'googletag.slots["' . $tag->machinename . '"] = googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
+  }
+  $click_url = variable_get('dfp_click_url', '');
+  if (!empty($click_url)) {
+    if (!preg_match("/^https?:\/\//", $click_url)) {
+      // relative URL; prepend site domain
+      $click_url = (($GLOBALS['is_https']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . "/" . $click_url;
+    }
+    $js .= '  .setClickUrl("' . $click_url . '")' . "\n";
+  }
+  $js .= '  .addService(googletag.pubads())' . "\n";
+
+  if (!empty($tag->adsense_ad_types)) {
+    $js .= '  .set("adsense_ad_types", "' . $tag->adsense_ad_types . '")' . "\n";
+  }
+  if (!empty($tag->adsense_channel_ids)) {
+    $js .= '  .set("adsense_channel_ids", "' . $tag->adsense_channel_ids . '")' . "\n";
+  }
+  foreach ($tag->adsense_colors as $key => $val) {
+    if (!empty($val)) {
+      $key = 'adsense_' . $key . '_color';
+      $val = '#' . drupal_strtoupper($val);
+      $js .= '  .set("' . $key . '", "' . $val . '")' . "\n";
+    }
+  }
+  $targeting = dfp_format_targeting($tag->targeting, $tag);
+  foreach ($targeting as $target) {
+    $js .= '  .setTargeting(' . $target['target'] . ', ' . $target['value'] . ')' . "\n";
+  }
+  // Apply size mapping when there are breakpoints.
+  if (!empty($tag->breakpoints)) {
+    $js .= '  .defineSizeMapping(mapping)' . "\n";
+  }
+  $js = rtrim($js, "\n") . ';';
+
+  $options = array(
+    'type' => 'inline',
+    'group' => JS_LIBRARY,
+    'weight' => 0,
+    'force header' => TRUE,
+  );
+  drupal_add_js($js, $options);
+}
+
+/**
+ * Prepare token replacement values.
+ *
+ * @param  (optional) object $tag
+ * @return array
+ */
+function _dfp_prepare_tokens($tag = NULL) {
+  global $user;
+
+  $data = array();
+  $data['user'] = $user;
+  $data['node'] = menu_get_object();
+
+  // We cannot use menu_get_object because the views version of the taxonomy
+  // term pages will not work properly.
+  $data['term'] = (arg(0) == 'taxonomy' && arg(1) == 'term' && is_numeric(arg(2))) ? taxonomy_term_load(arg(2)) : NULL;
+
+  if (!empty($tag)) {
+    $data['tag'] = $tag;
+  }
+
+  return $data;
+}
+
+/**
+ * Check adunit has a value and/or if the global should be used.
+ *
+ * @param  object $tag
+ * @return object $tag
+ */
+function _dfp_prepare_adunit($tag) {
+  $global_adunit = variable_get('dfp_default_adunit', '');
+  if (empty($tag->adunit) && !empty($global_adunit)) {
+    $tag->adunit = $global_adunit;
+  }
+
+  return $tag;
+}
+
+/**
+ * Replaces all tokens in a given string with appropriate values, with caching.
+ *
+ * This function is a memoizing wrapper for token_replace(), which is quite slow
+ * and inefficient. It takes advantage of specific knowledge about how DFP works
+ * to cache the result of token replacement. It is not a fully general solution
+ * but works for this module.
+ *
+ * @param string $text
+ *   A string potentially containing replaceable tokens.
+ * @param stdClass $tag
+ *   The tag for which we are encoding a string. This value will be provided
+ *   as additional context to token_replace().
+ * @param array $options
+ *   An array of options to pass to token_replace().  See that function for
+ *   further documentation.
+ * @return string
+ *   Text with tokens replaced.
+ *
+ * @see token_replace()
+ */
+function dfp_token_replace($text, $tag = NULL, array $options = array()) {
+  $processed_strings =& drupal_static(__FUNCTION__, NULL);
+
+  // Short-circuit the degenerate case, just like token_replace() does.
+  $text_tokens = token_scan($text);
+  if (empty($text_tokens)) {
+    return $text;
+  }
+
+  // Get the possible replacement sources.
+  // @todo This doesn't vary, so we could probably refactor it to be cached,
+  // too.
+  $data = _dfp_prepare_tokens($tag);
+
+  // Determine the cache key for this text string. That way we can cache
+  // reliably.
+  $key = _dfp_token_replace_make_key($text, $data);
+
+  // Use the same granularity as the blocks.
+  $cache_item = DFP_TOKEN_CACHE . ':' . implode(':', drupal_render_cid_parts(DRUPAL_CACHE_PER_PAGE));
+
+  // Lookup any already-cached token replacements.
+  if (is_null($processed_strings)) {
+    $cache = cache_get($cache_item, 'cache');
+    $processed_strings = $cache
+      ? $cache->data
+      : array();
+  }
+
+  // If the processed string we're looking for isn't already in the cache,
+  // then, and only then, do we call the expensive token_replace() (and cache
+  // the result).
+  if (!isset($processed_strings[$key]) || is_null($processed_strings[$key])) {
+    // Regenerate this particular replacement.
+    $processed_strings[$key] = token_replace($text, $data, $options);
+    $lifetime = variable_get('dfp_token_cache_lifetime', 0);
+    $expire_at = ($lifetime == 0) ? CACHE_TEMPORARY : (REQUEST_TIME + $lifetime);
+    cache_set($cache_item, $processed_strings, 'cache', $expire_at);
+  }
+
+  return $processed_strings[$key];
+}
+
+/**
+ * Generates an identifying key for the lookup to be processed.
+ *
+ * @param string $text
+ *   The text to be processed.
+ * @param array $data
+ *   The array of data parameters that will be passed to token_generate().
+ *   We'll use knowledge of what is expected in that array to build a
+ *   meaningful lookup key.
+ * @return string
+ *   The key in the lookup array that corresponds to this tokenization request.
+ */
+function _dfp_token_replace_make_key($text, array $data) {
+  // $text may be arbitrarily long, which can slow-down lookups. Hashing it
+  // keeps uniqueness but guarantees a manageable size. Since this value won't
+  // be used as the cache key itself we're not limited to 255 characters but
+  // it will be nicer on array lookups in PHP.
+  $keys[] = sha1($text);
+  $keys[] = isset($data['node']->nid) ? $data['node']->nid . '-' . entity_modified_last('node', $data['node'])  : NULL;
+  $keys[] = isset($data['user']->uid) ? $data['user']->uid . '-' . entity_modified_last('user', $data['user']) : NULL;
+  $keys[] = isset($data['term']->tid) ? $data['term']->tid . '-' . entity_modified_last('taxonomy_term', $data['term']) : NULL;
+  $keys[] = isset($data['tag']->machinename) ? $data['tag']->machinename . '-' . entity_modified_last('tag', $data['tag']) : NULL;
+
+  return implode('|', array_filter($keys));
+}
+
+/**
+ * Preprocess function for DFP tags.
+ */
+function template_preprocess_dfp_tag(&$variables) {
+  $tag = $variables['tag'];
+  $tag = _dfp_prepare_adunit($tag);
+  $slug_placement = variable_get('dfp_slug_placement', 0);
+
+  // Format certain tag properties for display.
+  $tag->adunit = dfp_token_replace('[dfp_tag:network_id]/' . $tag->adunit, $tag, array('sanitize' => TRUE, 'clear' => TRUE));
+  $tag->size = dfp_format_size($tag->size);
+  $tag->slug = dfp_format_slug($tag->slug);
+
+  // Create the attributes for the wrapper div and placeholder div.
+  $variables['placeholder_attributes'] = array(
+    'id' => $tag->placeholder_id,
+    'class' => array(
+      'dfp-tag-wrapper',
+    ),
+  );
+
+  if (!empty($tag->slug) && $slug_placement == 1) {
+    $variables['slug'] = array(
+      '#type' => 'container',
+      '#attributes' => array(
+        'class' => array(
+          'slug',
+        ),
+      ),
+      'slug' => array(
+        '#markup' => $tag->slug,
+      ),
+      '#weight' => -1,
+    );
+  }
+
+  // Define a javascript ad slot for this tag.
+  _dfp_js_slot_definition($tag);
+
+  // Flag the slot as processed.
+  $variables['tag']->processed = TRUE;
+}
+
+/**
+ * Preprocess function for DFP tags.
+ */
+function template_preprocess_dfp_short_tag(&$variables) {
+  static $tile = 0;
+  $tag = $variables['tag'];
+  $tag = _dfp_prepare_adunit($tag);
+
+  // Build a key|vals array and allow third party modules to modify it.
+  $keyvals = array();
+  $keyvals['iu'] = dfp_token_replace('/[dfp_tag:network_id]/' . $tag->adunit, $tag, array('sanitize' => TRUE, 'clear' => TRUE));
+  $keyvals['sz'] = str_replace(',', '|', check_plain($tag->raw->size));
+  $keyvals['c'] = rand(10000, 99999);
+
+  $targets = array();
+  foreach ($tag->targeting as $data) {
+    $targets[] = check_plain($data['target']) . '=' . check_plain($data['value']);
+  }
+  if (!empty($targets)) {
+    $keyvals['t'] = implode('&', $targets);
+  }
+  drupal_alter('dfp_short_tag_keyvals', $keyvals);
+
+  $variables['url_jump'] = 'http://' . DFP_GOOGLE_SHORT_TAG_SERVICES_URL . '/jump?' . drupal_http_build_query($keyvals);
+  $variables['url_ad'] = 'http://' . DFP_GOOGLE_SHORT_TAG_SERVICES_URL . '/ad?' . drupal_http_build_query($keyvals);
+}
+
+/**
+ * Implements of hook_page_build().
+ */
+function dfp_page_build(&$page) {
+  $html = '';
+
+  $tags = dfp_tag_load_all();
+  foreach ($tags as $tag) {
+    if (isset($tag->settings['out_of_page']) && $tag->settings['out_of_page'] == TRUE) {
+      drupal_alter('dfp_tag_load', $tag);
+    }
+  }
+
+  if (module_exists('context')) {
+    if ($plugin = context_get_plugin('reaction', 'dfp_outofpage')) {
+      if (isset($plugin->out_of_page_tags)) {
+        foreach ($plugin->out_of_page_tags as $key => $machinename) {
+          $tag = dfp_tag_load($machinename);
+          if (empty($tag->disabled)) {
+            $dfp_tag = dfp_tag($machinename);
+            $dfp_tag['dfp_wrapper']['#attributes']['class'][] = 'element-hidden';
+            $html .= render($dfp_tag);
+          }
+        }
+      }
+    }
+  }
+
+  // Add Out Of Page slots on the top of the page.
+  $page['page_top']['dfp_out_of_page'] = array(
+    '#weight' => -1000,
+    '#markup' => $html,
+  );
+}

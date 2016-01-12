@@ -1,0 +1,5 @@
+entity.dfp_tag.add_form:
+  route_name: entity.dfp_tag.add_form
+  title: 'Add DFP tag'
+  appears_on:
+    - entity.dfp_tag.collection

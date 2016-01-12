@@ -1,0 +1,53 @@
+dfp.admin_settings:
+  path: 'admin/structure/dfp/settings'
+  defaults:
+    _form: '\Drupal\dfp\Form\AdminSettings'
+    _title: 'Global DFP Settings'
+  requirements:
+    _permission: 'administer DFP'
+
+dfp.test_page:
+  path: 'admin/structure/dfp/test_page'
+  requirements:
+    _permission: 'administer DFP'
+#  $items['admin/structure/dfp_ads/test_page'] = array(
+#    'title' => 'DFP Test Page',
+#    'type' => MENU_LOCAL_TASK,
+#    'description' => "View all your DFP tags on a single page",
+#    'page callback' => 'dfp_adtest_page',
+#    'access arguments' => array('administer DFP'),
+#    'file' => 'dfp.adtest.inc',
+#    'weight' => 10,
+#  );
+
+entity.dfp_tag.add_form:
+  path: '/admin/structure/dfp/tags/add'
+  defaults:
+    _entity_form: 'dfp_tag.add'
+    _title: 'Add DFP tag'
+  requirements:
+    _permission: 'administer DFP'
+
+entity.dfp_tag.edit_form:
+  path: '/admin/structure/dfp/tags/manage/{dfp_tag}'
+  defaults:
+    _entity_form: 'dfp_tag.edit'
+  requirements:
+    _permission: 'administer DFP'
+
+entity.dfp_tag.delete_form:
+  path: '/admin/structure/dfp/tags/manage/{dfp_tag}/delete'
+  defaults:
+    _entity_form: 'dfp_tag.delete'
+    _title: 'Delete'
+  requirements:
+    _permission: 'administer DFP'
+#    _entity_access: 'dfp_tag.delete'
+
+entity.dfp_tag.collection:
+  path: '/admin/structure/dfp/tags'
+  defaults:
+    _entity_list: 'dfp_tag'
+    _title: 'DFP tags'
+  requirements:
+    _permission: 'administer DFP'

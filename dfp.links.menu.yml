@@ -1,0 +1,5 @@
+dfp.admin_settings:
+  title: 'DFP Ad Tags'
+  parent: system.admin_structure
+  description: 'Create and manage your DFP ad tags.'
+  route_name: entity.dfp_tag.collection

@@ -1,0 +1,10 @@
+name: 'Doubleclick for Publishers'
+type: module
+description: 'Integrates DFP Google Publisher Tags onto a site.'
+core: 8.x
+package: Advertising
+configure: dfp.admin_settings
+dependencies:
+  - block
+  - taxonomy
+#  - entity_modified

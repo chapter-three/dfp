@@ -1,0 +1,3 @@
+administer DFP:
+  title: 'Administer Doubleclick for Publisher ads'
+  description: 'Users can create, edit, and delete Doubleclick for Publishers (dfp) ad tags and configure how and when they should be displayed.'
