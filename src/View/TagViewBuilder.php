@@ -17,6 +17,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Render\Element;
 use Drupal\dfp\Entity\TagInterface;
+use Drupal\dfp\TokenInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -39,6 +40,13 @@ class TagViewBuilder extends EntityViewBuilder {
   protected $configFactory;
 
   /**
+   * DFP token service.
+   *
+   * @var \Drupal\dfp\TokenInterface
+   */
+  protected $token;
+
+  /**
    * Constructs a new BlockViewBuilder.
    *
    * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
@@ -50,10 +58,11 @@ class TagViewBuilder extends EntityViewBuilder {
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler.
    */
-  public function __construct(EntityTypeInterface $entity_type, EntityManagerInterface $entity_manager, LanguageManagerInterface $language_manager, ModuleHandlerInterface $module_handler, ConfigFactoryInterface $config_factory) {
+  public function __construct(EntityTypeInterface $entity_type, EntityManagerInterface $entity_manager, LanguageManagerInterface $language_manager, ModuleHandlerInterface $module_handler, ConfigFactoryInterface $config_factory, TokenInterface $token) {
     parent::__construct($entity_type, $entity_manager, $language_manager);
     $this->moduleHandler = $module_handler;
     $this->configFactory = $config_factory;
+    $this->token = $token;
   }
 
   /**
@@ -65,7 +74,8 @@ class TagViewBuilder extends EntityViewBuilder {
       $container->get('entity.manager'),
       $container->get('language_manager'),
       $container->get('module_handler'),
-      $container->get('config.factory')
+      $container->get('config.factory'),
+      $container->get('dfp.token')
     );
   }
 
@@ -101,10 +111,9 @@ class TagViewBuilder extends EntityViewBuilder {
           'contexts' => $entity->getCacheContexts(),
           'tags' => $cache_tags,
         ],
-        //'#weight' => $entity->getWeight(),
       ];
 
-      $build[$entity_id] += static::buildPreRenderableBlock($entity, $this->moduleHandler(), $this->configFactory);
+      $build[$entity_id] += static::buildPreRenderableBlock($entity, $this->moduleHandler(), $this->configFactory, $this->token);
 
       // Allow altering of cacheability metadata or setting #create_placeholder.
       // $this->moduleHandler->alter(['block_build', "block_build_" . $plugin->getBaseId()], $build[$entity_id], $plugin);
@@ -124,9 +133,9 @@ class TagViewBuilder extends EntityViewBuilder {
    * @return array
    *   A render array with a #pre_render callback to render the DFP tag.
    */
-  protected static function buildPreRenderableBlock(TagInterface $tag, ModuleHandlerInterface $module_handler, ConfigFactoryInterface $config_factory) {
+  protected static function buildPreRenderableBlock(TagInterface $tag, ModuleHandlerInterface $module_handler, ConfigFactoryInterface $config_factory, TokenInterface $token) {
     $global_settings = $config_factory->get('dfp.settings');
-    $tag_view = new TagView($tag, $global_settings);
+    $tag_view = new TagView($tag, $global_settings, $token);
 
     $build = array(
       '#contextual_links' => [

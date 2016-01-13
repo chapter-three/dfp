@@ -81,13 +81,13 @@ class Tag extends EntityForm {
       '#maxlength' => 64,
       '#default_value' => $tag->size(),
     );
-    $form['tag_settings']['pattern'] = array(
+    $form['tag_settings']['adunit'] = array(
       '#type' => 'textfield',
       '#title' => $this->t('Ad Unit Pattern'),
       '#required' => FALSE,
       '#maxlength' => 255,
-      '#default_value' => $tag->pattern(),
-      '#description' => $this->t('Use the tokens below to define how the ad unit should display. The network id will be included automatically. Example: [dfp_tag:url_parts:4]/[dfp_tag:slot]. Leave this field empty to use the default ad unit pattern as defined in <a href=":url">Global DFP Settings</a>.', array(':url' => Url::fromRoute('dfp.admin_settings')->toString())),
+      '#default_value' => $tag->adunit(),
+      '#description' => $this->t('Use the tokens below to define how the ad unit should display. The network id will be included automatically. Example: [dfp_tag:url_parts:4]/[dfp_tag:slot]. Leave this field empty to use the default ad unit adunit as defined in <a href=":url">Global DFP Settings</a>.', array(':url' => Url::fromRoute('dfp.admin_settings')->toString())),
     );
 //    $form['tag_settings']['tokens'] = array(
 //      '#theme' => 'token_tree',
@@ -216,8 +216,8 @@ class Tag extends EntityForm {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    if (preg_match(TagInterface::ADUNIT_PATTERN_VALIDATION_REGEX, $form_state->getValue('pattern'))) {
-      $form_state->setErrorByName('pattern', $this->t('Ad Unit Patterns can only include letters, numbers, hyphens, dashes, periods, slashes and tokens.'));
+    if (preg_match(TagInterface::ADUNIT_PATTERN_VALIDATION_REGEX, $form_state->getValue('adunit'))) {
+      $form_state->setErrorByName('adunit', $this->t('Ad Unit Patterns can only include letters, numbers, hyphens, dashes, periods, slashes and tokens.'));
     }
   }
 

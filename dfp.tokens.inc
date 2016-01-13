@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\Core\Render\BubbleableMetadata;
+
 /**
  * Implements hook_token_info().
  */
@@ -7,7 +9,7 @@ function dfp_token_info() {
   $type = array(
     'name' => t('DFP Ad Tags'),
     'description' => t('Tokens related to a given DFP ad tag.'),
-    'needs-data' => 'tag',
+    'needs-data' => 'dfp_tag',
   );
 
   $tag['slot'] = array(
@@ -32,7 +34,7 @@ function dfp_token_info() {
 /**
  * Implements hook_tokens().
  */
-function dfp_tokens($type, $tokens, array $data = array(), array $options = array()) {
+function dfp_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
   $replacements = array();
 
   if ($type == 'dfp_tag') {
@@ -40,13 +42,15 @@ function dfp_tokens($type, $tokens, array $data = array(), array $options = arra
       switch ($name) {
       case 'slot':
         // @todo
-        if (!empty($data['tag'])) {
-          $replacements[$original] = $data['tag']->slot;
+        if (!empty($data['dfp_tag'])) {
+          $replacements[$original] = $data['dfp_tag']->getSlot();
         }
         break;
 
       case 'network_id':
-        $replacements[$original] = \Drupal::config('dfp.settings')->get('network_id');
+        $config = \Drupal::config('dfp.settings');
+        $replacements[$original] = $config->get('network_id');
+        $bubbleable_metadata->addCacheableDependency($config);
         break;
 
       case 'ad_categories':

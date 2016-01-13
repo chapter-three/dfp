@@ -1,0 +1,4 @@
+services:
+  dfp.token:
+    class: Drupal\dfp\Token
+    arguments: ['@token', '@current_route_match', '@current_user']

@@ -24,7 +24,7 @@ interface TagInterface extends ConfigEntityInterface {
   /**
    * @return string
    */
-  public function pattern();
+  public function adunit();
 
   /**
    * @return string

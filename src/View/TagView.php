@@ -10,6 +10,7 @@ namespace Drupal\dfp\View;
 
 use Drupal\Core\Config\ImmutableConfig;
 use Drupal\dfp\Entity\TagInterface;
+use Drupal\dfp\TokenInterface;
 
 /**
  * A value object to combine a DFP tag with global settings for display.
@@ -26,9 +27,10 @@ class TagView {
    */
   protected $tag;
 
-  public function __construct(TagInterface $tag, ImmutableConfig $global_settings) {
+  public function __construct(TagInterface $tag, ImmutableConfig $global_settings, TokenInterface $token) {
     $this->tag = $tag;
     $this->globalSettings = $global_settings;
+    $this->token = $token;
   }
 
   /**
@@ -50,11 +52,11 @@ class TagView {
   }
 
   public function getAdUnit() {
-    $adunit = $this->tag->pattern();
+    $adunit = $this->tag->adunit();
     if (empty($adunit)) {
       $adunit = $this->globalSettings->get('default_pattern');
     }
-    return $adunit;
+    return $this->token->replace('/[dfp_tag:network_id]/' . $adunit, $this, ['clear' => TRUE]);
   }
 
   public function getRawSize() {
@@ -65,4 +67,7 @@ class TagView {
     return $this->tag->targeting();
   }
 
+  public function getSlot() {
+    return $this->tag->slot();
+  }
 }

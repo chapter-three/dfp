@@ -42,7 +42,7 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *     "id",
  *     "slot",
  *     "size",
- *     "pattern",
+ *     "adunit",
  *     "slug",
  *     "block",
  *     "short_tag",
@@ -98,7 +98,7 @@ class Tag extends ConfigEntityBase implements TagInterface {
    *
    * @var string
    */
-  protected $pattern;
+  protected $adunit;
 
   /**
    * Slug.
@@ -158,8 +158,8 @@ class Tag extends ConfigEntityBase implements TagInterface {
   /**
    * {@inheritdoc}
    */
-  public function pattern() {
-    return $this->pattern;
+  public function adunit() {
+    return $this->adunit;
   }
 
   /**
