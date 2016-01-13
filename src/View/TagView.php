@@ -8,7 +8,9 @@
 
 namespace Drupal\dfp\View;
 
+use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Config\ImmutableConfig;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\dfp\Entity\TagInterface;
 use Drupal\dfp\TokenInterface;
 
@@ -16,6 +18,10 @@ use Drupal\dfp\TokenInterface;
  * A value object to combine a DFP tag with global settings for display.
  */
 class TagView {
+
+  protected $shortTagQueryString;
+
+  protected $adUnit;
 
   /**
    * @var \Drupal\Core\Config\ImmutableConfig
@@ -27,10 +33,21 @@ class TagView {
    */
   protected $tag;
 
-  public function __construct(TagInterface $tag, ImmutableConfig $global_settings, TokenInterface $token) {
+  /**
+   * @var \Drupal\dfp\TokenInterface
+   */
+  protected $token;
+
+  /**
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  public function __construct(TagInterface $tag, ImmutableConfig $global_settings, TokenInterface $token, ModuleHandlerInterface $module_handler) {
     $this->tag = $tag;
     $this->globalSettings = $global_settings;
     $this->token = $token;
+    $this->moduleHandler = $module_handler;
   }
 
   /**
@@ -52,11 +69,14 @@ class TagView {
   }
 
   public function getAdUnit() {
-    $adunit = $this->tag->adunit();
-    if (empty($adunit)) {
-      $adunit = $this->globalSettings->get('default_pattern');
+    if (is_null($this->adUnit)) {
+      $adunit = $this->tag->adunit();
+      if (empty($adunit)) {
+        $adunit = $this->globalSettings->get('default_pattern');
+      }
+      $this->adUnit = $this->token->replace('/[dfp_tag:network_id]/' . $adunit, $this, ['clear' => TRUE]);
     }
-    return $this->token->replace('/[dfp_tag:network_id]/' . $adunit, $this, ['clear' => TRUE]);
+    return $this->adUnit;
   }
 
   public function getRawSize() {
@@ -69,5 +89,35 @@ class TagView {
 
   public function getSlot() {
     return $this->tag->slot();
+  }
+
+  public function getShortTagQueryString() {
+    if (is_null($this->shortTagQueryString)) {
+      // Build a key|vals array and allow third party modules to modify it.
+      $keyvals = [
+        'iu' => $this->getAdUnit(),
+        'sz' => str_replace(',', '|', $this->getRawSize()),
+        'c' => rand(10000, 99999),
+      ];
+
+      $targets = array();
+      foreach ($this->getRawTargetting() as $data) {
+        $targets[] = $data['target'] . '=' . $data['value'];
+      }
+      if (!empty($targets)) {
+        $keyvals['t'] = implode('&', $targets);
+      }
+      $this->moduleHandler->alter('dfp_short_tag_keyvals', $keyvals);
+      $this->shortTagQueryString = UrlHelper::buildQuery($keyvals);
+    }
+    return $this->shortTagQueryString;
+  }
+
+  public function isShortTag() {
+    return $this->tag->shortTag();
+  }
+
+  public function id() {
+    return $this->tag->id();
   }
 }

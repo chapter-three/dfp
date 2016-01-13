@@ -35,7 +35,11 @@ function dfp_theme() {
       'render element' => 'elements',
     ),
     'dfp_short_tag' => array(
-      'render element' => 'elements',
+      'variables' => array(
+        'tag' => NULL,
+        'url_jump' => NULL,
+        'url_ad' => NULL,
+      ),
     ),
   );
 }
@@ -62,34 +66,4 @@ function template_preprocess_dfp_tag(&$variables) {
 //  // Flag the slot as processed.
 //  $variables['tag']->processed = TRUE;
 
-}
-
-/**
- * Preprocess function for DFP short tags.
- */
-function template_preprocess_dfp_short_tag(&$variables) {
-  /** @var \Drupal\dfp\View\TagView $tag */
-  $tag = $variables['elements']['#tag'];
-  $variables['tag'] = $variables['elements']['#tag'];
-
-  // Build a key|vals array and allow third party modules to modify it.
-  $keyvals = [
-    'iu' => $tag->getAdUnit(),
-    'sz' => str_replace(',', '|', $tag->getRawSize()),
-    'c' => rand(10000, 99999),
-  ];
-
-  $targets = array();
-  foreach ($tag->getRawTargetting() as $data) {
-    $targets[] = $data['target'] . '=' . $data['value'];
-  }
-  if (!empty($targets)) {
-    $keyvals['t'] = implode('&', $targets);
-  }
-
-  \Drupal::moduleHandler()->alter('dfp_short_tag_keyvals', $keyvals);
-
-  $query_string = UrlHelper::buildQuery($keyvals);
-  $variables['url_jump'] = 'http://' . DFP_GOOGLE_SHORT_TAG_SERVICES_URL . '/jump?' . $query_string;
-  $variables['url_ad'] = 'http://' . DFP_GOOGLE_SHORT_TAG_SERVICES_URL . '/ad?' . $query_string;
 }

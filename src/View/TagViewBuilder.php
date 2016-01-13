@@ -99,24 +99,23 @@ class TagViewBuilder extends EntityViewBuilder {
   public function viewMultiple(array $entities = [], $view_mode = 'full', $langcode = NULL) {
     /** @var \Drupal\dfp\Entity\TagInterface[] $entities */
     $build = [];
-    foreach ($entities as $entity) {
-      $entity_id = $entity->id();
-      $cache_tags = Cache::mergeTags($this->getCacheTags(), $entity->getCacheTags());
+    foreach ($entities as $tag) {
+      $entity_id = $tag->id();
+      $cache_tags = Cache::mergeTags($this->getCacheTags(), $tag->getCacheTags());
 
-      // Create the render array for the block as a whole.
-      // @see template_preprocess_block().
+      // @todo get cache-ability based on tokens used in TagView...
+      $global_settings = $this->configFactory->get('dfp.settings');
+      $tag_view = new TagView($tag, $global_settings, $this->token, $this->moduleHandler());
+
       $build[$entity_id] = [
         '#cache' => [
-          'keys' => ['entity_view', 'dfp_tag', $entity->id()],
-          'contexts' => $entity->getCacheContexts(),
+          'keys' => ['entity_view', 'dfp_tag', $tag->id()],
+          'contexts' => $tag->getCacheContexts(),
           'tags' => $cache_tags,
         ],
       ];
 
-      $build[$entity_id] += static::buildPreRenderableBlock($entity, $this->moduleHandler(), $this->configFactory, $this->token);
-
-      // Allow altering of cacheability metadata or setting #create_placeholder.
-      // $this->moduleHandler->alter(['block_build', "block_build_" . $plugin->getBaseId()], $build[$entity_id], $plugin);
+      $build[$entity_id] += static::buildPreRenderableBlock($tag_view);
     }
 
     return $build;
@@ -125,58 +124,33 @@ class TagViewBuilder extends EntityViewBuilder {
   /**
    * Builds a #pre_render-able DFP tag render array.
    *
-   * @param \Drupal\dfp\Entity\TagInterface $tag
-   *   A DFP tag config entity.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
-   *   The module handler service.
+   * @param \Drupal\dfp\View\TagView $tag
+   *   A DFP tag.
    *
    * @return array
    *   A render array with a #pre_render callback to render the DFP tag.
    */
-  protected static function buildPreRenderableBlock(TagInterface $tag, ModuleHandlerInterface $module_handler, ConfigFactoryInterface $config_factory, TokenInterface $token) {
-    $global_settings = $config_factory->get('dfp.settings');
-    $tag_view = new TagView($tag, $global_settings, $token);
-
+  protected static function buildPreRenderableBlock(TagView $tag_view) {
     $build = array(
       '#contextual_links' => [
         'dfp_tag' => [
-          'route_parameters' => ['dfp_tag' => $tag->id()],
+          'route_parameters' => ['dfp_tag' => $tag_view->id()],
         ],
       ],
-      'dfp_wrapper' => array(
-        '#type' => 'container',
-        // @todo should we be adding attributes here or in the template?
-//        '#attributes' => array(
-//          'id' => $tag->getWrapperId(),
-//          'class' => array(
-//            'dfp-tag-wrapper',
-//          ),
-//        ),
-        'tag' => array(
-          '#theme' => $tag->shortTag() ? 'dfp_short_tag' : 'dfp_tag',
-          '#tag' => $tag_view,
-        ),
-      ),
     );
-    // @todo I think this is actaully all handled by template_process_dfp_tag().
-//    if (!empty($tag->slug()) && $global_settings->get('slug_placement') == 0) {
-//      $render_array['dfp_wrapper']['slug_wrapper'] = array(
-//        '#type' => 'container',
-//        '#attributes' => array(
-//          'class' => array(
-//            'slug',
-//          ),
-//        ),
-//        'slug' => array(
-//          '#markup' => $tag_view->getSlug(),
-//        ),
-//        '#weight' => -1,
-//      );
-//    }
-
-    // If an alter hook wants to modify the block contents, it can append
-    // another #pre_render hook.
-    // $module_handler->alter(['block_view', "block_view_$base_id"], $build, $plugin);
+    if ($tag_view->isShortTag()) {
+      $build['tag'] = [
+        '#theme' => 'dfp_short_tag',
+        '#url_jump' => 'http://' . DFP_GOOGLE_SHORT_TAG_SERVICES_URL . '/jump?' . $tag_view->getShortTagQueryString(),
+        '#url_ad' => 'http://' . DFP_GOOGLE_SHORT_TAG_SERVICES_URL . '/ad?' . $tag_view->getShortTagQueryString(),
+      ];
+    }
+    else {
+      $build['tag'] = [
+        '#theme' => 'dfp_tag',
+      ];
+    }
+    $build['tag']['#tag'] = $tag_view;
 
     return $build;
   }
