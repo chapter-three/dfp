@@ -49,4 +49,20 @@ class TagView {
     return 'js-dfp-tag-' . $this->tag->id();
   }
 
+  public function getAdUnit() {
+    $adunit = $this->tag->pattern();
+    if (empty($adunit)) {
+      $adunit = $this->globalSettings->get('default_pattern');
+    }
+    return $adunit;
+  }
+
+  public function getRawSize() {
+    return $this->tag->size();
+  }
+
+  public function getRawTargetting() {
+    return $this->tag->targeting();
+  }
+
 }

@@ -769,33 +769,6 @@ function template_preprocess_dfp_tag(&$variables) {
 }
 
 /**
- * Preprocess function for DFP tags.
- */
-function template_preprocess_dfp_short_tag(&$variables) {
-  static $tile = 0;
-  $tag = $variables['tag'];
-  $tag = _dfp_prepare_adunit($tag);
-
-  // Build a key|vals array and allow third party modules to modify it.
-  $keyvals = array();
-  $keyvals['iu'] = dfp_token_replace('/[dfp_tag:network_id]/' . $tag->adunit, $tag, array('sanitize' => TRUE, 'clear' => TRUE));
-  $keyvals['sz'] = str_replace(',', '|', check_plain($tag->raw->size));
-  $keyvals['c'] = rand(10000, 99999);
-
-  $targets = array();
-  foreach ($tag->targeting as $data) {
-    $targets[] = check_plain($data['target']) . '=' . check_plain($data['value']);
-  }
-  if (!empty($targets)) {
-    $keyvals['t'] = implode('&', $targets);
-  }
-  drupal_alter('dfp_short_tag_keyvals', $keyvals);
-
-  $variables['url_jump'] = 'http://' . DFP_GOOGLE_SHORT_TAG_SERVICES_URL . '/jump?' . drupal_http_build_query($keyvals);
-  $variables['url_ad'] = 'http://' . DFP_GOOGLE_SHORT_TAG_SERVICES_URL . '/ad?' . drupal_http_build_query($keyvals);
-}
-
-/**
  * Implements of hook_page_build().
  */
 function dfp_page_build(&$page) {

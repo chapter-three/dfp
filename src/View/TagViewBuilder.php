@@ -144,8 +144,7 @@ class TagViewBuilder extends EntityViewBuilder {
 //          ),
 //        ),
         'tag' => array(
-          //'#theme' => $tag->shortTag() ? 'dfp_short_tag' : 'dfp_tag',
-          '#theme' => 'dfp_tag',
+          '#theme' => $tag->shortTag() ? 'dfp_short_tag' : 'dfp_tag',
           '#tag' => $tag_view,
         ),
       ),

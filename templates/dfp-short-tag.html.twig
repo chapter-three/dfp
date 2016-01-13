@@ -1,0 +1,18 @@
+{#
+/**
+ * @file
+ * Default theme implementation to display a DFP short tag.
+ *
+ * Available variables:
+ * - tag: The DFP Tag configuration entity.
+ * - url_jump: Url to link to.
+ * - url_ad: Url to display the ad.
+ *
+ * @see template_preprocess_dfp_short_tag()
+ *
+ * @ingroup themeable
+ */
+#}
+<a href="{{ url_jump }}">
+    <img src="{{ url_ad }}">
+</a>
