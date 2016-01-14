@@ -1,15 +1,10 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: alex
- * Date: 12/01/16
- * Time: 15:44
- */
 
 namespace Drupal\dfp\View;
 
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Config\ImmutableConfig;
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Url;
 use Drupal\dfp\Entity\TagInterface;
@@ -19,14 +14,32 @@ use Drupal\dfp\TokenInterface;
  * A value object to combine a DFP tag with global settings for display.
  */
 class TagView {
+  use DependencySerializationTrait;
 
+  /**
+   * @var string
+   */
   protected $shortTagQueryString;
 
+  /**
+   * @var string
+   */
   protected $adUnit;
 
+  /**
+   * @var array
+   */
   protected $targets;
 
+  /**
+   * @var array
+   */
   protected $breakpoints;
+
+  /**
+   * @var string
+   */
+  protected static $clickUrl;
 
   /**
    * @var \Drupal\Core\Config\ImmutableConfig
@@ -47,8 +60,6 @@ class TagView {
    * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
   protected $moduleHandler;
-
-  protected static $clickUrl;
 
   public function __construct(TagInterface $tag, ImmutableConfig $global_settings, TokenInterface $token, ModuleHandlerInterface $module_handler) {
     $this->tag = $tag;
@@ -200,6 +211,10 @@ class TagView {
       }
     }
     return self::$clickUrl;
+  }
+
+  public function getSlugPlacement() {
+    return $this->globalSettings->get('slug_placement');
   }
 
 }

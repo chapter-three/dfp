@@ -7,15 +7,10 @@
 
 namespace Drupal\dfp\Plugin\Block;
 
-use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Block\BlockBase;
-use Drupal\Core\Block\BlockManagerInterface;
-use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManager;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Routing\UrlGeneratorInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -32,13 +27,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class TagBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
-//  /**
-//   * The Plugin Block Manager.
-//   *
-//   * @var \Drupal\Core\Block\BlockManagerInterface.
-//   */
-//  protected $blockManager;
-//
   /**
    * The entity repository service.
    *
@@ -59,21 +47,7 @@ class TagBlock extends BlockBase implements ContainerFactoryPluginInterface {
    * @var \Drupal\Core\Session\AccountInterface.
    */
   protected $account;
-//
-//  /**
-//   * The block content entity.
-//   *
-//   * @var \Drupal\block_content\BlockContentInterface
-//   */
-//  protected $blockContent;
-//
-//  /**
-//   * The URL generator.
-//   *
-//   * @var \Drupal\Core\Routing\UrlGeneratorInterface
-//   */
-//  protected $urlGenerator;
-//
+
   /**
    * Constructs a new BlockContentBlock.
    *
@@ -117,48 +91,6 @@ class TagBlock extends BlockBase implements ContainerFactoryPluginInterface {
     ];
   }
 
-//
-//  /**
-//   * Overrides \Drupal\Core\Block\BlockBase::blockForm().
-//   *
-//   * Adds body and description fields to the block configuration form.
-//   */
-//  public function blockForm($form, FormStateInterface $form_state) {
-//    $uuid = $this->getDerivativeId();
-//    $block = $this->entityManager->loadEntityByUuid('block_content', $uuid);
-//    $options = $this->entityManager->getViewModeOptionsByBundle('block_content', $block->bundle());
-//
-//    $form['view_mode'] = array(
-//      '#type' => 'select',
-//      '#options' => $options,
-//      '#title' => $this->t('View mode'),
-//      '#description' => $this->t('Output the block in this view mode.'),
-//      '#default_value' => $this->configuration['view_mode'],
-//      '#access' => (count($options) > 1),
-//    );
-//    $form['title']['#description'] = $this->t('The title of the block as shown to the user.');
-//    return $form;
-//  }
-//
-//  /**
-//   * {@inheritdoc}
-//   */
-//  public function blockSubmit($form, FormStateInterface $form_state) {
-//    // Invalidate the block cache to update custom block-based derivatives.
-//    $this->configuration['view_mode'] = $form_state->getValue('view_mode');
-//    $this->blockManager->clearCachedDefinitions();
-//  }
-//
-//  /**
-//   * {@inheritdoc}
-//   */
-//  protected function blockAccess(AccountInterface $account) {
-//    if ($this->getEntity()) {
-//      return $this->getEntity()->access('view', $account, TRUE);
-//    }
-//    return AccessResult::forbidden();
-//  }
-//
   /**
    * {@inheritdoc}
    */

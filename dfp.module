@@ -30,31 +30,37 @@ function dfp_help($route_name, RouteMatchInterface $route_match) {
  */
 function dfp_theme() {
   return array(
-    'dfp_tag' => array(
-      'render element' => 'elements',
-    ),
-    'dfp_short_tag' => array(
-      'variables' => array(
+    'dfp_tag' => [
+      'variables' => [
+        'tag' => NULL,
+      ]
+    ],
+    'dfp_short_tag' => [
+      'variables' => [
         'tag' => NULL,
         'url_jump' => NULL,
         'url_ad' => NULL,
-      ),
-    ),
-    'dfp_js' => array(
-      'variables' => array(
+      ],
+    ],
+    'dfp_js' => [
+      'variables' => [
         'google_tag_services_url' => NULL,
-        'targets' => []
-      ),
-    ),
+        'targets' => [],
+      ],
+    ],
     'dfp_slot_definition_js' => [
       'variables' => [
-        'tag' => NULL
+        'tag' => NULL,
       ]
     ]
   );
 }
 
+/**
+ * Implements hook_page_attachments().
+ */
 function dfp_page_attachments(array &$page) {
+  // @todo Work out how to add this only when required.
   $global_settings = \Drupal::config('dfp.settings');
   $build = [
     '#theme' => 'dfp_js',
@@ -68,52 +74,4 @@ function dfp_page_attachments(array &$page) {
     ],
     'dfp-setup'
   ];
-//  /** @var \Drupal\dfp\View\TagView $tag */
-//  foreach (\Drupal::service('dfp.slot_definitions')->getTags() as $tag) {
-//    $build = [
-//      '#theme' => 'dfp_slot_definition_js',
-//      '#tag' => $tag,
-//    ];
-//    $page['#attached']['html_head'][] = [
-//      [
-//        '#tag' => 'script',
-//        // The value of the HTML tag, here we want to end up with <script>alert("Hello world!");</script>.
-//        '#value' => \Drupal::service('renderer')->renderPlain($build),
-//      ],
-//      'dfp-slot-defintion-' . $tag->id()
-//    ];
-//
-//  }
-  $page['#attached']['html_head'][] = [
-    [
-      '#tag' => 'script',
-      '#value' => 'blah'
-      ], 'test'];
-}
-
-function dfp_page_attachments_alter(array &$page) {
-  $a = 1;
-}
-
-/**
- * Preprocess function for DFP tags.
- */
-function template_preprocess_dfp_tag(&$variables) {
-  /** @var \Drupal\dfp\View\TagView $tag */
-  $tag = $variables['elements']['#tag'];
-  $variables['tag'] = $variables['elements']['#tag'];
-  $variables['placeholder_id'] = $tag->getPlaceholderId();
-  $variables['slug_placement'] = \Drupal::config('dfp.settings')->get('slug_placement');
-
-//
-//  // Format certain tag properties for display.
-//  $tag->adunit = dfp_token_replace('[dfp_tag:network_id]/' . $tag->adunit, $tag, array('sanitize' => TRUE, 'clear' => TRUE));
-//  $tag->size = dfp_format_size($tag->size);
-//
-//  // Define a javascript ad slot for this tag.
-//  _dfp_js_slot_definition($tag);
-//
-//  // Flag the slot as processed.
-//  $variables['tag']->processed = TRUE;
-
 }

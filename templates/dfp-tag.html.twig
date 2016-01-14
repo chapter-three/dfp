@@ -4,24 +4,22 @@
  * Default theme implementation to display a DFP tag.
  *
  * Available variables:
- * - tag: The DFP Tag configuration entity.
- * - placeholder_id: The DFP Tag placeholder.
- * - slug_placement: Boolean indicating...
+ * - tag: \Drupal\dfp\View\TagView object.
  *
- * @see template_preprocess_dfp_tag()
+ * @see \Drupal\dfp\View\Tag\TagViewBuilder::buildPreTag()
  *
  * @ingroup themeable
  */
 #}
-<div id="{{ placeholder_id }}">
-    {% if slug_placement and tag.slug %}
+<div id="{{ tag.placeholderId }}">
+    {% if tag.slugPlacement and tag.slug %}
         <div>
             {{ tag.slug }}
         </div>
     {% endif %}
     <script type="text/javascript">
         googletag.cmd.push(function() {
-            googletag.display({{ placeholder_id }});
+            googletag.display({{ tag.placeholderId }});
         });
     </script>
 </div>
