@@ -26,7 +26,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @Block(
  *  id = "dfp_ad",
  *  admin_label = @Translation("DFP Ad block"),
- *  category = @Translation("Custom"),
+ *  category = @Translation("Advertising"),
  *  deriver = "Drupal\dfp\Plugin\Derivative\TagBlock"
  * )
  */
@@ -107,17 +107,16 @@ class TagBlock extends BlockBase implements ContainerFactoryPluginInterface {
       $container->get('current_user')
     );
   }
-//
-//  /**
-//   * {@inheritdoc}
-//   */
-//  public function defaultConfiguration() {
-//    return array(
-//      'status' => TRUE,
-//      'info' => '',
-//      'view_mode' => 'full',
-//    );
-//  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function defaultConfiguration() {
+    return [
+      'label_display' => 'hidden',
+    ];
+  }
+
 //
 //  /**
 //   * Overrides \Drupal\Core\Block\BlockBase::blockForm().

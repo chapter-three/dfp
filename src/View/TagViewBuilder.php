@@ -16,7 +16,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Render\Element;
-use Drupal\dfp\Entity\TagInterface;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\dfp\TokenInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -47,6 +47,11 @@ class TagViewBuilder extends EntityViewBuilder {
   protected $token;
 
   /**
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected $renderer;
+
+  /**
    * Constructs a new BlockViewBuilder.
    *
    * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
@@ -58,11 +63,12 @@ class TagViewBuilder extends EntityViewBuilder {
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler.
    */
-  public function __construct(EntityTypeInterface $entity_type, EntityManagerInterface $entity_manager, LanguageManagerInterface $language_manager, ModuleHandlerInterface $module_handler, ConfigFactoryInterface $config_factory, TokenInterface $token) {
+  public function __construct(EntityTypeInterface $entity_type, EntityManagerInterface $entity_manager, LanguageManagerInterface $language_manager, ModuleHandlerInterface $module_handler, ConfigFactoryInterface $config_factory, TokenInterface $token, RendererInterface $renderer) {
     parent::__construct($entity_type, $entity_manager, $language_manager);
     $this->moduleHandler = $module_handler;
     $this->configFactory = $config_factory;
     $this->token = $token;
+    $this->renderer = $renderer;
   }
 
   /**
@@ -75,7 +81,8 @@ class TagViewBuilder extends EntityViewBuilder {
       $container->get('language_manager'),
       $container->get('module_handler'),
       $container->get('config.factory'),
-      $container->get('dfp.token')
+      $container->get('dfp.token'),
+      $container->get('renderer')
     );
   }
 
@@ -100,22 +107,27 @@ class TagViewBuilder extends EntityViewBuilder {
     /** @var \Drupal\dfp\Entity\TagInterface[] $entities */
     $build = [];
     foreach ($entities as $tag) {
-      $entity_id = $tag->id();
-      $cache_tags = Cache::mergeTags($this->getCacheTags(), $tag->getCacheTags());
-
+      // @todo ensure a tag is only once on the page...
+//      if (isset($tag->processed) && $tag->processed === TRUE) {
+//        watchdog('dfp', 'DFP tag %machinename is being added to the page more than once.', array('%machinename' => $tag->machinename), WATCHDOG_WARNING);
+//        return;
+//      }
       // @todo get cache-ability based on tokens used in TagView...
       $global_settings = $this->configFactory->get('dfp.settings');
       $tag_view = new TagView($tag, $global_settings, $this->token, $this->moduleHandler());
 
-      $build[$entity_id] = [
+      $tag_id = $tag->id();
+      $cache_tags = Cache::mergeTags($this->getCacheTags(), $tag->getCacheTags());
+
+      $build[$tag_id] = [
         '#cache' => [
-          'keys' => ['entity_view', 'dfp_tag', $tag->id()],
+          'keys' => ['entity_view', 'dfp_tag', $tag_id],
           'contexts' => $tag->getCacheContexts(),
           'tags' => $cache_tags,
         ],
       ];
 
-      $build[$entity_id] += static::buildPreRenderableBlock($tag_view);
+      $build[$tag_id] += static::buildPreTag($tag_view, $this->renderer);
     }
 
     return $build;
@@ -130,7 +142,7 @@ class TagViewBuilder extends EntityViewBuilder {
    * @return array
    *   A render array with a #pre_render callback to render the DFP tag.
    */
-  protected static function buildPreRenderableBlock(TagView $tag_view) {
+  protected static function buildPreTag(TagView $tag_view, RendererInterface $renderer) {
     $build = array(
       '#contextual_links' => [
         'dfp_tag' => [
@@ -148,6 +160,17 @@ class TagViewBuilder extends EntityViewBuilder {
     else {
       $build['tag'] = [
         '#theme' => 'dfp_tag',
+      ];
+      $head_js_build = [
+        '#theme' => 'dfp_slot_definition_js',
+        '#tag' => $tag_view,
+      ];
+      $build['#attached']['html_head'][] = [
+        [
+          '#tag' => 'script',
+          '#value' => $renderer->renderPlain($head_js_build),
+        ],
+        'dfp-slot-defintion-' . $tag_view->id()
       ];
     }
     $build['tag']['#tag'] = $tag_view;

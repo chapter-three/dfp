@@ -143,12 +143,13 @@ class Tag extends EntityForm {
     $this->addTargetingForm($form['targeting_settings'], $existing_targeting);
 
     // Backfill ad settings options.
-    $form['backfill_settings'] = array(
+    $form['adsense_backfill'] = array(
       '#type' => 'details',
       '#title' => $this->t('Backfill Ad Settings'),
       '#open' => TRUE,
+      '#tree' => TRUE,
     );
-    $form['backfill_settings']['adsense_ad_types'] = array(
+    $form['adsense_backfill']['ad_types'] = array(
       '#type' => 'select',
       '#title' => $this->t('AdSense Ad Type'),
       '#empty_option' => $this->t('- None -'),
@@ -162,7 +163,7 @@ class Tag extends EntityForm {
       ),
       '#description' => $this->t('Choose what type of ads this tag can display when AdSense ads are used for backfill.'),
     );
-    $form['backfill_settings']['adsense_channel_ids'] = array(
+    $form['adsense_backfill']['channel_ids'] = array(
       '#type' => 'textfield',
       '#title' => $this->t('AdSense Channel ID(s)'),
       '#default_value' => $tag->adsenseChannelIds(),
@@ -170,18 +171,18 @@ class Tag extends EntityForm {
       '#description' => $this->t('Example: 271828183+314159265'),
         '#states' => array(
           '!visible' => array(
-            array(':input[name="adsense_ad_types"]' => array('value' => '')),
+            array(':input[name="adsense_backfill[ad_types]"]' => array('value' => '')),
           ),
         )
     );
-    $form['backfill_settings']['adsense_color_settings'] = array(
+    $form['adsense_backfill']['color_settings'] = array(
       '#type' => 'container',
       '#attributes' => array('class' => array('form-item')),
       //'#theme' => 'dfp_adsense_color_settings',
       '#states' => array(
         'visible' => array(
-          array(':input[name="adsense_ad_types"]' => array('value' => TagInterface::ADSENSE_TEXT)),
-          array(':input[name="adsense_ad_types"]' => array('value' => TagInterface::ADSENSE_TEXT_IMAGE)),
+          array(':input[name="adsense_backfill[ad_types]"]' => array('value' => TagInterface::ADSENSE_TEXT)),
+          array(':input[name="adsense_backfill[ad_types]"]' => array('value' => TagInterface::ADSENSE_TEXT_IMAGE)),
         ),
       ),
 //      '#attached' => array(
@@ -198,7 +199,7 @@ class Tag extends EntityForm {
       'url' => $this->t('URL color'),
     );
     foreach ($adsense_color_settings as $setting => $title) {
-      $form['backfill_settings']['adsense_color_settings'][$setting] = array(
+      $form['adsense_backfill']['color'][$setting] = array(
         '#type' => 'textfield',
         '#title' => $title,
         '#attributes' => array('class' => array('color-setting')),
@@ -227,6 +228,7 @@ class Tag extends EntityForm {
   public function save(array $form, FormStateInterface $form_state) {
 
     $tag = $this->entity;
+    $values = $form_state->getValues();
     $status = $tag->save();
     $t_args['%slot'] = $tag->label();
 

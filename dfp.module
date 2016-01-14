@@ -5,14 +5,13 @@
  * The DFP module.
  */
 
-use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Routing\RouteMatchInterface;
 
 // @todo move constants to interface
-define('DFP_GOOGLE_TAG_SERVICES_URL', 'www.googletagservices.com/tag/js/gpt.js');
+//define('DFP_GOOGLE_TAG_SERVICES_URL', 'www.googletagservices.com/tag/js/gpt.js');
 //define('DFP_GOOGLE_SHORT_TAG_SERVICES_URL', 'pubads.g.doubleclick.net/gampad');
+define('DFP_GOOGLE_TAG_SERVICES_URL', 'example.com/www.googletagservices.com/tag/js/gpt.js');
 define('DFP_GOOGLE_SHORT_TAG_SERVICES_URL', 'example.com/pubads.g.doubleclick.net/gampad');
-define('DFP_TOKEN_CACHE', 'dfp:tag_token_results');
 
 /**
  * Implements hook_help().
@@ -41,9 +40,60 @@ function dfp_theme() {
         'url_ad' => NULL,
       ),
     ),
+    'dfp_js' => array(
+      'variables' => array(
+        'google_tag_services_url' => NULL,
+        'targets' => []
+      ),
+    ),
+    'dfp_slot_definition_js' => [
+      'variables' => [
+        'tag' => NULL
+      ]
+    ]
   );
 }
 
+function dfp_page_attachments(array &$page) {
+  $global_settings = \Drupal::config('dfp.settings');
+  $build = [
+    '#theme' => 'dfp_js',
+    '#google_tag_services_url' => DFP_GOOGLE_TAG_SERVICES_URL,
+    '#targets' => $global_settings->get('targets'),
+  ];
+  $page['#attached']['html_head'][] = [
+    [
+      '#tag' => 'script',
+      '#value' => \Drupal::service('renderer')->renderPlain($build),
+    ],
+    'dfp-setup'
+  ];
+//  /** @var \Drupal\dfp\View\TagView $tag */
+//  foreach (\Drupal::service('dfp.slot_definitions')->getTags() as $tag) {
+//    $build = [
+//      '#theme' => 'dfp_slot_definition_js',
+//      '#tag' => $tag,
+//    ];
+//    $page['#attached']['html_head'][] = [
+//      [
+//        '#tag' => 'script',
+//        // The value of the HTML tag, here we want to end up with <script>alert("Hello world!");</script>.
+//        '#value' => \Drupal::service('renderer')->renderPlain($build),
+//      ],
+//      'dfp-slot-defintion-' . $tag->id()
+//    ];
+//
+//  }
+  $page['#attached']['html_head'][] = [
+    [
+      '#tag' => 'script',
+      '#value' => 'blah'
+      ], 'test'];
+}
+
+function dfp_page_attachments_alter(array &$page) {
+  $a = 1;
+}
 
 /**
  * Preprocess function for DFP tags.

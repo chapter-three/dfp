@@ -11,6 +11,7 @@ namespace Drupal\dfp\View;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Url;
 use Drupal\dfp\Entity\TagInterface;
 use Drupal\dfp\TokenInterface;
 
@@ -22,6 +23,10 @@ class TagView {
   protected $shortTagQueryString;
 
   protected $adUnit;
+
+  protected $targets;
+
+  protected $breakpoints;
 
   /**
    * @var \Drupal\Core\Config\ImmutableConfig
@@ -42,6 +47,8 @@ class TagView {
    * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
   protected $moduleHandler;
+
+  protected static $clickUrl;
 
   public function __construct(TagInterface $tag, ImmutableConfig $global_settings, TokenInterface $token, ModuleHandlerInterface $module_handler) {
     $this->tag = $tag;
@@ -120,4 +127,79 @@ class TagView {
   public function id() {
     return $this->tag->id();
   }
+
+  public function getTargets() {
+    if (is_null($this->targets)) {
+      $targets = $this->tag->targeting();
+      foreach ($targets as $key => &$target) {
+        $target['value'] = $this->token->replace($target['value'], $this, ['clear' => TRUE]);
+        // The target value could be blank if tokens are used. If so, removed it.
+        if (empty($target['value'])) {
+          unset($targets[$key]);
+          continue;
+        }
+
+        // Allow other modules to alter the target.
+        $this->moduleHandler->alter('dfp_target', $target);
+
+        // Convert the values into an array and trim the whitespace from each value.
+        $target['value'] = explode(',', $target['value']);
+
+      }
+      $this->targets = $targets;
+    }
+    return $this->targets;
+  }
+
+  public function getBreakpoints() {
+    if (is_null($this->breakpoints)) {
+      $this->breakpoints = array_map(function ($breakpoint) {
+        return [
+          'browser_size' => self::formatSize($breakpoint['browser_size']),
+          'ad_sizes' => self::formatSize($breakpoint['ad_sizes']),
+        ];
+      },  $this->tag->breakpoints());
+    }
+    return $this->breakpoints;
+  }
+
+  public function getSize() {
+    return self::formatSize($this->tag->size());
+  }
+
+  public static function formatSize($size) {
+    $formatted_sizes = [];
+
+    $sizes = explode(',', $size);
+    foreach ($sizes as $size) {
+      $formatted_size = explode('x', trim($size));
+      $formatted_sizes[] = '[' . implode(', ', $formatted_size) . ']';
+    }
+
+    return count($formatted_sizes) == 1 ? $formatted_sizes[0] : '[' . implode(', ', $formatted_sizes) . ']';
+  }
+
+  public function getAdsenseAdTypes() {
+    return $this->tag->adsenseAdTypes();
+  }
+
+  public function getAdsenseChannelIds() {
+    return $this->tag->adsenseChannelIds();
+  }
+
+  public function getAdSenseColors() {
+    return array_filter($this->tag->adsenseColors());
+  }
+
+  public function getClickUrl() {
+    // Since this can't change during a request statically cache it.
+    if (is_null(self::$clickUrl)) {
+      self::$clickUrl = (string) $this->globalSettings->get('click_url');
+      if (self::$clickUrl && !preg_match("/^https?:\/\//", self::$clickUrl)) {
+        self::$clickUrl = Url::fromUserInput(self::$clickUrl, ['absolute' => TRUE])->toString();
+      }
+    }
+    return self::$clickUrl;
+  }
+
 }

@@ -192,15 +192,19 @@ class Tag extends ConfigEntityBase implements TagInterface {
   }
 
   public function adsenseAdTypes() {
-    return isset($this->adsense_backfill['ad_types']) ?: NULL;
+    return isset($this->adsense_backfill['ad_types']) ? $this->adsense_backfill['ad_types'] : NULL;
   }
 
   public function adsenseChannelIds() {
-    return isset($this->adsense_backfill['channel_ids']) ?: NULL;
+    return isset($this->adsense_backfill['channel_ids']) ? $this->adsense_backfill['channel_ids'] : NULL;
   }
 
   public function adsenseColor($setting) {
-    return isset($this->adsense_backfill['color'][$setting]) ?: NULL;
+    return isset($this->adsense_backfill['color'][$setting]) ? $this->adsense_backfill['color'][$setting] : NULL;
+  }
+
+  public function adsenseColors() {
+    return isset($this->adsense_backfill['color']) ? $this->adsense_backfill['color'] : [];
   }
 
 }

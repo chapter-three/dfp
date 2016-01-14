@@ -267,7 +267,7 @@ class AdminSettings extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    if ($form_state->hasValue('click_url') && $form_state->getValue('async_rendering')) {
+    if ($form_state->getValue('click_url') && $form_state->getValue('async_rendering')) {
       $form_state->setErrorByName('click_url', $this->t('Setting a click URL does not work with async rendering.'));
     }
     if (preg_match(TagInterface::ADUNIT_PATTERN_VALIDATION_REGEX, $form_state->getValue('adunit_pattern'))) {

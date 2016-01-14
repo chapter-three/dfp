@@ -64,6 +64,11 @@ interface TagInterface extends ConfigEntityInterface {
   /**
    * @return array
    */
+  public function adsenseColors();
+
+  /**
+   * @return array
+   */
   public function breakpoints();
 
 }
