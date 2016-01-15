@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Builds placeholder replacement tokens for DFP Ad tag data.
+ */
+
 use Drupal\Core\Render\BubbleableMetadata;
 
 /**

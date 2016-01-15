@@ -1,10 +1,8 @@
 <?php
 
 /**
- * Created by PhpStorm.
- * User: alex
- * Date: 11/01/16
- * Time: 18:34
+ * @file
+ * Contains \Drupal\dfp\Form\Tag.
  */
 
 namespace Drupal\dfp\Form;

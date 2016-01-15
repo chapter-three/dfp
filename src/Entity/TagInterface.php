@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\dfp\Entity\TagInterface.
+ */
+
 namespace Drupal\dfp\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityInterface;

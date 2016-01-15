@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\brightcove\Form\AdminSettingsForm.
+ * Contains \Drupal\dfp\Form\AdminSettings.
  */
 
 namespace Drupal\dfp\Form;

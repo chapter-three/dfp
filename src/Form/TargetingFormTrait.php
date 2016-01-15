@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\dfp\Form\TargetingFormTrait.
+ */
+
 namespace Drupal\dfp\Form;
 
 use Drupal\Core\Form\FormStateInterface;

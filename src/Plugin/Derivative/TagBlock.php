@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\block_content\Plugin\Derivative\BlockContent.
+ * Contains \Drupal\dfp\Plugin\Derivative\TagBlock.
  */
 
 namespace Drupal\dfp\Plugin\Derivative;
@@ -14,7 +14,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Retrieves block plugin definitions for all custom blocks.
+ * Retrieves block plugin definitions for all available DFP Ad tags.
  */
 class TagBlock extends DeriverBase implements ContainerDeriverInterface {
   use StringTranslationTrait;

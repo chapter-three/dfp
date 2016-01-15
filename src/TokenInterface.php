@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\dfp\TokenInterface.
+ */
+
 namespace Drupal\dfp;
 
 use Drupal\Core\Render\BubbleableMetadata;

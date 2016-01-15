@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\block_content\Plugin\Block\BlockContentBlock.
+ * Contains \Drupal\dfp\Plugin\Block\TagBlock.
  */
 
 namespace Drupal\dfp\Plugin\Block;
