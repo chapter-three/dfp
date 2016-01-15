@@ -10,7 +10,7 @@ namespace Drupal\dfp\Entity;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 
 /**
- * Defines the Brightcove API client configuration entity class.
+ * Defines the DFP Ad tag configuration entity class.
  *
  * @todo list_cache_tags
  *
@@ -77,9 +77,9 @@ class Tag extends ConfigEntityBase implements TagInterface {
    *
    * @var boolean
    *
-   * @todo work out why this exists.
+   * @todo Not used at present. Regression from D7.
    */
-  //protected $out_of_page;
+  protected $out_of_page;
 
   /**
    * Size(s).
@@ -104,7 +104,7 @@ class Tag extends ConfigEntityBase implements TagInterface {
    * Slug.
    *
    * Override the default slug for this ad tag. Use <none> for no slug. Leave
-   * this field empty to use the default slug. Example: Advertisement
+   * this field empty to use the default slug. Example: Advertisement.
    *
    * @var string
    */
@@ -127,16 +127,22 @@ class Tag extends ConfigEntityBase implements TagInterface {
   protected $short_tag = FALSE;
 
   /**
+   * The breakpoints.
+   *
    * @var array
    */
   protected $breakpoints = [];
 
   /**
+   * The ad targeting.
+   *
    * @var array
    */
   protected $targeting = [];
 
   /**
+   * Settings used when AdSense ads are used for backfill.
+   *
    * @var array
    */
   protected $adsense_backfill = [];
@@ -183,26 +189,44 @@ class Tag extends ConfigEntityBase implements TagInterface {
     return $this->short_tag;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function targeting() {
     return $this->targeting;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function breakpoints() {
     return $this->breakpoints;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function adsenseAdTypes() {
     return isset($this->adsense_backfill['ad_types']) ? $this->adsense_backfill['ad_types'] : NULL;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function adsenseChannelIds() {
     return isset($this->adsense_backfill['channel_ids']) ? $this->adsense_backfill['channel_ids'] : NULL;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function adsenseColor($setting) {
     return isset($this->adsense_backfill['color'][$setting]) ? $this->adsense_backfill['color'][$setting] : NULL;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function adsenseColors() {
     return isset($this->adsense_backfill['color']) ? $this->adsense_backfill['color'] : [];
   }
