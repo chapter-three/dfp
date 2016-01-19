@@ -10,13 +10,12 @@ namespace Drupal\dfp\Form;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Class BreakpointFormTrait
- * @package Drupal\dfp\Form
+ * Provides form for adding breakpoints to a DFP tag.
  */
 trait BreakpointFormTrait {
 
   /**
-   * Validation function used by an individual breakpoint in the breakpoints form.
+   * Validation function used by an individual breakpoint.
    */
   public static function breakpointFormValidate(array $element, FormStateInterface &$form_state) {
     if (empty($element['browser_size']['#value']) && !empty($element['ad_sizes']['#value'])) {
@@ -45,8 +44,7 @@ trait BreakpointFormTrait {
   }
 
   /**
-   * Helper function that takes a form_state['values'] and removes
-   * empty breakpoints.
+   * Helper function that removes empty breakpoints from form values.
    */
   protected static function breakpointsTrim(array &$values, $parent = 'breakpoints') {
     foreach ($values as $key => &$val) {
@@ -93,7 +91,6 @@ trait BreakpointFormTrait {
       '#tree' => FALSE,
       '#prefix' => '<div id="dfp-breakpoints-wrapper">',
       '#suffix' => '</div>',
-      //'#theme' => 'dfp_breakpoint_settings',
       '#element_validate' => [[get_class($this), 'breakpointsFormValidate']],
     );
 
@@ -166,8 +163,11 @@ trait BreakpointFormTrait {
   }
 
   /**
-   * Returns the current breakpoints. The default value will be used unless an
-   * "input" exists in the form_state variable, in which case that will be used.
+   * Returns the current breakpoints.
+   *
+   * @return array
+   *   The default value will be used unless an "input" exists in the form_state
+   *   variable, in which case that will be used.
    */
   protected function getExistingBreakpoints(FormStateInterface $form_state, array $breakpoints = array()) {
     $user_input = $form_state->getUserInput();

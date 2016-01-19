@@ -9,6 +9,9 @@ namespace Drupal\dfp\Form;
 
 use Drupal\Core\Form\FormStateInterface;
 
+/**
+ * Adds a form for saving DFP targeting information.
+ */
 trait TargetingFormTrait {
 
   /**
@@ -35,7 +38,6 @@ trait TargetingFormTrait {
       '#tree' => FALSE,
       '#prefix' => '<div id="dfp-targeting-wrapper">',
       '#suffix' => '</div>',
-      //'#theme' => 'dfp_target_settings',
       '#element_validate' => [[get_class($this), 'targetingFormValidate']],
     );
 
@@ -65,14 +67,7 @@ trait TargetingFormTrait {
         'effect' => 'fade',
       ),
     );
-    // @todo
-//  $targeting_form['tokens'] = array(
-//    '#theme' => 'token_tree',
-//    '#token_types' => array('dfp_tag', 'node', 'term', 'user'),
-//    '#global_types' => TRUE,
-//    '#click_insert' => TRUE,
-//    '#dialog' => TRUE,
-//  );
+    // @todo Add token browser.
   }
 
   /**
@@ -145,7 +140,7 @@ trait TargetingFormTrait {
   }
 
   /**
-   * Helper function that takes a form_state['values'] and removes empty targets.
+   * Helper function that removes empty targets form form values.
    */
   protected static function trimTargetingValues(&$values, $parent = 'targeting') {
     foreach ($values as $key => &$val) {
@@ -166,4 +161,5 @@ trait TargetingFormTrait {
       }
     }
   }
+
 }

@@ -105,14 +105,8 @@ class AdminSettings extends ConfigFormBase {
         ),
       ),
     );
-    // @todo: token browser
-//    $form['global_tag_settings']['tokens'] = array(
-//      '#theme' => 'token_tree',
-//      '#token_types' => array('dfp_tag', 'node', 'term', 'user'),
-//      '#global_types' => TRUE,
-//      '#click_insert' => TRUE,
-//      '#dialog' => TRUE,
-//    );
+    // @todo: Add back token browser.
+
     $form['global_tag_settings']['async_rendering'] = array(
       '#type' => 'checkbox',
       '#title' => t('Render ads asynchronously'),
@@ -215,7 +209,7 @@ class AdminSettings extends ConfigFormBase {
     $existing_targeting = $this->getExistingTargeting($form_state, $config->get('targeting'));
     $this->addTargetingForm($form['targeting_settings'], $existing_targeting);
 
-    // AdTest Settings
+    // AdTest Settings.
     $form['adtest'] = array(
       '#type' => 'details',
       '#title' => $this->t('Ad Test Settings'),
@@ -227,39 +221,9 @@ class AdminSettings extends ConfigFormBase {
       '#description' => $this->t('Override the Ad Unit value for all the ad tags on a page by adding ?adtest=true to the URL. Use the tokens below to define how the ad unit should display. Example: [dfp_tag:network_id]/test/[dfp_tag:slot]'),
       '#default_value' => $config->get('adtest_adunit_pattern'),
     );
-    // @todo token browser
-//    $form['adtest']['tokens'] = array(
-//      '#theme' => 'token_tree',
-//      '#token_types' => array('dfp_tag', 'node', 'term', 'user'),
-//      '#global_types' => TRUE,
-//      '#click_insert' => TRUE,
-//      '#dialog' => TRUE,
-//    );
-
-    // @todo - this looks bad.
-    // Javascript.
-//    $form['javascript'] = array(
-//      '#type' => 'fieldset',
-//      '#title' => t('Inject Javascript'),
-//      '#collapsible' => TRUE,
-//      '#collapsed' => FALSE,
-//      '#weight' => 20,
-//      '#group' => 'settings',
-//    );
-//    $form['javascript']['dfp_injected_js'] = array(
-//      '#type' => 'textarea',
-//      '#title' => t('Inject javascript') . ' 1',
-//      '#description' => t('Inject this javascript into the @tag on every page request immediately after the googletag object becomes available.', array('@tag' => '<head>')),
-//      '#default_value' => variable_get('dfp_injected_js', ''),
-//      '#rows' => 5,
-//    );
-//    $form['javascript']['dfp_injected_js2'] = array(
-//      '#type' => 'textarea',
-//      '#title' => t('Inject javascript') . ' 2',
-//      '#description' => t('Inject this javascript into the @tag on every page request immediately before the enableServices call.', array('@tag' => '<head>')),
-//      '#default_value' => variable_get('dfp_injected_js2', ''),
-//      '#rows' => 5,
-//    );
+    // @todo Add back token browser.
+    // @todo Drupal 7 also had the ability to inject Javascript. Discuss whether
+    //   or not this should be implemented.
     return parent::buildForm($form, $form_state);
   }
 
@@ -275,7 +239,6 @@ class AdminSettings extends ConfigFormBase {
     }
   }
 
-
   /**
    * {@inheritdoc}
    */
@@ -288,31 +251,31 @@ class AdminSettings extends ConfigFormBase {
       $values['disable_init_load'] = FALSE;
     }
 
-    // @todo sort adding fields to taxonomy
+    // @todo Add fields to selected vocabularies.
     // Attach (or delete) an instance of the dfp_ad_categories term_reference
     // field for each vocabulary that should (or should not) have DFP Ad
     // Categories enabled.
-//    foreach ($form_state['values']['dfp_enable_ad_categories_bundles'] as $bundle => $enable) {
-//      $existing_instance = field_read_instance('taxonomy_term', 'field_dfp_ad_categories', $bundle);
-//      $enable = $enable && !$existing_instance && $form_state['values']['dfp_enable_ad_categories'];
-//      if ($enable) {
-//        $instance = array(
-//          'field_name' => 'field_dfp_ad_categories',
-//          'entity_type' => 'taxonomy_term',
-//          'label' => t('DFP Ad Category'),
-//          'bundle' => $bundle,
-//          'required' => FALSE,
-//          'widget' => array(
-//            'type' => 'options_select'
-//          ),
-//        );
-//        field_create_instance($instance);
-//      }
-//      elseif (!$enable && $existing_instance) {
-//        // Delete this field instance, but be certain not to delete the field.
-//        field_delete_instance($existing_instance, FALSE);
-//      }
-//    }
+    //    foreach ($form_state['values']['dfp_enable_ad_categories_bundles'] as $bundle => $enable) {
+    //      $existing_instance = field_read_instance('taxonomy_term', 'field_dfp_ad_categories', $bundle);
+    //      $enable = $enable && !$existing_instance && $form_state['values']['dfp_enable_ad_categories'];
+    //      if ($enable) {
+    //        $instance = array(
+    //          'field_name' => 'field_dfp_ad_categories',
+    //          'entity_type' => 'taxonomy_term',
+    //          'label' => t('DFP Ad Category'),
+    //          'bundle' => $bundle,
+    //          'required' => FALSE,
+    //          'widget' => array(
+    //            'type' => 'options_select'
+    //          ),
+    //        );
+    //        field_create_instance($instance);
+    //      }
+    //      elseif (!$enable && $existing_instance) {
+    //        // Delete this field instance, but be certain not to delete the field.
+    //        field_delete_instance($existing_instance, FALSE);
+    //      }
+    //    }
 
     $this->config('dfp.settings')
       ->set('network_id', $values['network_id'])

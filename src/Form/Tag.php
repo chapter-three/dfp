@@ -12,6 +12,9 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\dfp\Entity\TagInterface;
 
+/**
+ * Form to edit and add DFP tags.
+ */
 class Tag extends EntityForm {
   use BreakpointFormTrait;
   use TargetingFormTrait;
@@ -20,6 +23,8 @@ class Tag extends EntityForm {
    * {@inheritdoc}
    */
   public function form(array $form, FormStateInterface $form_state) {
+    // @todo Implement vertical tabs like D7 module.
+    // @todo Implement out_of_page setting like D7 module.
     $form = parent::form($form, $form_state);
 
     /** @var \Drupal\dfp\Entity\TagInterface $tag */
@@ -36,11 +41,6 @@ class Tag extends EntityForm {
       '#type' => 'details',
       '#title' => $this->t('Tag Settings'),
       '#open' => TRUE,
-//      '#attached' => array(
-//        'js' => array(
-//          'vertical-tabs' => drupal_get_path('module', 'dfp') . '/dfp.admin.js',
-//        ),
-//      ),
     );
 
     $form['tag_settings']['slot'] = array(
@@ -63,14 +63,6 @@ class Tag extends EntityForm {
       ),
     );
 
-//    $form['tag_settings']['out_of_page'] = array(
-//      '#type' => 'checkbox',
-//      '#title' => $this->t('Out of page (interstitial) ad slot'),
-//      '#description' => $this->t('Use Context module to place the Ad slot on the page.'),
-//      '#default_value' => isset($tag->settings['out_of_page']) ? $tag->settings['out_of_page'] : 0,
-//      '#parents' => array('settings', 'out_of_page'),
-//      '#weight' => 0,
-//    );
     $form['tag_settings']['size'] = array(
       '#type' => 'textfield',
       '#title' => $this->t('Size(s)'),
@@ -87,13 +79,7 @@ class Tag extends EntityForm {
       '#default_value' => $tag->adunit(),
       '#description' => $this->t('Use the tokens below to define how the ad unit should display. The network id will be included automatically. Example: [dfp_tag:url_parts:4]/[dfp_tag:slot]. Leave this field empty to use the default ad unit adunit as defined in <a href=":url">Global DFP Settings</a>.', array(':url' => Url::fromRoute('dfp.admin_settings')->toString())),
     );
-//    $form['tag_settings']['tokens'] = array(
-//      '#theme' => 'token_tree',
-//      '#token_types' => array('dfp_tag', 'node', 'term', 'user'),
-//      '#global_types' => TRUE,
-//      '#click_insert' => TRUE,
-//      '#dialog' => TRUE,
-//    );
+    // @todo Add token browser.
 
     // Global Display settings.
     $form['tag_display_options'] = array(
@@ -154,7 +140,6 @@ class Tag extends EntityForm {
       '#empty_value' => '',
       '#default_value' => $tag->adsenseAdTypes(),
       '#options' => array(
-//        '' => t('- None -'),
         TagInterface::ADSENSE_TEXT_IMAGE => $this->t('Both image and text ads'),
         TagInterface::ADSENSE_IMAGE => $this->t('Only image ads'),
         TagInterface::ADSENSE_TEXT => $this->t('Only text ads'),
@@ -167,28 +152,22 @@ class Tag extends EntityForm {
       '#default_value' => $tag->adsenseChannelIds(),
       '#required' => FALSE,
       '#description' => $this->t('Example: 271828183+314159265'),
-        '#states' => array(
-          '!visible' => array(
-            array(':input[name="adsense_backfill[ad_types]"]' => array('value' => '')),
-          ),
-        )
+      '#states' => array(
+        '!visible' => array(
+          array(':input[name="adsense_backfill[ad_types]"]' => array('value' => '')),
+        ),
+      ),
     );
     $form['adsense_backfill']['color'] = array(
       '#type' => 'fieldgroup',
       '#title' => $this->t('Color Settings for Text Ads'),
       '#attributes' => array('class' => array('form-item')),
-      //'#theme' => 'dfp_adsense_color_settings',
       '#states' => array(
         'visible' => array(
           array(':input[name="adsense_backfill[ad_types]"]' => array('value' => TagInterface::ADSENSE_TEXT)),
           array(':input[name="adsense_backfill[ad_types]"]' => array('value' => TagInterface::ADSENSE_TEXT_IMAGE)),
         ),
       ),
-//      '#attached' => array(
-//        'js' => array(
-//          'vertical-tabs' => drupal_get_path('module', 'dfp') . '/dfp.admin.js',
-//        ),
-//      ),
     );
     $adsense_color_settings = array(
       'background' => $this->t('Background color'),
@@ -225,9 +204,7 @@ class Tag extends EntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-
     $tag = $this->entity;
-    $values = $form_state->getValues();
     $status = $tag->save();
     $t_args['%slot'] = $tag->label();
 
