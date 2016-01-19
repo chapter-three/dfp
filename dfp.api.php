@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Hooks provided by the Chaos Tool Suite.
+ * Hooks provided by the DFP module.
  *
  * This file is divided into static hooks (hooks with string literal names) and
  * dynamic hooks (hooks with pattern-derived string names).
