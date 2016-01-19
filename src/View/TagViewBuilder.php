@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\dfp\View\Tag.
+ * Contains \Drupal\dfp\View\TagViewBuilder.
  */
 
 namespace Drupal\dfp\View;
@@ -15,7 +15,6 @@ use Drupal\Core\Entity\EntityViewBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
-use Drupal\Core\Render\Element;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\dfp\TokenInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -47,6 +46,8 @@ class TagViewBuilder extends EntityViewBuilder {
   protected $token;
 
   /**
+   * The renderer service.
+   *
    * @var \Drupal\Core\Render\RendererInterface
    */
   protected $renderer;
@@ -107,12 +108,8 @@ class TagViewBuilder extends EntityViewBuilder {
     /** @var \Drupal\dfp\Entity\TagInterface[] $entities */
     $build = [];
     foreach ($entities as $tag) {
-      // @todo ensure a tag is only once on the page...
-//      if (isset($tag->processed) && $tag->processed === TRUE) {
-//        watchdog('dfp', 'DFP tag %machinename is being added to the page more than once.', array('%machinename' => $tag->machinename), WATCHDOG_WARNING);
-//        return;
-//      }
-      // @todo get cache-ability based on tokens used in TagView...
+      // @todo Ensure a tag is only once on the page.
+      // @todo Get cache-ability based on tokens used in TagView...
       $global_settings = $this->configFactory->get('dfp.settings');
       $tag_view = new TagView($tag, $global_settings, $this->token, $this->moduleHandler());
 
@@ -136,8 +133,10 @@ class TagViewBuilder extends EntityViewBuilder {
   /**
    * Builds a #pre_render-able DFP tag render array.
    *
-   * @param \Drupal\dfp\View\TagView $tag
+   * @param \Drupal\dfp\View\TagView $tag_view
    *   A DFP tag.
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   The renderer service.
    *
    * @return array
    *   A render array with a #pre_render callback to render the DFP tag.
@@ -170,7 +169,7 @@ class TagViewBuilder extends EntityViewBuilder {
           '#tag' => 'script',
           '#value' => $renderer->renderPlain($head_js_build),
         ],
-        'dfp-slot-defintion-' . $tag_view->id()
+        'dfp-slot-defintion-' . $tag_view->id(),
       ];
     }
     $build['tag']['#tag'] = $tag_view;

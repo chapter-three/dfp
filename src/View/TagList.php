@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\dfp\View\TagList.
+ */
+
 namespace Drupal\dfp\View;
 
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
@@ -11,7 +16,7 @@ use Drupal\Core\Url;
  *
  * @see \Drupal\dfp\View\TagList
  */
-class TagList extends ConfigEntityListBuilder{
+class TagList extends ConfigEntityListBuilder {
 
   /**
    * {@inheritdoc}
@@ -43,9 +48,9 @@ class TagList extends ConfigEntityListBuilder{
    */
   public function render() {
     $build = parent::render();
-    $build['table']['#empty'] = $this->t('No DFP tags available. <a href=":link">Add DFP tag</a>.', [
-      ':link' => Url::fromRoute('entity.dfp_tag.add_form')->toString()
-    ]);
+    $build['table']['#empty'] = $this->t('No DFP tags available. <a href=":link">Add DFP tag</a>.',
+      [':link' => Url::fromRoute('entity.dfp_tag.add_form')->toString()]
+    );
     return $build;
   }
 
