@@ -39,6 +39,14 @@ trait TargetingFormTrait {
       '#element_validate' => [[get_class($this), 'targetingFormValidate']],
     );
 
+    $targeting_form['targeting']['table'] = [
+      '#type' => 'table',
+      '#header' => [
+        $this->t('Target'),
+        $this->t('Value(s)'),
+      ],
+    ];
+
     // Add existing targets to the form unless they are empty.
     foreach ($existing_targeting as $key => $data) {
       $this->addTargetForm($targeting_form, $key, $data);
@@ -95,12 +103,12 @@ trait TargetingFormTrait {
    * Helper form builder for an individual target.
    */
   protected function addTargetForm(array &$form, $key, array $data = array()) {
-    $form['targeting'][$key] = array(
+    $form['targeting']['table'][$key] = array(
       '#prefix' => '<div class="target" id="target-' . $key . '">',
       '#suffix' => '</div>',
       '#element_validate' => [[get_class($this), 'targetFormValidate']],
     );
-    $form['targeting'][$key]['target'] = array(
+    $form['targeting']['table'][$key]['target'] = array(
       '#type' => 'textfield',
       '#title_display' => 'invisible',
       '#title' => t('Target Name'),
@@ -109,7 +117,7 @@ trait TargetingFormTrait {
       '#parents' => array('targeting', $key, 'target'),
       '#attributes' => array('class' => array('field-target-target')),
     );
-    $form['targeting'][$key]['value'] = array(
+    $form['targeting']['table'][$key]['value'] = array(
       '#type' => 'textfield',
       '#title_display' => 'invisible',
       '#title' => t('Target Value'),
@@ -119,8 +127,8 @@ trait TargetingFormTrait {
       '#attributes' => array('class' => array('field-target-value')),
     );
     if (empty($data)) {
-      $form['targeting'][$key]['target']['#description'] = t('Example: color');
-      $form['targeting'][$key]['value']['#description'] = t('Example: red,white,blue');
+      $form['targeting']['table'][$key]['target']['#description'] = t('Example: color');
+      $form['targeting']['table'][$key]['value']['#description'] = t('Example: red,white,blue');
     }
   }
 

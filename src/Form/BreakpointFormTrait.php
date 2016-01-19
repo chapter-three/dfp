@@ -97,6 +97,21 @@ trait BreakpointFormTrait {
       '#element_validate' => [[get_class($this), 'breakpointsFormValidate']],
     );
 
+    $breakpoints_form['breakpoints']['table'] = [
+      '#type' => 'table',
+      '#header' => [
+        $this->t('Browser Size'),
+        $this->t('Ad Size(s)'),
+      ],
+    ];
+
+    $breakpoints_form['breakpoints']['help'] = [
+      '#type' => 'markup',
+      '#prefix' => '<p>',
+      '#markup' => $this->t('These breakpoints are set to implement DFP responsive mappings. See <a href="https://support.google.com/dfp_premium/answer/3423562?hl=en">this support article</a> for more information.'),
+      '#suffix' => '</p>',
+    ];
+
     // Add existing breakpoints to the form unless they are empty.
     foreach ($existing_breakpoints as $key => $data) {
       $this->addBreakpointForm($breakpoints_form, $key, $data);
@@ -121,12 +136,12 @@ trait BreakpointFormTrait {
    * Helper form builder for an individual breakpoint.
    */
   protected function addBreakpointForm(array &$form, $key, array $data = array()) {
-    $form['breakpoints'][$key] = array(
+    $form['breakpoints']['table'][$key] = array(
       '#prefix' => '<div class="breakpoint" id="breakpoint-' . $key . '">',
       '#suffix' => '</div>',
       '#element_validate' => [[get_class($this), 'breakpointFormValidate']],
     );
-    $form['breakpoints'][$key]['browser_size'] = array(
+    $form['breakpoints']['table'][$key]['browser_size'] = array(
       '#type' => 'textfield',
       '#title_display' => 'invisible',
       '#title' => $this->t('Minimum Browser Size'),
@@ -135,7 +150,7 @@ trait BreakpointFormTrait {
       '#parents' => array('breakpoints', $key, 'browser_size'),
       '#attributes' => array('class' => array('field-breakpoint-browser-size')),
     );
-    $form['breakpoints'][$key]['ad_sizes'] = array(
+    $form['breakpoints']['table'][$key]['ad_sizes'] = array(
       '#type' => 'textfield',
       '#title_display' => 'invisible',
       '#title' => $this->t('Ad Sizes'),
@@ -145,8 +160,8 @@ trait BreakpointFormTrait {
       '#attributes' => array('class' => array('field-breakpoint-ad-sizes')),
     );
     if (empty($data)) {
-      $form['breakpoints'][$key]['browser_size']['#description'] = $this->t('Example: 1024x768');
-      $form['breakpoints'][$key]['ad_sizes']['#description'] = $this->t('Example: 300x600,300x250');
+      $form['breakpoints']['table'][$key]['browser_size']['#description'] = $this->t('Example: 1024x768');
+      $form['breakpoints']['table'][$key]['ad_sizes']['#description'] = $this->t('Example: 300x600,300x250');
     }
   }
 

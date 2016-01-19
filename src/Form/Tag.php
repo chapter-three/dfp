@@ -173,8 +173,9 @@ class Tag extends EntityForm {
           ),
         )
     );
-    $form['adsense_backfill']['color_settings'] = array(
-      '#type' => 'container',
+    $form['adsense_backfill']['color'] = array(
+      '#type' => 'fieldgroup',
+      '#title' => $this->t('Color Settings for Text Ads'),
       '#attributes' => array('class' => array('form-item')),
       //'#theme' => 'dfp_adsense_color_settings',
       '#states' => array(
@@ -197,12 +198,12 @@ class Tag extends EntityForm {
       'url' => $this->t('URL color'),
     );
     foreach ($adsense_color_settings as $setting => $title) {
+      // @todo integrate color picker if color module enabled.
       $form['adsense_backfill']['color'][$setting] = array(
         '#type' => 'textfield',
         '#title' => $title,
         '#attributes' => array('class' => array('color-setting')),
         '#field_prefix' => '#',
-        '#title_display' => 'invisible',
         '#default_value' => $tag->adsenseColor($setting),
         '#size' => 6,
       );
