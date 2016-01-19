@@ -57,8 +57,12 @@ class TagBlock extends BlockBase implements ContainerFactoryPluginInterface {
    *   The plugin ID for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
-   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
-   *   The entity manager service.
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
+   *   The entity repository service.
+   * @param \Drupal\Core\Entity\EntityTypeManager $entity_type_manager
+   *   The entity type manager.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The current user.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityRepositoryInterface $entity_repository, EntityTypeManager $entity_type_manager, AccountInterface $account) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
@@ -102,9 +106,9 @@ class TagBlock extends BlockBase implements ContainerFactoryPluginInterface {
       return [
         '#markup' => $this->t('DFP tag with uuid %uuid does not exist. <a href=":url">Add DFP tag</a>.', [
           '%uuid' => $this->getDerivativeId(),
-          ':url' => Url::fromRoute('entity.dfp_tag.add_form')->toString()
+          ':url' => Url::fromRoute('entity.dfp_tag.add_form')->toString(),
         ]),
-        '#access' => $this->account->hasPermission('administer DFP')
+        '#access' => $this->account->hasPermission('administer DFP'),
       ];
     }
   }

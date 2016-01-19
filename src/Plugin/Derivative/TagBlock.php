@@ -50,17 +50,16 @@ class TagBlock extends DeriverBase implements ContainerDeriverInterface {
    * {@inheritdoc}
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
+    /** @var \Drupal\dfp\Entity\TagInterface[] $tags */
     $tags = $this->tagStorage->loadMultiple();
-    /** @var $tag \Drupal\dfp\Entity\TagInterface */
     foreach ($tags as $tag) {
       if ($tag->hasBlock()) {
         $this->derivatives[$tag->uuid()] = $base_plugin_definition;
-        $this->derivatives[$tag->uuid()]['admin_label'] = $this->t('DFP tag: @slotname', array('@slotname' => $tag->slot()));
-        $this->derivatives[$tag->uuid()]['config_dependencies']['config'] = array(
-          $tag->getConfigDependencyName()
-        );
+        $this->derivatives[$tag->uuid()]['admin_label'] = $this->t('DFP tag: @slotname', ['@slotname' => $tag->slot()]);
+        $this->derivatives[$tag->uuid()]['config_dependencies']['config'] = [$tag->getConfigDependencyName()];
       }
     }
     return parent::getDerivativeDefinitions($base_plugin_definition);
   }
+
 }
