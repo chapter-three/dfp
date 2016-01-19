@@ -45,24 +45,23 @@ function dfp_tokens($type, $tokens, array $data, array $options, BubbleableMetad
   if ($type == 'dfp_tag') {
     foreach ($tokens as $name => $original) {
       switch ($name) {
-      case 'slot':
-        // @todo
-        if (!empty($data['dfp_tag'])) {
-          $replacements[$original] = $data['dfp_tag']->getSlot();
-        }
-        break;
+        case 'slot':
+          if (!empty($data['dfp_tag'])) {
+            $replacements[$original] = $data['dfp_tag']->getSlot();
+          }
+          break;
 
-      case 'network_id':
-        $config = \Drupal::config('dfp.settings');
-        $replacements[$original] = $config->get('network_id');
-        $bubbleable_metadata->addCacheableDependency($config);
-        break;
+        case 'network_id':
+          $config = \Drupal::config('dfp.settings');
+          $replacements[$original] = $config->get('network_id');
+          $bubbleable_metadata->addCacheableDependency($config);
+          break;
 
-      case 'ad_categories':
-        // @todo what to do here
-        $term_names = &drupal_static('dfp_entity_targeting_terms', array());
-        $replacements[$original] = implode(',', $term_names);
-        break;
+        case 'ad_categories':
+          // @todo What to do here?
+          $term_names = &drupal_static('dfp_entity_targeting_terms', array());
+          $replacements[$original] = implode(',', $term_names);
+          break;
       }
     }
   }

@@ -62,10 +62,12 @@ function dfp_theme() {
 function dfp_page_attachments(array &$page) {
   // @todo Work out how to add this only when required.
   $global_settings = \Drupal::config('dfp.settings');
+  $targeting = $global_settings->get('targets');
+  \Drupal::moduleHandler()->alter('dfp_global_targeting', $targeting);
   $build = [
     '#theme' => 'dfp_js',
     '#google_tag_services_url' => DFP_GOOGLE_TAG_SERVICES_URL,
-    '#targets' => $global_settings->get('targets'),
+    '#targets' => $targeting,
   ];
   $page['#attached']['html_head'][] = [
     [

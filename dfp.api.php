@@ -14,39 +14,23 @@
  */
 
 /**
- * Alter the raw tag object just after it is loaded from the database.
+ * Alter a targeting key|value pair from a DFP tag.
  *
- * @param object $tag
+ * @param array $targeting
+ *   The DFP tag's targeting key|value pair.
  */
-function hook_dfp_tag_load_alter(&$tag) {
-
-}
-
-/**
- * Alter the tag object just after it is loaded and the settings have been
- * loaded properly.
- *
- * @param object $tag
- */
-function hook_dfp_tag_alter(&$tag) {
-
-}
-
-/**
- * Alter a targeting key|value pair.
- *
- * @param array $target
- */
-function hook_dfp_target_alter(&$target) {
-
+function hook_dfp_target_alter(&$targeting) {
+  // @todo Add example.
 }
 
 /**
  * Alter the global targeting key|value pairs.
  *
- * @param array $target
+ * @param array $targeting
+ *   The global targeting key|value pairs.
  */
-function hook_dfp_global_targeting_alter(&$target) {
+function hook_dfp_global_targeting_alter(&$targeting) {
+  // @todo Fix example to be Drupal 8 relevant.
   // The following example adds the URL arguments array to the targeting.
   $arg = arg();
   if (!empty($arg)) {
@@ -58,13 +42,13 @@ function hook_dfp_global_targeting_alter(&$target) {
 }
 
 /**
- * Alter the keyvals array that is about to be used during the construction of
- * a short tag.
+ * Alters the keyvals array used during the construction of a short tag.
  *
  * @param array $keyvals
+ *   The keyvals array used during the construction of a short tag.
  */
 function hook_dfp_short_tag_keyvals_alter(&$keyvals) {
-
+  // @todo Add example.
 }
 
 /**
