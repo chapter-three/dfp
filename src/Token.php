@@ -19,10 +19,26 @@ use Drupal\dfp\View\TagView;
 class Token implements TokenInterface {
 
   /**
+   * Drupal core's token service.
+   *
+   * @var \Drupal\Core\Utility\Token
+   */
+  protected $coreToken;
+
+  /**
+   * The route match service.
+   *
+   * @var \Drupal\Core\Routing\RouteMatchInterface
+   */
+  protected $routeMatch;
+
+  /**
    * Token constructor.
    *
    * @param \Drupal\Core\Utility\Token $core_token
+   *   Drupal core's token service.
    * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   The route match service.
    */
   public function __construct(CoreToken $core_token, RouteMatchInterface $route_match, AccountInterface $account) {
     $this->coreToken = $core_token;

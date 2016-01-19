@@ -10,6 +10,9 @@ namespace Drupal\dfp;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\dfp\View\TagView;
 
+/**
+ * Interface for the DFP token service.
+ */
 interface TokenInterface {
 
   /**
@@ -22,9 +25,10 @@ interface TokenInterface {
    * @param array $options
    *   (optional) A keyed array of settings and flags to control the token
    *   replacement process.
-   * @param \Drupal\Core\Render\BubbleableMetadata $bubbleable_metadata|null
+   * @param \Drupal\Core\Render\BubbleableMetadata $bubbleable_metadata
    *   (optional) An object to which static::generate() and the hooks and
    *   functions that it invokes will add their required bubbleable metadata.
+   *   Defaults to NULL.
    *
    * @return string
    *   The token result is the entered HTML text with tokens replaced. The
