@@ -233,62 +233,6 @@ class dfpAdCategoriesTest extends dfpBaseTest {
   }
 }
 
-class dfpTokensTest extends dfpBaseTest {
-  /**
-   * Implements getInfo().
-   */
-  public static function getInfo() {
-    return array(
-      'name' => t('DFP Tokens'),
-      'description' => t('Tests for custom tokens created by the DFP module.'),
-      'group' => t('DFP'),
-    );
-  }
-
-  function testSlotToken() {
-    $edit = $this->dfpBasicTagEditValues();
-
-    // Create a tag that uses the slot token in a target.
-    $test_slot = $this->randomName(8);
-    $edit['slot'] = $test_slot;
-    $edit['targeting[0][target]'] = 'slot';
-    $edit['targeting[0][value]'] = '[dfp_tag:slot]';
-    $tag = $this->createTag($edit);
-    $this->assertPropertySet('Targeting', 'slot', $test_slot);
-  }
-
-  function testNetworkIDToken() {
-    $edit = $this->dfpBasicTagEditValues();
-
-    // Create a tag that uses the networkid token in a target.
-    $test_network_id = $this->randomName(8);
-    variable_set('dfp_network_id', $test_network_id);
-    $edit['targeting[0][target]'] = 'network id';
-    $edit['targeting[0][value]'] = '[dfp_tag:network_id]';
-    $tag = $this->createTag($edit);
-    $this->assertPropertySet('Targeting', 'network id', $test_network_id);
-  }
-
-  function testUrlPartsToken() {
-    // Create a tag that uses the url parts token in a target.
-    $tag = $this->createTag();
-    $url = 'admin/structure/dfp_ads';
-    $url_parts = explode('/', $url);
-
-    $max_parts_to_test = 3;
-    for ($i = 1; $i <= $max_parts_to_test; $i++) {
-      $edit['targeting[0][target]'] = 'url parts';
-      $edit['targeting[0][value]'] = '[dfp_tag:url_parts:' . $i . ']';
-      $this->editTag($tag->machinename, $edit);
-
-      $this->drupalGet($url);
-      $replacement = implode('/', array_slice($url_parts, 0, $i));
-      $this->assertPropertySet('Targeting', 'url parts', $replacement);
-    }
-  }
-
-}
-
 class dfpAdTestTest extends dfpBaseTest {
   /**
    * Implements getInfo().

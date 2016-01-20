@@ -54,7 +54,7 @@ class Token implements TokenInterface {
       'user' => $this->account,
     ];
     if ($tag) {
-      $data['dfp-tag'] = $tag;
+      $data['dfp_tag'] = $tag;
     }
 
     // Determine other data from the RouteMatch object.

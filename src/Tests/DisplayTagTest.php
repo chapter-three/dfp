@@ -150,6 +150,24 @@ class DisplayTagTest extends DfpTestBase {
     $this->drupalGet('<front>');
     $this->assertPropertyNotSet('Targeting', $old_target, $old_value);
     $this->assertPropertyNotSet('Targeting', '', '');
+
+    // Create a tag that uses the slot token in a target.
+    $edit = $this->dfpBasicTagEditValues();
+    $test_slot = $this->randomMachineName();
+    $edit['slot'] = $test_slot;
+    $edit['targeting[0][target]'] = 'slot';
+    $edit['targeting[0][value]'] = '[dfp_tag:slot]';
+    $this->dfpCreateTag($edit);
+    $this->drupalGet('<front>');
+    $this->assertPropertySet('Targeting', 'slot', $test_slot);
+
+    // Create a tag that uses the network ID token in a target.
+    $edit = $this->dfpBasicTagEditValues();
+    $edit['targeting[0][target]'] = 'network id';
+    $edit['targeting[0][value]'] = '[dfp_tag:network_id]';
+    $this->dfpCreateTag($edit);
+    $this->drupalGet('<front>');
+    $this->assertPropertySet('Targeting', 'network id', '12345');
   }
 
   /**
