@@ -5,6 +5,7 @@
  * The DFP module.
  */
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Routing\RouteMatchInterface;
 
 // @todo move constants to interface
@@ -29,7 +30,7 @@ function dfp_help($route_name, RouteMatchInterface $route_match) {
  * Implements hook_theme().
  */
 function dfp_theme() {
-  return array(
+  return [
     'dfp_tag' => [
       'variables' => [
         'tag' => NULL,
@@ -45,6 +46,10 @@ function dfp_theme() {
     'dfp_js' => [
       'variables' => [
         'google_tag_services_url' => NULL,
+        'async_rendering' => NULL,
+        'single_request' => NULL,
+        'collapse_empty_divs' => NULL,
+        'disable_init_load' => NULL,
         'targeting' => [],
       ],
     ],
@@ -52,8 +57,8 @@ function dfp_theme() {
       'variables' => [
         'tag' => NULL,
       ]
-    ]
-  );
+    ],
+  ];
 }
 
 /**
@@ -62,11 +67,16 @@ function dfp_theme() {
 function dfp_page_attachments(array &$page) {
   // @todo Work out how to add this only when required.
   $global_settings = \Drupal::config('dfp.settings');
-  $targeting = $global_settings->get('targets');
+  $targeting = $global_settings->get('targeting');
   \Drupal::moduleHandler()->alter('dfp_global_targeting', $targeting);
+  $targeting = \Drupal\dfp\View\TagView::formatTargeting($targeting, \Drupal::service('dfp.token'), \Drupal::moduleHandler());
   $build = [
     '#theme' => 'dfp_js',
     '#google_tag_services_url' => DFP_GOOGLE_TAG_SERVICES_URL,
+    '#async_rendering' => $global_settings->get('async_rendering'),
+    '#single_request' => $global_settings->get('single_request'),
+    '#collapse_empty_divs' => $global_settings->get('collapse_empty_divs'),
+    '#disable_init_load' => $global_settings->get('disable_init_load'),
     '#targeting' => $targeting,
   ];
   $page['#attached']['html_head'][] = [
@@ -74,6 +84,12 @@ function dfp_page_attachments(array &$page) {
       '#tag' => 'script',
       '#value' => \Drupal::service('renderer')->renderPlain($build),
     ],
-    'dfp-setup'
+    'dfp-setup',
   ];
+  if (isset($page['#cache']['tags'])) {
+    $page['#cache']['tags'] = Cache::mergeTags($page['#cache']['tags'], $global_settings->getCacheTags());
+  }
+  else {
+    $page['#cache']['tags'] = $global_settings->getCacheTags();
+  }
 }

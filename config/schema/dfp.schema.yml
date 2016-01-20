@@ -1,0 +1,53 @@
+# Schema for the configuration files of the DFP module.
+
+dfp.settings:
+  type: config_object
+  label: 'DFP settings'
+  mapping:
+    network_id:
+      type: string
+      label: 'DFP network ID'
+    adunit_pattern:
+      type: string
+      label: 'Ad unit pattern'
+    click_url:
+      type: string
+      label: 'Click URL'
+    async_rendering:
+      type: boolean
+      label: 'Use asynchronous rendering'
+    disable_init_load:
+      type: boolean
+      label: 'Disable init load'
+    single_request:
+      type: boolean
+      label: 'Use a single request'
+    ad_categories_bundles:
+      type: ignore
+    token_cache_lifetime:
+      type: integer
+      label: 'The token cache lifetime'
+    default_slug:
+      type: string
+      label: 'The default slug'
+    collapse_empty_divs:
+      type: integer
+      label: 'Collapse empty divs'
+    slug_placement:
+      type: integer
+      label: 'Where to place the slug'
+    targeting:
+      type: sequence
+      label: 'Targeting'
+      sequence:
+        type: mapping
+        mapping:
+          target:
+            type: string
+            label: 'Target'
+          value:
+            type: string
+            label: 'Value'
+    adtest_adunit_pattern:
+      type: string
+      label: 'Ad unit test pattern'

@@ -48,7 +48,11 @@ googletag.cmd.push(function() {
     googletag.pubads().disableInitialLoad();
   {% endif %}
   {% for target in targeting %}
-    googletag.pubads().setTargeting('{{ target.target }}', '{{ target.value }}');
+    googletag.pubads().setTargeting('{{ target.target }}', [
+      {%- for value in target.value -%}
+      '{{ value }}'{%- if not loop.last -%},{%- endif -%}
+      {%- endfor -%}
+    ]);
   {% endfor %}
 });
 googletag.enableServices();

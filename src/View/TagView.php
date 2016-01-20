@@ -235,25 +235,47 @@ class TagView {
    */
   public function getTargeting() {
     if (is_null($this->targeting)) {
-      $targets = $this->tag->targeting();
-      foreach ($targets as $key => &$target) {
-        $target['value'] = $this->token->replace($target['value'], $this, ['clear' => TRUE]);
-        // The target value could be blank if tokens are used. If so, remove it.
-        if (empty($target['value'])) {
-          unset($targets[$key]);
-          continue;
-        }
-
-        // Allow other modules to alter the target.
-        $this->moduleHandler->alter('dfp_target', $target);
-
-        // Convert the values into an array.
-        $target['value'] = explode(',', $target['value']);
-
-      }
-      $this->targeting = $targets;
+      $this->targeting = self::formatTargeting($this->tag->targeting(), $this->token, $this->moduleHandler, $this);
     }
     return $this->targeting;
+  }
+
+  /**
+   * Formats a targeting array.
+   *
+   * @param array $targeting
+   *   The targeting array. An array of arrays. Each each has two keys 'target'
+   *   and 'value'. The 'target' value is a string. The 'value' value is a
+   *   string with multiple values delimited by a comma.
+   * @param \Drupal\dfp\TokenInterface $token
+   *   The DFP token service.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler.
+   * @param \Drupal\dfp\View\TagView|NULL $tag_view
+   *   (optional) The TagView object. Defaults to NULL.
+   *
+   * @return array
+   *   An array of arrays. Each each has two keys 'target' and 'value'. The
+   *   'target' value is a trimmed string. The 'value' value is an array of
+   *   strings, also trimmed.
+   */
+  public static function formatTargeting(array $targeting, TokenInterface $token, ModuleHandlerInterface $module_handler, TagView $tag_view = NULL) {
+    foreach ($targeting as $key => &$target) {
+      $target['target'] = trim($target['target']);
+      $target['value'] = $token->replace($target['value'], $tag_view, ['clear' => TRUE]);
+      // The target value could be blank if tokens are used. If so, remove it.
+      if (empty($target['value'])) {
+        unset($targeting[$key]);
+        continue;
+      }
+
+      // Allow other modules to alter the target.
+      $module_handler->alter('dfp_target', $target);
+
+      // Convert the values into an array.
+      $target['value'] = array_map('trim', explode(',', $target['value']));
+    }
+    return $targeting;
   }
 
   /**

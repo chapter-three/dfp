@@ -49,11 +49,13 @@ class Token implements TokenInterface {
   /**
    * {@inheritdoc}
    */
-  public function replace($text, TagView $tag, array $options = array(), BubbleableMetadata $bubbleable_metadata = NULL) {
+  public function replace($text, TagView $tag = NULL, array $options = array(), BubbleableMetadata $bubbleable_metadata = NULL) {
     $data = [
-      'dfp_tag' => $tag,
       'user' => $this->account,
     ];
+    if ($tag) {
+      $data['dfp-tag'] = $tag;
+    }
 
     // Determine other data from the RouteMatch object.
     $node = $this->routeMatch->getParameter('node');

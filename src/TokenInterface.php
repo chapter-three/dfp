@@ -21,7 +21,8 @@ interface TokenInterface {
    * @param string $text
    *   An HTML string containing replaceable tokens.
    * @param \Drupal\dfp\View\TagView $tag
-   *   An TagView object that merges values of the Tag and global settings.
+   *   (optional) An TagView object that merges values of the Tag and global
+   *   settings. Defaults to NULL.
    * @param array $options
    *   (optional) A keyed array of settings and flags to control the token
    *   replacement process.
@@ -41,6 +42,6 @@ interface TokenInterface {
    *
    * @see \Drupal\Core\Utility\Token::replace()
    */
-  public function replace($text, TagView $tag, array $options = array(), BubbleableMetadata $bubbleable_metadata = NULL);
+  public function replace($text, TagView $tag = NULL, array $options = array(), BubbleableMetadata $bubbleable_metadata = NULL);
 
 }

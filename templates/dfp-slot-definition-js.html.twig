@@ -47,7 +47,7 @@ works. But because of syntax highlighting and sanity we keep this. -->
   {% for target in tag.targeting %}
     .setTargeting('{{ target.target }}', [
       {%- for value in target.value -%}
-        '{{ value|trim }}'{%- if not loop.last -%},{%- endif -%}
+        '{{ value }}'{%- if not loop.last -%},{%- endif -%}
       {%- endfor -%}
     ])
   {% endfor %}
