@@ -142,7 +142,7 @@ class TagView {
       if (empty($adunit)) {
         $adunit = $this->globalSettings->get('default_pattern');
       }
-      $this->adUnit = $this->token->replace('/[dfp_tag:network_id]/' . $adunit, $this, ['clear' => TRUE]);
+      $this->adUnit = '/' . $this->globalSettings->get('network_id') . '/' . $this->token->replace($adunit, $this, ['clear' => TRUE]);
     }
     return $this->adUnit;
   }
