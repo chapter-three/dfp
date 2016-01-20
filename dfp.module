@@ -9,10 +9,8 @@ use Drupal\Core\Cache\Cache;
 use Drupal\Core\Routing\RouteMatchInterface;
 
 // @todo move constants to interface
-//define('DFP_GOOGLE_TAG_SERVICES_URL', 'www.googletagservices.com/tag/js/gpt.js');
-//define('DFP_GOOGLE_SHORT_TAG_SERVICES_URL', 'pubads.g.doubleclick.net/gampad');
-define('DFP_GOOGLE_TAG_SERVICES_URL', 'example.com/www.googletagservices.com/tag/js/gpt.js');
-define('DFP_GOOGLE_SHORT_TAG_SERVICES_URL', 'example.com/pubads.g.doubleclick.net/gampad');
+define('DFP_GOOGLE_TAG_SERVICES_URL', 'www.googletagservices.com/tag/js/gpt.js');
+define('DFP_GOOGLE_SHORT_TAG_SERVICES_URL', 'pubads.g.doubleclick.net/gampad');
 
 /**
  * Implements hook_help().
