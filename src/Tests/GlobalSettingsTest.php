@@ -60,11 +60,11 @@ class GlobalSettingsTest extends WebTestBase {
       'async_rendering' => FALSE,
       'single_request' => FALSE,
       'collapse_empty_divs' => '0',
+      'click_url' => '/custom_click_url',
       'targeting[0][target]' => 'test target ',
       'targeting[0][value]' => 'test value 3',
       'targeting[1][target]' => 'test target 2',
       'targeting[1][value]' => 'test value 4',
-
     ];
     $this->drupalPostForm('admin/structure/dfp/settings', $edit, t('Save configuration'));
 
@@ -74,6 +74,16 @@ class GlobalSettingsTest extends WebTestBase {
     $this->assertNoRaw('googletag.pubads().collapseEmptyDivs();', 'Collapse empty divs is turned on.');
     $this->assertRaw("googletag.pubads().setTargeting('test target', ['test value 3']);", 'Global targeting values appear correclty in javascript.');
     $this->assertRaw("googletag.pubads().setTargeting('test target 2', ['test value 4']);", 'Global targeting values appear correclty in javascript.');
+    $this->assertEqual('/custom_click_url', \Drupal::config('dfp.settings')->get('click_url'));
+
+    $edit = [
+      'async_rendering' => TRUE,
+      'click_url' => '/custom_click_url',
+      'adunit_pattern' => '$has_an_illegal_character',
+    ];
+    $this->drupalPostForm('admin/structure/dfp/settings', $edit, t('Save configuration'));
+    $this->assertText(t('Setting a click URL does not work with async rendering.'));
+    $this->assertText(t('Ad Unit Patterns can only include letters, numbers, hyphens, dashes, periods, slashes and tokens.'));
   }
 
 }
