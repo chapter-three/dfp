@@ -45,7 +45,7 @@ function dfp_theme() {
     'dfp_js' => [
       'variables' => [
         'google_tag_services_url' => NULL,
-        'targets' => [],
+        'targeting' => [],
       ],
     ],
     'dfp_slot_definition_js' => [
@@ -67,7 +67,7 @@ function dfp_page_attachments(array &$page) {
   $build = [
     '#theme' => 'dfp_js',
     '#google_tag_services_url' => DFP_GOOGLE_TAG_SERVICES_URL,
-    '#targets' => $targeting,
+    '#targeting' => $targeting,
   ];
   $page['#attached']['html_head'][] = [
     [

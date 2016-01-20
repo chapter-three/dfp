@@ -6,6 +6,7 @@
  * Available variables:
  * - google_tag_services_url:
  * - async_rendering
+ * - targeting
  *
  * @see dfp_page_attachments()
  *
@@ -46,7 +47,7 @@ googletag.cmd.push(function() {
   {% if disable_init_load %}
     googletag.pubads().disableInitialLoad();
   {% endif %}
-  {% for target in targets %}
+  {% for target in targeting %}
     googletag.pubads().setTargeting('{{ target.target }}', '{{ target.value }}');
   {% endfor %}
 });

@@ -44,7 +44,7 @@ works. But because of syntax highlighting and sanity we keep this. -->
     .set('adsense_{{ key }}_color', '#{{ color|upper }}')
   {% endfor %}
 
-  {% for target in tag.targets %}
+  {% for target in tag.targeting %}
     .setTargeting('{{ target.target }}', [
       {%- for value in target.value -%}
         '{{ value|trim }}'{%- if not loop.last -%},{%- endif -%}
