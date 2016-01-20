@@ -5,7 +5,6 @@ async_rendering: true
 disable_init_load: false
 single_request: true
 ad_categories_bundles: []
-token_cache_lifetime: 0
 default_slug: ''
 collapse_empty_divs: 1
 slug_placement: 1

@@ -24,9 +24,6 @@ dfp.settings:
       label: 'Use a single request'
     ad_categories_bundles:
       type: ignore
-    token_cache_lifetime:
-      type: integer
-      label: 'The token cache lifetime'
     default_slug:
       type: string
       label: 'The default slug'

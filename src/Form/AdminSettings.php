@@ -158,12 +158,6 @@ class AdminSettings extends ConfigFormBase {
         ),
       ),
     );
-    $form['global_tag_settings']['token_cache_lifetime'] = array(
-      '#type' => 'textfield',
-      '#title' => $this->t('Token cache lifetime'),
-      '#default_value' => $config->get('token_cache_lifetime'),
-      '#description' => $this->t('The time, in seconds, that the DFP token cache will be valid for. The token cache will always be cleared at the next system cron run after this time period, or when this form is saved.'),
-    );
 
     // Global display options.
     $form['global_display_options'] = array(
@@ -285,7 +279,6 @@ class AdminSettings extends ConfigFormBase {
       ->set('disable_init_load', $values['disable_init_load'])
       ->set('single_request', $values['single_request'])
       ->set('ad_categories_bundles', $values['ad_categories_bundles'])
-      ->set('token_cache_lifetime', $values['token_cache_lifetime'])
       ->set('default_slug', $values['default_slug'])
       ->set('collapse_empty_divs', $values['collapse_empty_divs'])
       ->set('adtest_adunit_pattern', $values['adtest_adunit_pattern'])
