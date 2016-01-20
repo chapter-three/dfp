@@ -39,7 +39,14 @@ abstract class DfpTestBase extends WebTestBase {
     parent::setUp();
 
     // Create an admin user with all the permissions needed to run tests.
-    $this->adminUser = $this->drupalCreateUser(array('administer DFP', 'administer taxonomy', 'access administration pages', 'administer blocks', 'bypass node access', 'administer nodes'));
+    $this->adminUser = $this->drupalCreateUser([
+      'administer DFP',
+      'administer taxonomy',
+      'access administration pages',
+      'administer blocks',
+      'bypass node access',
+      'administer nodes',
+    ]);
     $this->drupalLogin($this->adminUser);
 
     // Set up global settings needed for DFP ads to work.
@@ -107,8 +114,7 @@ abstract class DfpTestBase extends WebTestBase {
   }
 
   /**
-   * Creates a simple $edit array to be used on the DFP tag form to create a new
-   * DFP tag object.
+   * Creates a simple form values $edit array to be used to create a DFP tag.
    *
    * @return array
    *   A simple $edit array to be used on the DFP tag form.
@@ -145,10 +151,13 @@ abstract class DfpTestBase extends WebTestBase {
    *   How many sizes to generate.
    *
    * @return string|array
-   *  A size formatted as ###x### or an array of sizes if $count > 1.
+   *   A size formatted as ###x### or an array of sizes if $count > 1.
    */
   protected function dfpGenerateSize($count = 1) {
-    $sizes = array('300x250', '300x600', '728x90', '728x10', '160x600', '120x80', '300x100', '50x50', '160x300');
+    $sizes = [
+      '300x250', '300x600', '728x90', '728x10', '160x600', '120x80', '300x100',
+      '50x50', '160x300',
+    ];
     shuffle($sizes);
 
     return $count == 1 ? array_pop($sizes) : array_slice($sizes, 0, min($count, count($sizes)));
@@ -158,6 +167,7 @@ abstract class DfpTestBase extends WebTestBase {
    * Gets the global DFP settings.
    *
    * @return \Drupal\Core\Config\ImmutableConfig
+   *   The global DFP settings.
    */
   protected function getGlobalConfig() {
     return \Drupal::config('dfp.settings');
@@ -165,6 +175,16 @@ abstract class DfpTestBase extends WebTestBase {
 
   /**
    * Assert that a property is properly being set.
+   *
+   * @param string $property
+   *   The property.
+   * @param string $key
+   *   The key.
+   * @param string $val
+   *   The value.
+   *
+   * @return bool
+   *   TRUE if the property is set, FALSE otherwise.
    */
   protected function assertPropertySet($property, $key, $val) {
     $pattern = $this->getPropertyPattern($property, $key, $val);
@@ -173,13 +193,37 @@ abstract class DfpTestBase extends WebTestBase {
 
   /**
    * Assert that a property is not being set.
+   *
+   * @param string $property
+   *   The property.
+   * @param string $key
+   *   The key.
+   * @param string $val
+   *   The value.
+   *
+   * @return bool
+   *   TRUE if the property is not set, FALSE otherwise.
    */
   protected function assertPropertyNotSet($property, $key, $val) {
     $pattern = $this->getPropertyPattern($property, $key, $val);
     return $this->assertNoPattern($pattern, 'A ' . $property . ' property was not set for ' . $key . ' = ' . $val);
   }
 
+  /**
+   * Gets pattern used in assertPropertySet() and assertPropertyNotSet().
+   *
+   * @param string $property
+   *   The property.
+   * @param string $key
+   *   The key.
+   * @param string $val
+   *   The value.
+   *
+   * @return string
+   *   The pattern.
+   */
   private function getPropertyPattern($property, $key, $val) {
     return '|' . '.set' . $property . '\(\'' . $key . '\',{1}\s(.)*' . addslashes($val) . '|';
   }
+
 }

@@ -26,8 +26,6 @@ class TagViewTest extends UnitTestCase {
 
   /**
    * Data provider for self::testFormatSize().
-   *
-   * @return array
    */
   public function formatSizeProvider() {
     return [

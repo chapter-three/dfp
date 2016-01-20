@@ -35,7 +35,7 @@ class DisplayTagTest extends DfpTestBase {
   }
 
   /**
-   * Tests breakpoint mappings
+   * Tests breakpoint mappings.
    *
    * @todo add multiple breakpoint configs to the tag.
    */
@@ -101,7 +101,7 @@ class DisplayTagTest extends DfpTestBase {
   /**
    * Tests targeting display.
    */
-  function testTargeting() {
+  public function testTargeting() {
     $edit = $this->dfpBasicTagEditValues();
 
     // Create a tag with a target with only one value.
@@ -110,7 +110,11 @@ class DisplayTagTest extends DfpTestBase {
     $this->assertPropertySet('Targeting', $edit['targeting[0][target]'], $edit['targeting[0][value]']);
 
     // Create a tag with a target with multiple values.
-    $values = array($this->randomMachineName(), $this->randomMachineName(), $this->randomMachineName());
+    $values = [
+      $this->randomMachineName(),
+      $this->randomMachineName(),
+      $this->randomMachineName(),
+    ];
     $edit['targeting[0][target]'] = $this->randomMachineName();
     $edit['targeting[0][value]'] = implode(', ', $values);
     $this->dfpEditTag($tag->id(), $edit);
@@ -173,7 +177,7 @@ class DisplayTagTest extends DfpTestBase {
   /**
    * Tests Adsense backfill settings.
    */
-  function testBackfill() {
+  public function testBackfill() {
     $edit = $this->dfpBasicTagEditValues();
 
     // Create a tag with backfill settings.
