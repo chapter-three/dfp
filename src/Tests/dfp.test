@@ -469,37 +469,3 @@ class dfpAdTestTest extends dfpBaseTest {
   }
 
 }
-
-class DFPUnitTest extends DrupalUnitTestCase {
-  protected $profile = 'testing';
-
-  /**
-   * Implementation of setUp().
-   */
-  function setUp() {
-    // Enable a couple modules.
-    drupal_load('module', 'dfp');
-    parent::setUp();
-  }
-
-  /**
-   * Implements getInfo().
-   */
-  public static function getInfo() {
-    return array(
-      'name' => t('DFP Unit Tests'),
-      'description' => t('Checks the integrity of certain DFP functions.'),
-      'group' => t('DFP'),
-    );
-  }
-
-  function testDFPformatSize() {
-    $sizes = '300x250';
-    $expected_result = '[300, 250]';
-
-    $this->assertTrue(dfp_format_size($sizes) == $expected_result, 'The dfp_format_sizes function correctly handles an single size.');
-    $sizes = '300x250,728x90';
-    $expected_result = '[[300, 250], [728, 90]]';
-    $this->assertTrue(dfp_format_size($sizes) == $expected_result, 'The dfp_format_sizes function correctly handles multiple sizes.');
-  }
-}
