@@ -213,7 +213,7 @@ class Tag extends EntityForm {
     }
     elseif ($status == SAVED_NEW) {
       drupal_set_message(t('The DFP tag %slot has been added.', $t_args));
-      $context = array_merge($t_args, array('link' => $tag->toLink($this->t('View'))->toString()));
+      $context = array_merge($t_args, array('link' => $tag->toLink($this->t('Edit DFP tag'), 'edit-form')->toString()));
       $this->logger('dfp')->notice('Added DFP tag %slot.', $context);
     }
 

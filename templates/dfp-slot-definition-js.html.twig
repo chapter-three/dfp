@@ -33,11 +33,11 @@ works. But because of syntax highlighting and sanity we keep this. -->
   .addService(googletag.pubads())
 
   {% if tag.adsenseAdTypes %}
-    .set("adsense_ad_types", "{{ tag.adsenseAdTypes }}")
+    .set('adsense_ad_types', '{{ tag.adsenseAdTypes }}')
   {% endif %}
 
   {% if tag.adsenseChannelIds %}
-    .set("adsense_channel_ids", "{{ tag.adsenseChannelIds }}")
+    .set('adsense_channel_ids', '{{ tag.adsenseChannelIds }}')
   {% endif %}
 
   {% for key, color in tag.adSenseColors %}

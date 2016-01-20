@@ -8,6 +8,7 @@
 namespace Drupal\dfp\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\EntityStorageInterface;
 
 /**
  * Defines the DFP Ad tag configuration entity class.
@@ -229,6 +230,16 @@ class Tag extends ConfigEntityBase implements TagInterface {
    */
   public function adsenseColors() {
     return isset($this->adsense_backfill['color']) ? $this->adsense_backfill['color'] : [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    parent::postSave($storage, $update);
+
+    // Invalidate the block cache to update DFP ad tag-based derivatives.
+    \Drupal::service('plugin.manager.block')->clearCachedDefinitions();
   }
 
 }

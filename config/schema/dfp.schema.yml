@@ -51,3 +51,82 @@ dfp.settings:
     adtest_adunit_pattern:
       type: string
       label: 'Ad unit test pattern'
+
+dfp.tag.*:
+  type: config_entity
+  label: 'DFP tag'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    slot:
+      type: string
+      label: 'Ad slot'
+    size:
+      type: string
+      label: 'Ad size(s)'
+    adunit:
+      type: string
+      label: 'Ad unit'
+    slug:
+      type: string
+      label: 'Slug'
+    block:
+      type: boolean
+      label: 'Provide a block'
+    short_tag:
+      type: boolean
+      label: 'Display as a short tag'
+    breakpoints:
+      type: sequence
+      label: 'Breakpoints'
+      sequence:
+        type: mapping
+        mapping:
+          browser_size:
+            type: string
+            label: 'Browser size'
+          ad_sizes:
+            type: string
+            label: 'Ad size(s)'
+    targeting:
+      type: sequence
+      label: 'Targeting'
+      sequence:
+        type: mapping
+        mapping:
+          target:
+            type: string
+            label: 'Target'
+          value:
+            type: string
+            label: 'Value'
+    adsense_backfill:
+      type: mapping
+      label: 'Adsense backfill'
+      mapping:
+        ad_types:
+          type: string
+          label: 'Adsense ad types'
+        channel_ids:
+          type: string
+          label: 'Adsense channel IDs'
+        color:
+          type: mapping
+          label: 'Adsense color settings'
+          mapping:
+            background:
+              type: string
+              label: 'Background color'
+            border:
+              type: string
+              label: 'Border color'
+            link:
+              type: string
+              label: 'Link color'
+            text:
+              type: string
+              label: 'Text color'
+            url:
+              type: string
+              label: 'URL color'

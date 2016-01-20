@@ -27,7 +27,7 @@ class GlobalSettingsTest extends WebTestBase {
   public static $modules = array('dfp');
 
   /**
-   * Set up test.
+   * {@inheritdoc}
    */
   protected function setUp() {
     parent::setUp();
