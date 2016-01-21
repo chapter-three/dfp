@@ -190,7 +190,7 @@ class TagView {
       $keyvals = [
         'iu' => $this->getAdUnit(),
         'sz' => str_replace(',', '|', $this->getRawSize()),
-        'c' => rand(10000, 99999),
+        'c' => mt_rand(10000, 99999),
       ];
 
       $targets = array();
