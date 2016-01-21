@@ -183,6 +183,8 @@ class TagView {
    *
    * @return string
    *   The short tag query string.
+   *
+   * @see https://support.google.com/dfp_sb/answer/2623168
    */
   public function getShortTagQueryString() {
     if (is_null($this->shortTagQueryString)) {

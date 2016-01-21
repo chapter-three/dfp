@@ -87,4 +87,32 @@ class TagViewTest extends UnitTestCase {
     ];
   }
 
+  /**
+   * @covers ::getShortTagQueryString
+   * @dataProvider getShortTagQueryStringProvider
+   */
+  public function testGetShortTagQueryString($tag_ad_unit, $tag_sizes, $tag_targeting, $network_id, $regex) {
+    $tag = $this->prophesize(TagInterface::class);
+    $tag->adunit()->willReturn($tag_ad_unit);
+    $tag->size()->willReturn($tag_sizes);
+    $tag->targeting()->willReturn($tag_targeting);
+    $config_factory = $this->getConfigFactoryStub(['dfp.settings' => ['default_pattern' => 'default_adunit', 'network_id' => $network_id]]);
+    $token = $this->getMock(TokenInterface::class);
+    $token->method('replace')->willReturnArgument(0);
+    $module_handler = $this->prophesize(ModuleHandlerInterface::class)->reveal();
+    $tag_view = new TagView($tag->reveal(), $config_factory->get('dfp.settings'), $token, $module_handler);
+    $this->assertRegExp($regex, $tag_view->getShortTagQueryString());
+  }
+
+  /**
+   * Data provider for self::testGetShortTagQueryString().
+   */
+  public function getShortTagQueryStringProvider() {
+    return [
+      ['adunit', '300x200', [], '12345', '|^iu=/12345/adunit&sz=300x200&c=[0-9]{5}$|'],
+      ['adunit', '300x200', [['target' => 'target', 'value' => 'value,value2']], '12345', '|^iu=/12345/adunit&sz=300x200&c=[0-9]{5}&t=target%3Dvalue%2Cvalue2$|'],
+      ['adunit', '300x200', [['target' => 'target', 'value' => 'value,value2'], ['target' => 'target2', 'value' => 'value3']], '12345', '|^iu=/12345/adunit&sz=300x200&c=[0-9]{5}&t=target%3Dvalue%2Cvalue2%26target2%3Dvalue3$|'],
+    ];
+  }
+
 }
