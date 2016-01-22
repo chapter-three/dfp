@@ -2,3 +2,8 @@ services:
   dfp.token:
     class: Drupal\dfp\Token
     arguments: ['@token', '@current_route_match', '@current_user']
+  dfp.html_response.subscriber:
+    class: Drupal\dfp\EventSubscriber\HtmlResponseSubscriber
+    arguments: ['@renderer', '@config.factory', '@module_handler', '@dfp.token']
+    tags:
+      - { name: event_subscriber }

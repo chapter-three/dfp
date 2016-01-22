@@ -7,7 +7,7 @@
 
 namespace Drupal\dfp\View;
 
-use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -114,17 +114,20 @@ class TagViewBuilder extends EntityViewBuilder {
       $tag_view = new TagView($tag, $global_settings, $this->token, $this->moduleHandler());
 
       $tag_id = $tag->id();
-      $cache_tags = Cache::mergeTags($this->getCacheTags(), $tag->getCacheTags());
-
       $build[$tag_id] = [
         '#cache' => [
           'keys' => ['entity_view', 'dfp_tag', $tag_id],
-          'contexts' => $tag->getCacheContexts(),
-          'tags' => $cache_tags,
         ],
       ];
 
+      // Sort out the cache tags and contexts.
+      $cacheable_metadata = CacheableMetadata::createFromObject($global_settings);
+      $cacheable_metadata->merge(CacheableMetadata::createFromObject($tag));
+      $cacheable_metadata->addCacheTags($this->getCacheTags());
+      $cacheable_metadata->applyTo($build);
+
       $build[$tag_id] += static::buildPreTag($tag_view, $this->renderer);
+
     }
 
     return $build;
@@ -166,10 +169,12 @@ class TagViewBuilder extends EntityViewBuilder {
       ];
       $build['#attached']['html_head'][] = [
         [
-          '#tag' => 'script',
-          '#value' => $renderer->renderPlain($head_js_build),
+          // Use a fake #type so HtmlResponseAttachmentsProcessor::processHead()
+          // does not add one.
+          '#type' => 'dfp_script',
+          '#markup' => $renderer->renderPlain($head_js_build),
         ],
-        'dfp-slot-defintion-' . $tag_view->id(),
+        'dfp-slot-definition-' . $tag_view->id(),
       ];
     }
     $build['tag']['#tag'] = $tag_view;

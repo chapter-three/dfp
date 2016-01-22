@@ -39,6 +39,8 @@ class Token implements TokenInterface {
    *   Drupal core's token service.
    * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    *   The route match service.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The current user.
    */
   public function __construct(CoreToken $core_token, RouteMatchInterface $route_match, AccountInterface $account) {
     $this->coreToken = $core_token;

@@ -11,11 +11,7 @@
  * @ingroup themeable
  */
 #}
-{% if false %}
-<!-- This is designed to not be printed because of how dfp_page_attachments()
-works. But because of syntax highlighting and sanity we keep this. -->
 <script type="text/javascript">
-{% endif %}
   {% if tag.breakpoints %}
       // Start by defining breakpoints for this ad.
       var mapping = googletag.sizeMapping()
@@ -56,6 +52,4 @@ works. But because of syntax highlighting and sanity we keep this. -->
     .defineSizeMapping(mapping)
   {% endif %}
   ;
-{% if false %}
 </script>
-{% endif %}

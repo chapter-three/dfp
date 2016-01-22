@@ -4,8 +4,10 @@
  * Default theme implementation to display a DFP short tag.
  *
  * Available variables:
- * - google_tag_services_url:
  * - async_rendering
+ * - single_request
+ * - collapse_empty_divs
+ * - disable_init_load
  * - targeting
  *
  * @see dfp_page_attachments()
@@ -13,22 +15,6 @@
  * @ingroup themeable
  */
 #}
-{% if false %}
-<!-- This is designed to not be printed because of how dfp_page_attachments()
-works. But because of syntax highlighting and sanity we keep this. -->
-<script type="text/javascript">
-{% endif %}
-// Initialize the google variables.
-var googletag = googletag || {};
-googletag.cmd = googletag.cmd || [];
-// Add a place to store the slot name variable.
-googletag.slots = googletag.slots || {};
-(function() {
-  var useSSL = "https:" == document.location.protocol;
-  var src = (useSSL ? 'https:' : 'http:') + '//{{ google_tag_services_url }}';
-  document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
-})();
-</script>
 <script type="text/javascript">
 googletag.cmd.push(function() {
   {% if async_rendering %}
@@ -56,8 +42,4 @@ googletag.cmd.push(function() {
   {% endfor %}
 });
 googletag.enableServices();
-{% if false %}
-// This is designed to not be printed because of how dfp_page_attachments()
-// works.
 </script>
-{% endif %}

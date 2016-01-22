@@ -1,0 +1,25 @@
+{#
+/**
+ * @file
+ * Default theme implementation to display a DFP short tag.
+ *
+ * Available variables:
+ * - google_tag_services_url:
+ *
+ * @see dfp_page_attachments()
+ *
+ * @ingroup themeable
+ */
+#}
+<script type="text/javascript">
+// Initialize the google variables.
+var googletag = googletag || {};
+googletag.cmd = googletag.cmd || [];
+// Add a place to store the slot name variable.
+googletag.slots = googletag.slots || {};
+(function() {
+  var useSSL = "https:" == document.location.protocol;
+  var src = (useSSL ? 'https:' : 'http:') + '//{{ google_tag_services_url }}';
+  document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
+})();
+</script>
