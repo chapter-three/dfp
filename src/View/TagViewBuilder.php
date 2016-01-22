@@ -143,6 +143,8 @@ class TagViewBuilder extends EntityViewBuilder {
    *
    * @return array
    *   A render array with a #pre_render callback to render the DFP tag.
+   *
+   * @see \Drupal\dfp\DfpResponseAttachmentsProcessor::processAttachments()
    */
   protected static function buildPreTag(TagView $tag_view, RendererInterface $renderer) {
     $build = array(
@@ -163,19 +165,9 @@ class TagViewBuilder extends EntityViewBuilder {
       $build['tag'] = [
         '#theme' => 'dfp_tag',
       ];
-      $head_js_build = [
-        '#theme' => 'dfp_slot_definition_js',
-        '#tag' => $tag_view,
-      ];
-      $build['#attached']['html_head'][] = [
-        [
-          // Use a fake #type so HtmlResponseAttachmentsProcessor::processHead()
-          // does not add one.
-          '#type' => 'dfp_script',
-          '#markup' => $renderer->renderPlain($head_js_build),
-        ],
-        'dfp-slot-definition-' . $tag_view->id(),
-      ];
+      // Attach a tag. These attachments are processed by
+      // \Drupal\dfp\DfpResponseAttachmentsProcessor::processAttachments().
+      $build['#attached']['dfp_slot'][] = $tag_view;
     }
     $build['tag']['#tag'] = $tag_view;
 

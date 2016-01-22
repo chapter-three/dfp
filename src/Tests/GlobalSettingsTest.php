@@ -7,8 +7,6 @@
 
 namespace Drupal\dfp\Tests;
 
-use Drupal\simpletest\WebTestBase;
-
 /**
  * Tests DFP global configuration.
  *
@@ -17,7 +15,7 @@ use Drupal\simpletest\WebTestBase;
  * @see dfp.settings.yml
  * @see \Drupal\dfp\Form\AdminSettings
  */
-class GlobalSettingsTest extends WebTestBase {
+class GlobalSettingsTest extends DfpTestBase {
 
   /**
    * Modules to enable.
@@ -48,6 +46,12 @@ class GlobalSettingsTest extends WebTestBase {
       'targeting[0][value]' => '<em>test value</em>, test value 2 ',
     ];
     $this->drupalPostForm('admin/structure/dfp/settings', $edit, t('Save configuration'));
+
+    $this->drupalGet('<front>');
+    $this->assertNoRaw('googletag', 'With no DFP tags set up there is no additional JS added');
+
+    // Create a tag.
+    $this->dfpCreateTag();
 
     $this->drupalGet('<front>');
     $this->assertRaw('googletag.pubads().enableAsyncRendering();', 'Asyncronous rendering is turned on.');
