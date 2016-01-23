@@ -17,6 +17,7 @@ use Drupal\Core\Render\AttachmentsResponseProcessorInterface;
 use Drupal\Core\Render\HtmlResponse;
 use Drupal\Core\Render\HtmlResponseAttachmentsProcessor;
 use Drupal\Core\Render\RendererInterface;
+use Drupal\dfp\Entity\TagInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -144,7 +145,7 @@ class DfpHtmlResponseAttachmentsProcessor extends HtmlResponseAttachmentsProcess
       // HtmlResponseAttachmentsProcessor::processHead() adding one.
       '#type' => 'dfp_script',
       '#theme' => 'dfp_js_head_top',
-      '#google_tag_services_url' => DFP_GOOGLE_TAG_SERVICES_URL,
+      '#google_tag_services_url' => TagInterface::GOOGLE_TAG_SERVICES_URL,
     ];
   }
 

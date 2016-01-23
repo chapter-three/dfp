@@ -18,6 +18,8 @@ interface TagInterface extends ConfigEntityInterface {
   const ADSENSE_TEXT_IMAGE = 'text_image';
   const ADSENSE_IMAGE = 'image';
   const ADSENSE_TEXT = 'text';
+  const GOOGLE_SHORT_TAG_SERVICES_URL = 'pubads.g.doubleclick.net/gampad';
+  const GOOGLE_TAG_SERVICES_URL = 'www.googletagservices.com/tag/js/gpt.js';
 
   /**
    * Gets the ad slot.

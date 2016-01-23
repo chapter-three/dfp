@@ -16,6 +16,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Render\RendererInterface;
+use Drupal\dfp\Entity\TagInterface;
 use Drupal\dfp\TokenInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -157,8 +158,8 @@ class TagViewBuilder extends EntityViewBuilder {
     if ($tag_view->isShortTag()) {
       $build['tag'] = [
         '#theme' => 'dfp_short_tag',
-        '#url_jump' => 'http://' . DFP_GOOGLE_SHORT_TAG_SERVICES_URL . '/jump?' . $tag_view->getShortTagQueryString(),
-        '#url_ad' => 'http://' . DFP_GOOGLE_SHORT_TAG_SERVICES_URL . '/ad?' . $tag_view->getShortTagQueryString(),
+        '#url_jump' => 'http://' . TagInterface::GOOGLE_SHORT_TAG_SERVICES_URL . '/jump?' . $tag_view->getShortTagQueryString(),
+        '#url_ad' => 'http://' . TagInterface::GOOGLE_SHORT_TAG_SERVICES_URL . '/ad?' . $tag_view->getShortTagQueryString(),
       ];
     }
     else {
