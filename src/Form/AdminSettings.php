@@ -74,147 +74,147 @@ class AdminSettings extends ConfigFormBase {
     // @todo vertical tabs?
 
     // Default tag settings.
-    $form['global_tag_settings'] = array(
+    $form['global_tag_settings'] = [
       '#type' => 'details',
       '#title' => $this->t('Global Tag Settings'),
       '#open' => TRUE,
-    );
-    $form['global_tag_settings']['network_id'] = array(
+    ];
+    $form['global_tag_settings']['network_id'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Network ID'),
       '#default_value' => $config->get('network_id'),
       '#required' => TRUE,
       '#description' => t('The Network ID to use on all tags. According to Google this value should begin with a /.'),
-    );
-    $form['global_tag_settings']['adunit_pattern'] = array(
+    ];
+    $form['global_tag_settings']['adunit_pattern'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Default Ad Unit Pattern'),
       '#required' => FALSE,
       '#maxlength' => 255,
       '#default_value' => $config->get('adunit_pattern'),
       '#description' => $this->t('Use the tokens below to define how the default ad unit should display. This can be overridden on each tag. The network id will be included automatically. Example: [current-page:url:args:value:0]/[current-page:url:args:value:1]/[dfp_tag:slot]'),
-    );
-    $form['global_tag_settings']['click_url'] = array(
+    ];
+    $form['global_tag_settings']['click_url'] = [
       '#type' => 'textfield',
       '#title' => $this->t('DFP Click URL (Sync mode only)'),
       '#default_value' => $config->get('click_url'),
       '#description' => $this->t('Sets a click URL on each DFP tag. Useful for intercepting ad click calls for reporting. Values beginning with http:// are treated as absolute; otherwise relative to current site domain.'),
-      '#states' => array(
-        'enabled' => array(
-          'input[name="async_rendering"]' => array('checked' => FALSE),
-        ),
-      ),
-    );
+      '#states' => [
+        'enabled' => [
+          'input[name="async_rendering"]' => ['checked' => FALSE],
+        ],
+      ],
+    ];
     // @todo: Add back token browser.
 
-    $form['global_tag_settings']['async_rendering'] = array(
+    $form['global_tag_settings']['async_rendering'] = [
       '#type' => 'checkbox',
       '#title' => t('Render ads asynchronously'),
       '#default_value' => $config->get('async_rendering'),
       '#description' => $this->t('This can speed up page rendering time by loading page content without waiting for ads to load.'),
-    );
-    $form['global_tag_settings']['disable_init_load'] = array(
+    ];
+    $form['global_tag_settings']['disable_init_load'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Disable initial ad load'),
       '#default_value' => $config->get('disable_init_load'),
       '#description' => $this->t('(Async mode only) Disables the initial fetch of ads from Google when the page is first loaded. Calls to refresh() can still be used to fetch ads.'),
-      '#states' => array(
-        'enabled' => array(
-          'input[name="async_rendering"]' => array('checked' => TRUE),
-        ),
-      ),
-    );
-    $form['global_tag_settings']['single_request'] = array(
+      '#states' => [
+        'enabled' => [
+          'input[name="async_rendering"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+    $form['global_tag_settings']['single_request'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Combine all ad requests into a single request'),
       '#default_value' => $config->get('single_request'),
       '#description' => $this->t('This can speed up page rendering time by limiting the number of external requests.'),
-    );
+    ];
 
     $ad_categories_bundles = $config->get('ad_categories_bundles');
-    $form['global_tag_settings']['enable_ad_categories'] = array(
+    $form['global_tag_settings']['enable_ad_categories'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Enable DFP Ad Categories'),
       '#default_value' => !empty($ad_categories_bundles),
       '#description' => $this->t('Example: if you have an "animals" vocabulary and you want to target the same ads to "dogs", "cats" and "hamsters" you can edit each of those terms and set the DFP Ad Category to "pets". Whenever the taxonomy terms are included as targeting values, anything tagged "cats" will target "pets" instead.'),
-    );
+    ];
 
     $bundles = $this->bundleInfo->getBundleInfo('taxonomy_term');
-    $options = array();
+    $options = [];
     foreach ($bundles as $key => $bundle) {
       if ($key != 'dfp_ad_categories') {
         $options[$key] = (string) $bundle['label'];
       }
     }
     // @todo react to bundle
-    $form['global_tag_settings']['ad_categories_bundles'] = array(
+    $form['global_tag_settings']['ad_categories_bundles'] = [
       '#type' => 'checkboxes',
       '#options' => $options,
       '#default_value' => $ad_categories_bundles,
       '#title' => $this->t('Select the vocabularies on which DFP Ad Categories should be enabled.'),
-      '#states' => array(
-        'visible' => array(
-          'input[name="enable_ad_categories"]' => array('checked' => TRUE),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          'input[name="enable_ad_categories"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
 
     // Global display options.
-    $form['global_display_options'] = array(
+    $form['global_display_options'] = [
       '#type' => 'details',
       '#title' => $this->t('Global Display Options'),
       '#open' => TRUE,
-    );
-    $form['global_display_options']['default_slug'] = array(
+    ];
+    $form['global_display_options']['default_slug'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Global Slug'),
       '#default_value' => $config->get('default_slug'),
       '#required' => FALSE,
       '#description' => $this->t('Slug all ad tags with this label. Example: Advertisement'),
-    );
-    $form['global_display_options']['collapse_empty_divs'] = array(
+    ];
+    $form['global_display_options']['collapse_empty_divs'] = [
       '#type' => 'radios',
       '#title' => $this->t('Collapse empty divs'),
       '#default_value' => $config->get('collapse_empty_divs'),
-      '#options' => array(
+      '#options' => [
         0 => $this->t('Never'),
         1 => $this->t('Collapse only if no ad is served'),
         2 => $this->t('Expand only if an ad is served'),
-      ),
+      ],
       '#description' => $this->t('<dl><dt>Never</dt><dd>Never collapse ad slots.</dd><dt>Collapse only</dt><dd>Collapse before any ad is loaded. Useful if ad slots will get filled most of the time.</dd><dt>Expand only</dt><dd>Collapse all divs on the page before any ads are fetched and expand if an ad is loaded into the ad slot. Useful if ad slots will stay empty most of the time.</dd></dl>'),
-    );
-    $form['global_display_options']['slug_placement'] = array(
+    ];
+    $form['global_display_options']['slug_placement'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Hide slug if no ad is served (recommended)'),
       '#default_value' => $config->get('slug_placement'),
-      '#states' => array(
-        'visible' => array(
-          'input[name="collapse_empty_divs"]' => array('!value' => 0),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          'input[name="collapse_empty_divs"]' => ['!value' => 0],
+        ],
+      ],
+    ];
 
     // Global targeting options.
-    $form['targeting_settings'] = array(
+    $form['targeting_settings'] = [
       '#type' => 'details',
       '#title' => $this->t('Global Targeting'),
       '#open' => TRUE,
-    );
+    ];
     $existing_targeting = $this->getExistingTargeting($form_state, $config->get('targeting'));
     $this->addTargetingForm($form['targeting_settings'], $existing_targeting);
 
     // AdTest Settings.
-    $form['adtest'] = array(
+    $form['adtest'] = [
       '#type' => 'details',
       '#title' => $this->t('Ad Test Settings'),
       '#open' => TRUE,
-    );
-    $form['adtest']['adtest_adunit_pattern'] = array(
+    ];
+    $form['adtest']['adtest_adunit_pattern'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Ad Unit Pattern for Ad Tests'),
       '#description' => $this->t('Override the Ad Unit value for all the ad tags on a page by adding ?adtest=true to the URL. Use the tokens below to define how the ad unit should display. Example: [dfp_tag:network_id]/test/[dfp_tag:slot]'),
       '#default_value' => $config->get('adtest_adunit_pattern'),
-    );
+    ];
     // @todo Add back token browser.
     // @todo Drupal 7 also had the ability to inject Javascript. Discuss whether
     //   or not this should be implemented.

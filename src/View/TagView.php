@@ -195,7 +195,7 @@ class TagView {
         'c' => mt_rand(10000, 99999),
       ];
 
-      $targets = array();
+      $targets = [];
       foreach ($this->getRawTargeting() as $data) {
         $targets[] = $data['target'] . '=' . $data['value'];
       }

@@ -51,7 +51,7 @@ class Token implements TokenInterface {
   /**
    * {@inheritdoc}
    */
-  public function replace($text, TagView $tag = NULL, array $options = array(), BubbleableMetadata $bubbleable_metadata = NULL) {
+  public function replace($text, TagView $tag = NULL, array $options = [], BubbleableMetadata $bubbleable_metadata = NULL) {
     $data = [
       'user' => $this->account,
     ];

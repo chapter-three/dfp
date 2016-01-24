@@ -22,14 +22,14 @@ class GlobalSettingsTest extends DfpTestBase {
    *
    * @var array
    */
-  public static $modules = array('dfp');
+  public static $modules = ['dfp'];
 
   /**
    * {@inheritdoc}
    */
   protected function setUp() {
     parent::setUp();
-    $web_user = $this->drupalCreateUser(array('administer DFP'));
+    $web_user = $this->drupalCreateUser(['administer DFP']);
     $this->drupalLogin($web_user);
   }
 

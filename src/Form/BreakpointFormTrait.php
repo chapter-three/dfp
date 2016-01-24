@@ -84,15 +84,15 @@ trait BreakpointFormTrait {
   /**
    * Helper form builder for the breakpoints form.
    */
-  protected function addBreakpointsForm(array &$breakpoints_form, array $existing_breakpoints = array()) {
+  protected function addBreakpointsForm(array &$breakpoints_form, array $existing_breakpoints = []) {
     // Display settings.
-    $breakpoints_form['breakpoints'] = array(
+    $breakpoints_form['breakpoints'] = [
       '#type' => 'markup',
       '#tree' => FALSE,
       '#prefix' => '<div id="dfp-breakpoints-wrapper">',
       '#suffix' => '</div>',
       '#element_validate' => [[get_class($this), 'breakpointsFormValidate']],
-    );
+    ];
 
     $breakpoints_form['breakpoints']['table'] = [
       '#type' => 'table',
@@ -116,46 +116,46 @@ trait BreakpointFormTrait {
     // Add one blank set of breakpoint fields.
     $this->addBreakpointForm($breakpoints_form, count($existing_breakpoints));
 
-    $breakpoints_form['breakpoints']['dfp_more_breakpoints'] = array(
+    $breakpoints_form['breakpoints']['dfp_more_breakpoints'] = [
       '#type' => 'submit',
       '#value' => $this->t('Add another breakpoint'),
       '#submit' => [[get_class($this), 'moreBreakpointsSubmit']],
-      '#limit_validation_errors' => array(),
-      '#ajax' => array(
+      '#limit_validation_errors' => [],
+      '#ajax' => [
         'callback' => [get_class($this), 'moreBreakpointsJs'],
         'wrapper' => 'dfp-breakpoints-wrapper',
         'effect' => 'fade',
-      ),
-    );
+      ],
+    ];
   }
 
   /**
    * Helper form builder for an individual breakpoint.
    */
-  protected function addBreakpointForm(array &$form, $key, array $data = array()) {
-    $form['breakpoints']['table'][$key] = array(
+  protected function addBreakpointForm(array &$form, $key, array $data = []) {
+    $form['breakpoints']['table'][$key] = [
       '#prefix' => '<div class="breakpoint" id="breakpoint-' . $key . '">',
       '#suffix' => '</div>',
       '#element_validate' => [[get_class($this), 'breakpointFormValidate']],
-    );
-    $form['breakpoints']['table'][$key]['browser_size'] = array(
+    ];
+    $form['breakpoints']['table'][$key]['browser_size'] = [
       '#type' => 'textfield',
       '#title_display' => 'invisible',
       '#title' => $this->t('Minimum Browser Size'),
       '#size' => 10,
       '#default_value' => isset($data['browser_size']) ? $data['browser_size'] : '',
-      '#parents' => array('breakpoints', $key, 'browser_size'),
-      '#attributes' => array('class' => array('field-breakpoint-browser-size')),
-    );
-    $form['breakpoints']['table'][$key]['ad_sizes'] = array(
+      '#parents' => ['breakpoints', $key, 'browser_size'],
+      '#attributes' => ['class' => ['field-breakpoint-browser-size']],
+    ];
+    $form['breakpoints']['table'][$key]['ad_sizes'] = [
       '#type' => 'textfield',
       '#title_display' => 'invisible',
       '#title' => $this->t('Ad Sizes'),
       '#size' => 20,
       '#default_value' => isset($data['ad_sizes']) ? $data['ad_sizes'] : '',
-      '#parents' => array('breakpoints', $key, 'ad_sizes'),
-      '#attributes' => array('class' => array('field-breakpoint-ad-sizes')),
-    );
+      '#parents' => ['breakpoints', $key, 'ad_sizes'],
+      '#attributes' => ['class' => ['field-breakpoint-ad-sizes']],
+    ];
     if (empty($data)) {
       $form['breakpoints']['table'][$key]['browser_size']['#description'] = $this->t('Example: 1024x768');
       $form['breakpoints']['table'][$key]['ad_sizes']['#description'] = $this->t('Example: 300x600,300x250');
@@ -169,7 +169,7 @@ trait BreakpointFormTrait {
    *   The default value will be used unless an "input" exists in the form_state
    *   variable, in which case that will be used.
    */
-  protected function getExistingBreakpoints(FormStateInterface $form_state, array $breakpoints = array()) {
+  protected function getExistingBreakpoints(FormStateInterface $form_state, array $breakpoints = []) {
     $user_input = $form_state->getUserInput();
     if (isset($user_input['breakpoints'])) {
       $breakpoints = $user_input['breakpoints'];

@@ -23,10 +23,10 @@ class TagList extends ConfigEntityListBuilder {
    */
   public function buildHeader() {
     $header['title'] = t('Ad Slot');
-    $header['size'] = array(
+    $header['size'] = [
       'data' => t('Size(s)'),
-      'class' => array(RESPONSIVE_PRIORITY_MEDIUM),
-    );
+      'class' => [RESPONSIVE_PRIORITY_MEDIUM],
+    ];
     $header['block'] = t('Block');
 
     return $header + parent::buildHeader();

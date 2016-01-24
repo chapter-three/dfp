@@ -27,7 +27,7 @@ class DisplayTagTest extends DfpTestBase {
     $this->assertRaw('googletag.defineSlot("' . $tag_view->getAdUnit() . '", ' . $tag_view->getSize() . ', "' . $tag_view->getPlaceholderId() . '")');
 
     // Create a tag with an ID longer than 32 characters.
-    $edit = array('id' => Unicode::strtolower($this->randomMachineName(64)));
+    $edit = ['id' => Unicode::strtolower($this->randomMachineName(64))];
     $tag = $this->dfpCreateTag($edit);
     $tag_view = $this->dfpTagToTagView($tag);
     $this->drupalGet('<front>');
@@ -181,7 +181,7 @@ class DisplayTagTest extends DfpTestBase {
     $edit = $this->dfpBasicTagEditValues();
 
     // Create a tag with backfill settings.
-    $colors = array('background', 'border', 'link', 'text', 'url');
+    $colors = ['background', 'border', 'link', 'text', 'url'];
 
     $edit['adsense_backfill[ad_types]'] = 'text_image';
     $edit['adsense_backfill[channel_ids]'] = $this->randomMachineName();

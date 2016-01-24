@@ -9,33 +9,33 @@
  * Page callback for the DFP test page. It displays all tags on the site.
  */
 function dfp_adtest_page() {
-  $output = array();
+  $output = [];
   $form = drupal_get_form('dfp_adtest_form');
 
-  $output[] = array(
+  $output[] = [
     '#markup' => render($form),
-    '#attached' => array(
-      'css' => array(
+    '#attached' => [
+      'css' => [
         'dfp-admin' => drupal_get_path('module', 'dfp') . '/dfp.admin.css',
-      ),
-    ),
-  );
+      ],
+    ],
+  ];
 
   $tags = dfp_tag_load_all();
   foreach ($tags as $tag) {
-    $tag_slot = array(
-      'tag slot name' => array(
+    $tag_slot = [
+      'tag slot name' => [
         '#markup' => '<h3>' . check_plain($tag->slot) . '</h3>',
-      ),
-    );
+      ],
+    ];
     $tag_tag = dfp_tag($tag->machinename);
-    $tag_devel = array();
+    $tag_devel = [];
     if (module_exists('devel')) {
-      $tag_devel['object'] = array(
+      $tag_devel['object'] = [
         '#markup' => kpr($tag, TRUE),
-      );
+      ];
     }
-    $output[] = array($tag_slot, $tag_tag, $tag_devel);
+    $output[] = [$tag_slot, $tag_tag, $tag_devel];
   }
 
   return $output;
@@ -49,24 +49,24 @@ function dfp_adtest_form($form, &$form_state) {
   form_load_include($form_state, 'inc', 'dfp', 'dfp.adtest');
 
   $form['#method'] = 'get';
-  $form['adunit_override'] = array(
+  $form['adunit_override'] = [
     '#type' => 'textfield',
     '#title' => t('Ad Unit Override'),
     '#default_value' => isset($_GET['adunit_override']) ? $_GET['adunit_override'] : '',
     '#description' => t('Override the Ad Unit value for all the ad tags below. Use the tokens below to define how the ad unit should display. Example: [dfp_tag:network_id]/test/[dfp_tag:slot]'),
-  );
-  $form['tokens'] = array(
+  ];
+  $form['tokens'] = [
     '#theme' => 'token_tree',
-    '#token_types' => array('dfp_tag', 'node', 'term', 'user'),
+    '#token_types' => ['dfp_tag', 'node', 'term', 'user'],
     '#global_types' => TRUE,
     '#click_insert' => TRUE,
     '#dialog' => TRUE,
     '#weight' => 100,
-  );
-  $form['submit'] = array(
+  ];
+  $form['submit'] = [
     '#type' => 'submit',
     '#value' => t('Override'),
-  );
+  ];
 
   return $form;
 }

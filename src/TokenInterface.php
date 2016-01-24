@@ -42,6 +42,6 @@ interface TokenInterface {
    *
    * @see \Drupal\Core\Utility\Token::replace()
    */
-  public function replace($text, TagView $tag = NULL, array $options = array(), BubbleableMetadata $bubbleable_metadata = NULL);
+  public function replace($text, TagView $tag = NULL, array $options = [], BubbleableMetadata $bubbleable_metadata = NULL);
 
 }

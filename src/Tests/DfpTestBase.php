@@ -30,7 +30,7 @@ abstract class DfpTestBase extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = array('dfp');
+  public static $modules = ['dfp'];
 
   /**
    * {@inheritdoc}
@@ -65,7 +65,7 @@ abstract class DfpTestBase extends WebTestBase {
    * @return \Drupal\dfp\Entity\Tag
    *   The created DFP tag.
    */
-  protected function dfpCreateTag($edit = array()) {
+  protected function dfpCreateTag($edit = []) {
     // Create a new tag.
     $edit += $this->dfpBasicTagEditValues();
     $this->drupalPostForm('admin/structure/dfp/tags/add', $edit, t('Save'));
@@ -121,7 +121,7 @@ abstract class DfpTestBase extends WebTestBase {
    */
   protected function dfpBasicTagEditValues() {
     $machinename = $this->randomMachineName(16);
-    $basic_tag = array(
+    $basic_tag = [
       'id' => Unicode::strtolower($machinename),
       'slot' => $machinename,
       'size' => implode(',', $this->dfpGenerateSize(2)),
@@ -139,7 +139,7 @@ abstract class DfpTestBase extends WebTestBase {
       'targeting[0][value]' => $this->randomMachineName(8),
       'breakpoints[0][browser_size]' => $this->dfpGenerateSize(),
       'breakpoints[0][ad_sizes]' => implode(',', $this->dfpGenerateSize(2)),
-    );
+    ];
 
     return $basic_tag;
   }

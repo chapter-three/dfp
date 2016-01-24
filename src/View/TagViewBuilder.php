@@ -98,7 +98,7 @@ class TagViewBuilder extends EntityViewBuilder {
    * {@inheritdoc}
    */
   public function view(EntityInterface $entity, $view_mode = 'full', $langcode = NULL) {
-    $build = $this->viewMultiple(array($entity), $view_mode, $langcode);
+    $build = $this->viewMultiple([$entity], $view_mode, $langcode);
     return reset($build);
   }
 
@@ -148,13 +148,13 @@ class TagViewBuilder extends EntityViewBuilder {
    * @see \Drupal\dfp\DfpResponseAttachmentsProcessor::processAttachments()
    */
   protected static function buildPreTag(TagView $tag_view, RendererInterface $renderer) {
-    $build = array(
+    $build = [
       '#contextual_links' => [
         'dfp_tag' => [
           'route_parameters' => ['dfp_tag' => $tag_view->id()],
         ],
       ],
-    );
+    ];
     if ($tag_view->isShortTag()) {
       $build['tag'] = [
         '#theme' => 'dfp_short_tag',

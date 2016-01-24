@@ -34,10 +34,10 @@ function hook_dfp_global_targeting_alter(&$targeting) {
   // The following example adds the URL arguments array to the targeting.
   $arg = arg();
   if (!empty($arg)) {
-    $targeting[] = array(
+    $targeting[] = [
       'target' => 'arg',
       'value' => $arg,
-    );
+    ];
   }
 }
 

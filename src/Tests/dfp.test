@@ -15,7 +15,7 @@ class dfpBaseTest extends DrupalWebTestCase {
     menu_rebuild();
 
     // Create an admin user with all the permissions needed to run tests.
-    $this->admin_user = $this->drupalCreateUser(array('administer DFP', 'administer taxonomy', 'access administration pages', 'administer blocks', 'bypass node access', 'administer nodes', 'edit terms in 1'));
+    $this->admin_user = $this->drupalCreateUser(['administer DFP', 'administer taxonomy', 'access administration pages', 'administer blocks', 'bypass node access', 'administer nodes', 'edit terms in 1']);
     $this->drupalLogin($this->admin_user);
 
     // Add the some global settings needed for dfp ads to work.
@@ -29,7 +29,7 @@ class dfpBaseTest extends DrupalWebTestCase {
    */
   function dfpBasicTagEditValues() {
     $machinename = drupal_strtolower($this->randomName(8));
-    $basic_tag = array(
+    $basic_tag = [
       'machinename' => $machinename,
       'slot' => $machinename,
       'size' => implode(',', $this->dfpGenerateSize(2)),
@@ -47,7 +47,7 @@ class dfpBaseTest extends DrupalWebTestCase {
       'targeting[0][value]' => $this->randomName(8),
       'breakpoints[0][browser_size]' => $this->dfpGenerateSize(),
       'breakpoints[0][ad_sizes]' => implode(',', $this->dfpGenerateSize(2)),
-    );
+    ];
 
     return $basic_tag;
   }
@@ -57,7 +57,7 @@ class dfpBaseTest extends DrupalWebTestCase {
    * formatted as ###x###.
    */
   function dfpGenerateSize($count = 1) {
-    $sizes = array('300x250', '300x600', '728x90', '728x10', '160x600', '120x80', '300x100', '50x50', '160x300');
+    $sizes = ['300x250', '300x600', '728x90', '728x10', '160x600', '120x80', '300x100', '50x50', '160x300'];
     shuffle($sizes);
 
     return $count == 1 ? array_pop($sizes) : array_slice($sizes, 0, min($count, count($sizes)));
@@ -66,7 +66,7 @@ class dfpBaseTest extends DrupalWebTestCase {
   /**
    * Creates a basic dfp ad tag.
    */
-  function createTag($edit = array()) {
+  function createTag($edit = []) {
     // Create a new tag.
     $edit += $this->dfpBasicTagEditValues();
     $this->drupalPost('admin/structure/dfp_ads/add', $edit, t('Save'));
@@ -76,7 +76,7 @@ class dfpBaseTest extends DrupalWebTestCase {
     $this->assertTrue(is_object($tag) && $tag->machinename = $edit['machinename'], 'The new tag was saved correctly.');
 
     // Display the new tag.
-    $edit = array();
+    $edit = [];
     $delta = 'dfp_' . (drupal_strlen($tag->machinename) >= 32 ? md5($tag->machinename) : $tag->machinename);
     $edit['blocks[' . $delta . '][region]'] = 'sidebar_first';
     $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
@@ -134,43 +134,43 @@ class dfpAdCategoriesTest extends dfpBaseTest {
    * Implements getInfo().
    */
   public static function getInfo() {
-    return array(
+    return [
       'name' => t('DFP Ad Categories'),
       'description' => t('Tests the functionaility of DFP ad categories.'),
       'group' => t('DFP'),
-    );
+    ];
   }
 
   function testEnableDisableAdCategories() {
     // Check that enabling DFP Ad Categories for the "tags" vocabulary works.
-    $edit = array(
+    $edit = [
       'dfp_enable_ad_categories' => 1,
       'dfp_enable_ad_categories_bundles[tags]' => 'tags',
-    );
+    ];
     $this->drupalPost('admin/structure/dfp_ads/settings', $edit, t('Save configuration'));
     $this->drupalGet('admin/structure/taxonomy/tags/add');
     $this->assertFieldByName('field_dfp_ad_categories[und]');
 
     // Check that disabling DFP Ad Categories vocabulary works even when a
     // bundle is selected.
-    $edit = array(
+    $edit = [
       'dfp_enable_ad_categories' => 0,
-    );
+    ];
     $this->drupalPost('admin/structure/dfp_ads/settings', $edit, t('Save configuration'));
     $this->drupalGet('admin/structure/taxonomy/tags/add');
     $this->assertNoFieldByName('field_dfp_ad_categories[und]');
 
     // Check that disabling DFP Ad Categories on a specific vocabulary works.
     // For this test to be valid, we first need to reenable DFP Ad Categories.
-    $edit = array(
+    $edit = [
       'dfp_enable_ad_categories' => 1,
       'dfp_enable_ad_categories_bundles[tags]' => 'tags',
-    );
+    ];
     $this->drupalPost('admin/structure/dfp_ads/settings', $edit, t('Save configuration'));
     $this->drupalGet('admin/structure/taxonomy/tags/add');
-    $edit = array(
+    $edit = [
       'dfp_enable_ad_categories_bundles[tags]' => 0,
-    );
+    ];
     $this->drupalPost('admin/structure/dfp_ads/settings', $edit, t('Save configuration'));
     $this->drupalGet('admin/structure/taxonomy/tags/add');
     $this->assertNoFieldByName('field_dfp_ad_categories[und]');
@@ -182,10 +182,10 @@ class dfpAdCategoriesTest extends dfpBaseTest {
     $tags_vocabulary = taxonomy_vocabulary_machine_name_load('tags');
 
     // Turn on DFP ad categories for the "tags" vocabulary.
-    $edit = array(
+    $edit = [
       'dfp_enable_ad_categories' => 1,
       'dfp_enable_ad_categories_bundles[tags]' => 'tags',
-    );
+    ];
     $this->drupalPost('admin/structure/dfp_ads/settings', $edit, t('Save configuration'));
 
     // Create a new DFP Ad Category term.
@@ -194,16 +194,16 @@ class dfpAdCategoriesTest extends dfpBaseTest {
     $test_tag = $this->createTerm($tags_vocabulary);
 
     // Create a new "Article" node with these two tags.
-    $edit = array(
+    $edit = [
       'title' => $this->randomName(8),
       'field_tags[und]' => $control_tag->name . ', ' . $test_tag->name,
-    );
+    ];
     $this->drupalPost('node/add/article', $edit, t('Save'));
 
     // Edit one the new tags and tag it with a DFP Ad Category.
-    $edit = array(
+    $edit = [
       'field_dfp_ad_categories[und]' => $dfp_category->tid,
-    );
+    ];
     $this->drupalPost('taxonomy/term/' . $test_tag->tid . '/edit', $edit, t('Save'));
 
     // Create a DFP ad slot that targets the [dfp_tag:ad_categories] token.
@@ -238,18 +238,18 @@ class dfpAdTestTest extends dfpBaseTest {
    * Implements getInfo().
    */
   public static function getInfo() {
-    return array(
+    return [
       'name' => t('Displaying AdTest DFP Tags'),
       'description' => t('Tests for displaying overridden DFP tags for ad test purposes.'),
       'group' => t('DFP'),
-    );
+    ];
   }
 
   function testTestPage() {
     $tag = $this->createTag();
 
     $override = $this->randomName(8);
-    $this->drupalGet('admin/structure/dfp_ads/test_page', array('query' => array('adunit_override' => $override)));
+    $this->drupalGet('admin/structure/dfp_ads/test_page', ['query' => ['adunit_override' => $override]]);
     $this->assertRaw('googletag.defineSlot("' . variable_get('dfp_network_id', '') . '/' . $override . '"', 'The Ad Unit Name was properly overridden on the Ad Test Page.');
   }
 
@@ -258,7 +258,7 @@ class dfpAdTestTest extends dfpBaseTest {
 
     $override = $this->randomName(8);
     variable_set('dfp_adtest_adunit', $override);
-    $this->drupalGet('admin/structure/dfp_ads/test_page', array('query' => array('adtest' => 'true')));
+    $this->drupalGet('admin/structure/dfp_ads/test_page', ['query' => ['adtest' => 'true']]);
     $this->assertRaw('googletag.defineSlot("' . variable_get('dfp_network_id', '') . '/' . $override . '"', 'The Ad Unit Name was properly overridden using the adtest query string.');
   }
 
