@@ -385,13 +385,13 @@ class TagView {
   }
 
   /**
-   * Gets the slug placement.
+   * Gets whether the slug should be hidden.
    *
-   * @return int
-   *   The slug placement.
+   * @return bool
+   *   TRUE if the slug should be hidden, FALSE if not.
    */
-  public function getSlugPlacement() {
-    return $this->globalSettings->get('slug_placement');
+  public function isSlugHidden() {
+    return $this->globalSettings->get('hide_slug');
   }
 
 }

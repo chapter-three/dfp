@@ -30,9 +30,9 @@ dfp.settings:
     collapse_empty_divs:
       type: integer
       label: 'Collapse empty divs'
-    slug_placement:
-      type: integer
-      label: 'Where to place the slug'
+    hide_slug:
+      type: boolean
+      label: 'Whether to hide the slug'
     targeting:
       type: sequence
       label: 'Targeting'

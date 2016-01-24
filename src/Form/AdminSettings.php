@@ -183,10 +183,10 @@ class AdminSettings extends ConfigFormBase {
       ],
       '#description' => $this->t('<dl><dt>Never</dt><dd>Never collapse ad slots.</dd><dt>Collapse only</dt><dd>Collapse before any ad is loaded. Useful if ad slots will get filled most of the time.</dd><dt>Expand only</dt><dd>Collapse all divs on the page before any ads are fetched and expand if an ad is loaded into the ad slot. Useful if ad slots will stay empty most of the time.</dd></dl>'),
     ];
-    $form['global_display_options']['slug_placement'] = [
+    $form['global_display_options']['hide_slug'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Hide slug if no ad is served (recommended)'),
-      '#default_value' => $config->get('slug_placement'),
+      '#default_value' => $config->get('hide_slug'),
       '#states' => [
         'visible' => [
           'input[name="collapse_empty_divs"]' => ['!value' => 0],
@@ -283,6 +283,7 @@ class AdminSettings extends ConfigFormBase {
       ->set('collapse_empty_divs', $values['collapse_empty_divs'])
       ->set('adtest_adunit_pattern', $values['adtest_adunit_pattern'])
       ->set('targeting', $values['targeting'])
+      ->set('hide_slug', $values['hide_slug'])
       ->save();
   }
 

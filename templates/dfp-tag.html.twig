@@ -12,7 +12,7 @@
  */
 #}
 <div id="{{ tag.placeholderId }}">
-    {% if tag.slugPlacement and tag.slug %}
+    {% if tag.isSlugHidden == false and tag.slug %}
         <div>
             {{ tag.slug }}
         </div>

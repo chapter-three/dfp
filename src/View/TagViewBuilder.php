@@ -120,7 +120,7 @@ class TagViewBuilder extends EntityViewBuilder {
       $cacheable_metadata = CacheableMetadata::createFromObject($global_settings);
       $cacheable_metadata->merge(CacheableMetadata::createFromObject($tag));
       $cacheable_metadata->addCacheTags($this->getCacheTags());
-      $cacheable_metadata->applyTo($build);
+      $cacheable_metadata->applyTo($build[$tag_id]);
 
       $build[$tag_id] += static::buildPreTag($tag_view);
 

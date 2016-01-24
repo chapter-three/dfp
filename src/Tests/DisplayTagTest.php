@@ -76,6 +76,7 @@ class DisplayTagTest extends DfpTestBase {
    * Tests slug display.
    */
   public function testSlug() {
+    $this->config('dfp.settings')->set('hide_slug', FALSE)->save();
     $edit = $this->dfpBasicTagEditValues();
 
     // Create a tag without a slug, display it and ensure the default slug is
@@ -96,6 +97,15 @@ class DisplayTagTest extends DfpTestBase {
     $this->dfpEditTag($tag->id(), $edit);
     $this->drupalGet('<front>');
     $this->assertText('Tag specific slug');
+
+    // Set the slug to be hidden. Use admin UI and the cache tags added in
+    // \Drupal\dfp\View\TagViewBuilder::viewMultiple() are tested.
+    $edit = [
+      'hide_slug' => TRUE,
+    ];
+    $this->drupalPostForm('admin/structure/dfp/settings', $edit, t('Save configuration'));
+    $this->drupalGet('<front>');
+    $this->assertNoText('Tag specific slug');
   }
 
   /**

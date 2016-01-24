@@ -7,6 +7,6 @@ single_request: true
 ad_categories_bundles: []
 default_slug: ''
 collapse_empty_divs: 1
-slug_placement: 1
+hide_slug: true
 targeting: []
 adtest_adunit_pattern: ''
