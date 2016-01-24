@@ -54,7 +54,7 @@ class GlobalSettingsTest extends DfpTestBase {
     $this->dfpCreateTag();
 
     $this->drupalGet('<front>');
-    $this->assertRaw('googletag.pubads().enableAsyncRendering();', 'Asyncronous rendering is turned on.');
+    $this->assertRaw('googletag.pubads().enableAsyncRendering();', 'Asynchronous rendering is turned on.');
     $this->assertRaw('googletag.pubads().enableSingleRequest();', 'Single request is turned on.');
     $this->assertRaw('googletag.pubads().collapseEmptyDivs();', 'Collapse empty divs is turned on.');
     $this->assertRaw("googletag.pubads().setTargeting('&lt;em&gt;test target&lt;/em&gt;', ['&lt;em&gt;test value&lt;/em&gt;','test value 2']);", 'Global targeting values appear correclty in javascript.');
@@ -73,11 +73,11 @@ class GlobalSettingsTest extends DfpTestBase {
     $this->drupalPostForm('admin/structure/dfp/settings', $edit, t('Save configuration'));
 
     $this->drupalGet('<front>');
-    $this->assertNoRaw('googletag.pubads().enableAsyncRendering();', 'Asyncronous rendering is turned on.');
+    $this->assertNoRaw('googletag.pubads().enableAsyncRendering();', 'Asynchronous rendering is turned on.');
     $this->assertNoRaw('googletag.pubads().enableSingleRequest();', 'Single request is turned on.');
     $this->assertNoRaw('googletag.pubads().collapseEmptyDivs();', 'Collapse empty divs is turned on.');
-    $this->assertRaw("googletag.pubads().setTargeting('test target', ['test value 3']);", 'Global targeting values appear correclty in javascript.');
-    $this->assertRaw("googletag.pubads().setTargeting('test target 2', ['test value 4']);", 'Global targeting values appear correclty in javascript.');
+    $this->assertRaw("googletag.pubads().setTargeting('test target', ['test value 3']);", 'Global targeting values appear correctly in javascript.');
+    $this->assertRaw("googletag.pubads().setTargeting('test target 2', ['test value 4']);", 'Global targeting values appear correctly in javascript.');
     $this->assertEqual('/custom_click_url', \Drupal::config('dfp.settings')->get('click_url'));
 
     $edit = [

@@ -213,7 +213,7 @@ class dfpAdCategoriesTest extends dfpBaseTest {
     $edit['slot'] = $this->randomName(8);
     $edit['targeting[0][target]'] = 'categories';
     $edit['targeting[0][value]'] = '[dfp_tag:ad_categories]';
-    $tag = $this->createTag($edit);
+    $this->createTag($edit);
 
     // Check that when we are on the node page, that the DFP Ad Category is used
     // and that the control tag is also displayed.

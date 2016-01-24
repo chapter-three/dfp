@@ -42,12 +42,12 @@ function hook_dfp_global_targeting_alter(&$targeting) {
 }
 
 /**
- * Alters the keyvals array used during the construction of a short tag.
+ * Alters the key values array used during the construction of a short tag.
  *
- * @param array $keyvals
- *   The keyvals array used during the construction of a short tag.
+ * @param array $key_values
+ *   The key values array used during the construction of a short tag.
  */
-function hook_dfp_short_tag_keyvals_alter(&$keyvals) {
+function hook_dfp_short_tag_keyvals_alter(&$key_values) {
   // @todo Add example.
 }
 

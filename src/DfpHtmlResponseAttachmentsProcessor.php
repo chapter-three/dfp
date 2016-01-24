@@ -18,6 +18,7 @@ use Drupal\Core\Render\HtmlResponse;
 use Drupal\Core\Render\HtmlResponseAttachmentsProcessor;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\dfp\Entity\TagInterface;
+use Drupal\dfp\View\TagView;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -159,7 +160,7 @@ class DfpHtmlResponseAttachmentsProcessor extends HtmlResponseAttachmentsProcess
     $global_settings = $this->configFactory->get('dfp.settings');
     $targeting = $global_settings->get('targeting');
     $this->moduleHandler->alter('dfp_global_targeting', $targeting);
-    $targeting = \Drupal\dfp\View\TagView::formatTargeting($targeting, $this->token, $this->moduleHandler);
+    $targeting = TagView::formatTargeting($targeting, $this->token, $this->moduleHandler);
     return [
       // Use a fake #type to prevent
       // HtmlResponseAttachmentsProcessor::processHead() adding one.

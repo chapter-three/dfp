@@ -188,8 +188,8 @@ class TagView {
    */
   public function getShortTagQueryString() {
     if (is_null($this->shortTagQueryString)) {
-      // Build a key|vals array and allow third party modules to modify it.
-      $keyvals = [
+      // Build a key|values array and allow third party modules to modify it.
+      $key_values = [
         'iu' => $this->getAdUnit(),
         'sz' => str_replace(',', '|', $this->getRawSize()),
         'c' => mt_rand(10000, 99999),
@@ -200,10 +200,10 @@ class TagView {
         $targets[] = $data['target'] . '=' . $data['value'];
       }
       if (!empty($targets)) {
-        $keyvals['t'] = implode('&', $targets);
+        $key_values['t'] = implode('&', $targets);
       }
-      $this->moduleHandler->alter('dfp_short_tag_keyvals', $keyvals);
-      $this->shortTagQueryString = UrlHelper::buildQuery($keyvals);
+      $this->moduleHandler->alter('dfp_short_tag_keyvals', $key_values);
+      $this->shortTagQueryString = UrlHelper::buildQuery($key_values);
     }
     return $this->shortTagQueryString;
   }
@@ -370,7 +370,7 @@ class TagView {
   /**
    * Gets the click URL.
    *
-   * @var string
+   * @return string
    *   The click URL.
    */
   public function getClickUrl() {
@@ -387,8 +387,8 @@ class TagView {
   /**
    * Gets the slug placement.
    *
-   * @var string
-   *   The slug placement
+   * @return int
+   *   The slug placement.
    */
   public function getSlugPlacement() {
     return $this->globalSettings->get('slug_placement');

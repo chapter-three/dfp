@@ -217,7 +217,7 @@ class Tag extends EntityForm {
       $this->logger('dfp')->notice('Added DFP tag %slot.', $context);
     }
 
-    $form_state->setRedirectUrl($tag->urlInfo('collection'));
+    $form_state->setRedirectUrl($tag->toUrl('collection'));
   }
 
 }

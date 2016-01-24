@@ -47,13 +47,6 @@ class TagViewBuilder extends EntityViewBuilder {
   protected $token;
 
   /**
-   * The renderer service.
-   *
-   * @var \Drupal\Core\Render\RendererInterface
-   */
-  protected $renderer;
-
-  /**
    * Constructs a new BlockViewBuilder.
    *
    * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
@@ -64,13 +57,16 @@ class TagViewBuilder extends EntityViewBuilder {
    *   The language manager.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
+   * @param \Drupal\dfp\TokenInterface $token
+   *   DFP token service.
    */
-  public function __construct(EntityTypeInterface $entity_type, EntityManagerInterface $entity_manager, LanguageManagerInterface $language_manager, ModuleHandlerInterface $module_handler, ConfigFactoryInterface $config_factory, TokenInterface $token, RendererInterface $renderer) {
+  public function __construct(EntityTypeInterface $entity_type, EntityManagerInterface $entity_manager, LanguageManagerInterface $language_manager, ModuleHandlerInterface $module_handler, ConfigFactoryInterface $config_factory, TokenInterface $token) {
     parent::__construct($entity_type, $entity_manager, $language_manager);
     $this->moduleHandler = $module_handler;
     $this->configFactory = $config_factory;
     $this->token = $token;
-    $this->renderer = $renderer;
   }
 
   /**
@@ -83,8 +79,7 @@ class TagViewBuilder extends EntityViewBuilder {
       $container->get('language_manager'),
       $container->get('module_handler'),
       $container->get('config.factory'),
-      $container->get('dfp.token'),
-      $container->get('renderer')
+      $container->get('dfp.token')
     );
   }
 
@@ -127,7 +122,7 @@ class TagViewBuilder extends EntityViewBuilder {
       $cacheable_metadata->addCacheTags($this->getCacheTags());
       $cacheable_metadata->applyTo($build);
 
-      $build[$tag_id] += static::buildPreTag($tag_view, $this->renderer);
+      $build[$tag_id] += static::buildPreTag($tag_view);
 
     }
 
@@ -139,15 +134,13 @@ class TagViewBuilder extends EntityViewBuilder {
    *
    * @param \Drupal\dfp\View\TagView $tag_view
    *   A DFP tag.
-   * @param \Drupal\Core\Render\RendererInterface $renderer
-   *   The renderer service.
    *
    * @return array
    *   A render array with a #pre_render callback to render the DFP tag.
    *
    * @see \Drupal\dfp\DfpResponseAttachmentsProcessor::processAttachments()
    */
-  protected static function buildPreTag(TagView $tag_view, RendererInterface $renderer) {
+  protected static function buildPreTag(TagView $tag_view) {
     $build = [
       '#contextual_links' => [
         'dfp_tag' => [
